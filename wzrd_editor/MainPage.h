@@ -5,6 +5,8 @@
 #pragma once
 
 #include "MainPage.g.h"
+#include "utilities.h"
+#include "DDSTextureLoader.h"
 
 namespace winrt::wzrd_editor::implementation
 {
@@ -31,6 +33,8 @@ namespace winrt::wzrd_editor::implementation
 		void CreateDepthStencilBufferAndView();
 		void WaitForGPU();
 		void BuildRootSignature();
+		void LoadTextures();
+
 		std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> GetStaticSamplers();
 		D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView() const;
 

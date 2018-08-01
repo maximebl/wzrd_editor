@@ -2,8 +2,8 @@
 #include "MainPage.h"
 
 using namespace winrt;
-using namespace Windows::UI::Xaml;
-using namespace Windows::System::Threading;
+using namespace winrt::Windows::UI::Xaml;
+using namespace winrt::Windows::System::Threading;
 
 namespace winrt::wzrd_editor::implementation
 {
@@ -52,6 +52,8 @@ namespace winrt::wzrd_editor::implementation
 		}
 
 		CreateDepthStencilBufferAndView();
+
+		LoadTextures();
 		BuildRootSignature();
 
 		m_running = true;
@@ -304,6 +306,36 @@ namespace winrt::wzrd_editor::implementation
 			pointWrap, pointClamp,
 			linearWrap, linearClamp,
 			anisotropicWrap, anisotropicClamp };
+	}
+
+	void MainPage::LoadTextures()
+	{
+		// create tmpUploadHeap
+		Microsoft::WRL::ComPtr<ID3D12Resource> tmpResource;
+		auto woodCrateTexture = std::make_unique<Texture>();
+		woodCrateTexture->Name = "woodCrateTexture";
+
+		tmp = woodCrateTexture->Resource.get();
+
+		woodCrateTexture->Filename = L"Textures/WoodCrate01.dds";
+		check_hresult(
+			DirectX::CreateDDSTextureFromFile12(
+				m_device.get(),
+				m_graphicsCommandList.get(),
+				woodCrateTexture->Filename.c_str(),
+				tmpResource,
+				woodCrateTexture->UploadHeap
+			)
+		);
+		/*check_hresult(
+			DirectX::CreateDDSTextureFromFile12(
+				m_device.get(),
+				m_graphicsCommandList.get(),
+				woodCrateTexture->Filename.c_str(),
+				woodCrateTexture->Resource,
+				woodCrateTexture->UploadHeap
+			)
+		);*/
 	}
 
 	void MainPage::BuildRootSignature()
