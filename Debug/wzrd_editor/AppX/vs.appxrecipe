@@ -1,0 +1,126 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Machine>MAX</Machine>
+    <WindowsUser>maxim</WindowsUser>
+    <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
+    <TargetOsVersion>10.0</TargetOsVersion>
+    <TargetOsDescription>Windows 10.0</TargetOsDescription>
+    <SolutionConfiguration>Debug|Win32</SolutionConfiguration>
+    <PackageArchitecture>x86</PackageArchitecture>
+    <PackageIdentityName>b1542fa3-f357-4eee-9f7e-77715d624b17</PackageIdentityName>
+    <PackageIdentityPublisher>CN=maxim</PackageIdentityPublisher>
+    <IntermediateOutputPath>c:\Users\maxim\Source\Repos\wzrd_editor\wzrd_editor\Debug\</IntermediateOutputPath>
+    <RemoteDeploymentType>CopyToDevice</RemoteDeploymentType>
+    <PackageRegistrationPath>
+    </PackageRegistrationPath>
+    <RemoveNonLayoutFiles>false</RemoveNonLayoutFiles>
+    <DeployOptionalPackages>false</DeployOptionalPackages>
+    <WindowsSdkPath>C:\Program Files %28x86%29\Windows Kits\10\</WindowsSdkPath>
+    <LayoutDir>c:\users\maxim\Source\Repos\wzrd_editor\Debug\wzrd_editor\AppX</LayoutDir>
+    <RegisteredManifestChecksum>16718F012F71129761F881E5A98D0732F3D3E71ED8FB24FFD9436D758F39EE9F</RegisteredManifestChecksum>
+    <RegisteredPackageMoniker>b1542fa3-f357-4eee-9f7e-77715d624b17_1.0.0.0_x86__1mkedjvecenvy</RegisteredPackageMoniker>
+    <RegisteredUserModeAppID>b1542fa3-f357-4eee-9f7e-77715d624b17_1mkedjvecenvy!App</RegisteredUserModeAppID>
+    <RegisteredPackageID>b1542fa3-f357-4eee-9f7e-77715d624b17</RegisteredPackageID>
+    <RegisteredPackagePublisher>CN=maxim</RegisteredPackagePublisher>
+    <RegisteredVersion>1.0.0.0</RegisteredVersion>
+    <JitOptimizationSuppressed>True</JitOptimizationSuppressed>
+  </PropertyGroup>
+  <ItemGroup>
+    <AppXManifest Include="c:\users\maxim\Source\Repos\wzrd_editor\Debug\wzrd_editor\AppxManifest.xml">
+      <PackagePath>AppxManifest.xml</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2018-07-29T18:45:22.596</Modified>
+    </AppXManifest>
+  </ItemGroup>
+  <ItemGroup>
+    <AppxPackagedFile Include="c:\users\maxim\Source\Repos\wzrd_editor\Debug\wzrd_editor\wzrd_editor.exe">
+      <PackagePath>wzrd_editor.exe</PackagePath>
+      <Modified>2018-08-01T02:37:54.102</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="c:\users\maxim\Source\Repos\wzrd_editor\Debug\wzrd_editor\wzrd_editor.winmd">
+      <PackagePath>wzrd_editor.winmd</PackagePath>
+      <Modified>2018-07-28T04:49:59.855</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="c:\Users\maxim\Source\Repos\wzrd_editor\wzrd_editor\Assets\LockScreenLogo.scale-200.png">
+      <PackagePath>Assets\LockScreenLogo.scale-200.png</PackagePath>
+      <Modified>2018-07-02T22:56:59.851</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="c:\Users\maxim\Source\Repos\wzrd_editor\wzrd_editor\Assets\SplashScreen.scale-200.png">
+      <PackagePath>Assets\SplashScreen.scale-200.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2018-07-02T22:56:59.851</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="c:\Users\maxim\Source\Repos\wzrd_editor\wzrd_editor\Assets\Square150x150Logo.scale-200.png">
+      <PackagePath>Assets\Square150x150Logo.scale-200.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2018-07-02T22:56:59.851</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="c:\Users\maxim\Source\Repos\wzrd_editor\wzrd_editor\Assets\Square44x44Logo.scale-200.png">
+      <PackagePath>Assets\Square44x44Logo.scale-200.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2018-07-02T22:56:59.851</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="c:\Users\maxim\Source\Repos\wzrd_editor\wzrd_editor\Assets\Square44x44Logo.targetsize-24_altform-unplated.png">
+      <PackagePath>Assets\Square44x44Logo.targetsize-24_altform-unplated.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2018-07-02T22:56:59.851</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="c:\Users\maxim\Source\Repos\wzrd_editor\wzrd_editor\Assets\StoreLogo.png">
+      <PackagePath>Assets\StoreLogo.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2018-07-02T22:56:59.851</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="c:\Users\maxim\Source\Repos\wzrd_editor\wzrd_editor\Assets\Wide310x150Logo.scale-200.png">
+      <PackagePath>Assets\Wide310x150Logo.scale-200.png</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2018-07-02T22:56:59.851</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="c:\users\maxim\Source\Repos\wzrd_editor\Debug\wzrd_editor\App.xbf">
+      <PackagePath>App.xbf</PackagePath>
+      <Modified>2018-08-01T02:41:13.998</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="c:\users\maxim\Source\Repos\wzrd_editor\Debug\wzrd_editor\MainPage.xbf">
+      <PackagePath>MainPage.xbf</PackagePath>
+      <Modified>2018-08-01T02:41:13.999</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\Microsoft.UniversalCRT.Debug\10.0.17134.0\\redist\Debug\x86\ucrtbased.dll">
+      <PackagePath>ucrtbased.dll</PackagePath>
+      <Modified>2018-04-20T04:05:16.000</Modified>
+    </AppxPackagedFile>
+    <AppxPackagedFile Include="c:\users\maxim\Source\Repos\wzrd_editor\Debug\wzrd_editor\resources.pri">
+      <PackagePath>resources.pri</PackagePath>
+      <ReRegisterAppIfChanged>true</ReRegisterAppIfChanged>
+      <Modified>2018-07-29T18:45:22.534</Modified>
+    </AppxPackagedFile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResolvedSDKReference Include="C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\Microsoft.VCLibs\14.0\">
+      <Name>Microsoft.VCLibs.140.00.Debug</Name>
+      <Version>14.0.26428.1</Version>
+      <Architecture>ARM</Architecture>
+      <FrameworkIdentity>Name = Microsoft.VCLibs.140.00.Debug, MinVersion = 14.0.26428.1, Publisher = %27CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US%27</FrameworkIdentity>
+      <AppxLocation>C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\Microsoft.VCLibs\14.0\.\AppX\Debug\ARM\Microsoft.VCLibs.ARM.Debug.14.00.appx</AppxLocation>
+      <MoreInfo>
+      </MoreInfo>
+    </ResolvedSDKReference>
+    <ResolvedSDKReference Include="C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\Microsoft.VCLibs\14.0\">
+      <Name>Microsoft.VCLibs.140.00.Debug</Name>
+      <Version>14.0.26428.1</Version>
+      <Architecture>x64</Architecture>
+      <FrameworkIdentity>Name = Microsoft.VCLibs.140.00.Debug, MinVersion = 14.0.26428.1, Publisher = %27CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US%27</FrameworkIdentity>
+      <AppxLocation>C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\Microsoft.VCLibs\14.0\.\AppX\Debug\x64\Microsoft.VCLibs.x64.Debug.14.00.appx</AppxLocation>
+      <MoreInfo>
+      </MoreInfo>
+    </ResolvedSDKReference>
+    <ResolvedSDKReference Include="C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\Microsoft.VCLibs\14.0\">
+      <Name>Microsoft.VCLibs.140.00.Debug</Name>
+      <Version>14.0.26428.1</Version>
+      <Architecture>x86</Architecture>
+      <FrameworkIdentity>Name = Microsoft.VCLibs.140.00.Debug, MinVersion = 14.0.26428.1, Publisher = %27CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US%27</FrameworkIdentity>
+      <AppxLocation>C:\Program Files %28x86%29\Microsoft SDKs\Windows Kits\10\ExtensionSDKs\Microsoft.VCLibs\14.0\.\AppX\Debug\x86\Microsoft.VCLibs.x86.Debug.14.00.appx</AppxLocation>
+      <MoreInfo>
+      </MoreInfo>
+    </ResolvedSDKReference>
+  </ItemGroup>
+</Project>
