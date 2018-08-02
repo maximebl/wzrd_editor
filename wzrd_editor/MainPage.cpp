@@ -88,8 +88,16 @@ namespace winrt::wzrd_editor::implementation
         throw hresult_not_implemented();
     }
 
-    void MainPage::ClickHandler(IInspectable const&, RoutedEventArgs const&)
+    Windows::Foundation::IAsyncAction MainPage::texturePickerClickHandler(IInspectable const&, RoutedEventArgs const&)
     {
+		winrt::Windows::Storage::Pickers::FileOpenPicker filePicker;
+		filePicker.FileTypeFilter().Append(L".dds");
+		auto file = co_await filePicker.PickSingleFileAsync();
+		if (file == nullptr)
+		{
+			return;
+		}
+		auto buffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
     }
 
 	Windows::Foundation::IAsyncAction MainPage::ui_thread_work()
@@ -307,6 +315,10 @@ namespace winrt::wzrd_editor::implementation
 			linearWrap, linearClamp,
 			anisotropicWrap, anisotropicClamp };
 	}
+	
+	//Windows::Foundation::IAsyncAction MainPage::ExampleFileAccess()
+	//{
+	//}
 
 	void MainPage::LoadTextures()
 	{

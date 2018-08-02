@@ -7,13 +7,10 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    
-
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Height="700" Width="1099" Margin="0,0,0,0">
 
         <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right">
-            <AppBarButton Icon="OpenFile" Label="Texture"/>
-
+            <AppBarButton x:Name="texturePicker" Click="texturePickerClickHandler" Icon="OpenFile" Label="Texture"/>
             <CommandBar.SecondaryCommands>
                 <AppBarButton Icon="Setting" Label="Settings"/>
             </CommandBar.SecondaryCommands>
