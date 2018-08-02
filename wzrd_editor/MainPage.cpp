@@ -311,31 +311,34 @@ namespace winrt::wzrd_editor::implementation
 	void MainPage::LoadTextures()
 	{
 		// create tmpUploadHeap
-		Microsoft::WRL::ComPtr<ID3D12Resource> tmpResource;
-		auto woodCrateTexture = std::make_unique<Texture>();
-		woodCrateTexture->Name = "woodCrateTexture";
+		//Microsoft::WRL::ComPtr<ID3D12Resource> tmpResource;
+		//Microsoft::WRL::ComPtr<ID3D12Resource> tmpUploadHeap;
 
-		tmp = woodCrateTexture->Resource.get();
+		//auto woodCrateTexture = std::make_unique<Texture>();
+		//woodCrateTexture->Name = "woodCrateTexture";
 
-		woodCrateTexture->Filename = L"Textures/WoodCrate01.dds";
-		check_hresult(
-			DirectX::CreateDDSTextureFromFile12(
-				m_device.get(),
-				m_graphicsCommandList.get(),
-				woodCrateTexture->Filename.c_str(),
-				tmpResource,
-				woodCrateTexture->UploadHeap
-			)
-		);
-		/*check_hresult(
-			DirectX::CreateDDSTextureFromFile12(
-				m_device.get(),
-				m_graphicsCommandList.get(),
-				woodCrateTexture->Filename.c_str(),
-				woodCrateTexture->Resource,
-				woodCrateTexture->UploadHeap
-			)
-		);*/
+		//tmpResource = woodCrateTexture->Resource.get();
+		//tmpUploadHeap = woodCrateTexture->UploadHeap.get();
+		//woodCrateTexture->Filename = L"C:/Users/maxim/Source/Repos/wzrd_editor/wzrd_editor/Textures/WoodCrate01.dds";
+
+		//check_hresult(
+		//	DirectX::CreateDDSTextureFromFile12(
+		//		m_device.get(),
+		//		m_graphicsCommandList.get(),
+		//		woodCrateTexture->Filename.c_str(),
+		//		tmpResource,
+		//		tmpUploadHeap
+		//	)
+		//);
+		//check_hresult(
+		//	DirectX::CreateDDSTextureFromFile12(
+		//		m_device.get(),
+		//		m_graphicsCommandList.get(),
+		//		woodCrateTexture->Filename.c_str(),
+		//		woodCrateTexture->Resource,
+		//		woodCrateTexture->UploadHeap
+		//	)
+		//);
 	}
 
 	void MainPage::BuildRootSignature()

@@ -163,6 +163,7 @@ static HRESULT LoadTextureDataFromFile(_In_z_ const wchar_t* fileName,
 		FILE_SHARE_READ,
 		OPEN_EXISTING,
 		nullptr)));
+
 #else
 	ScopedHandle hFile(safe_handle(CreateFileW(fileName,
 		GENERIC_READ,
