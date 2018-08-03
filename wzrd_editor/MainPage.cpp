@@ -35,7 +35,9 @@ namespace winrt::wzrd_editor::implementation
 		);
 
 		CreateCommandObjects();
+
 		check_hresult(m_graphicsCommandList->Close());
+
 		CreateAndAssociateSwapChain();
 		CreateDescriptorHeaps();
 
@@ -55,6 +57,7 @@ namespace winrt::wzrd_editor::implementation
 
 		LoadTextures();
 		BuildRootSignature();
+
 
 		m_running = true;
 		m_window = Window::Current().CoreWindow().GetForCurrentThread();
@@ -90,6 +93,7 @@ namespace winrt::wzrd_editor::implementation
 
     Windows::Foundation::IAsyncAction MainPage::texturePickerClickHandler(IInspectable const&, RoutedEventArgs const&)
     {
+		// Pick and read the file data
 		winrt::Windows::Storage::Pickers::FileOpenPicker filePicker;
 		filePicker.FileTypeFilter().Append(L".dds");
 		auto file = co_await filePicker.PickSingleFileAsync();
@@ -97,7 +101,39 @@ namespace winrt::wzrd_editor::implementation
 		{
 			return;
 		}
-		auto buffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
+
+		auto fileBuffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
+		auto dataReader = winrt::Windows::Storage::Streams::DataReader::FromBuffer(fileBuffer);
+
+		std::vector<unsigned char> file_bytes;
+		int fileSize = fileBuffer.Length();
+		file_bytes.assign(fileSize, 0);
+		dataReader.ReadBytes(file_bytes);
+		
+		// Create the texture 
+		auto woodCrateTexture = std::make_unique<Texture>();
+		woodCrateTexture->Name = "woodCrateTexture";
+
+		Microsoft::WRL::ComPtr<ID3D12Resource> tmpResource = woodCrateTexture->Resource.get();
+		Microsoft::WRL::ComPtr<ID3D12Resource> tmpUploadHeap = woodCrateTexture->UploadHeap.get();
+
+		check_hresult(m_graphicsCommandList->Reset(m_commandAllocator.get(), nullptr));
+		// Create the dds texture
+		check_hresult(
+			DirectX::CreateDDSTextureFromMemory12(
+				m_device.get(),
+				m_graphicsCommandList.get(),
+				&file_bytes.front(),
+				fileSize,
+				tmpResource,
+				tmpUploadHeap
+			)
+		);
+
+		woodCrateTexture->Resource.attach(tmpResource.Get());
+		woodCrateTexture->UploadHeap.attach(tmpUploadHeap.Get());
+
+		check_hresult(m_graphicsCommandList->Close());
     }
 
 	Windows::Foundation::IAsyncAction MainPage::ui_thread_work()
@@ -342,15 +378,7 @@ namespace winrt::wzrd_editor::implementation
 		//		tmpUploadHeap
 		//	)
 		//);
-		//check_hresult(
-		//	DirectX::CreateDDSTextureFromFile12(
-		//		m_device.get(),
-		//		m_graphicsCommandList.get(),
-		//		woodCrateTexture->Filename.c_str(),
-		//		woodCrateTexture->Resource,
-		//		woodCrateTexture->UploadHeap
-		//	)
-		//);
+
 	}
 
 	void MainPage::BuildRootSignature()
