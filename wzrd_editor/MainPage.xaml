@@ -11,6 +11,7 @@
 
         <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right">
             <AppBarButton x:Name="texturePicker" Click="texturePickerClickHandler" Icon="OpenFile" Label="Texture"/>
+            <AppBarButton x:Name="shaderPicker" Click="shaderPickerClickHandler" Icon="Edit" Label="Shader"/>
             <CommandBar.SecondaryCommands>
                 <AppBarButton Icon="Setting" Label="Settings"/>
             </CommandBar.SecondaryCommands>

@@ -55,9 +55,7 @@ namespace winrt::wzrd_editor::implementation
 
 		CreateDepthStencilBufferAndView();
 
-		LoadTextures();
 		BuildRootSignature();
-
 
 		m_running = true;
 		m_window = Window::Current().CoreWindow().GetForCurrentThread();
@@ -133,8 +131,65 @@ namespace winrt::wzrd_editor::implementation
 		woodCrateTexture->Resource.attach(tmpResource.Get());
 		woodCrateTexture->UploadHeap.attach(tmpUploadHeap.Get());
 
+		m_textures[woodCrateTexture->Name] = std::move(woodCrateTexture);
+
 		check_hresult(m_graphicsCommandList->Close());
+
+		BuildShaderResources();
     }
+
+	Windows::Foundation::IAsyncAction MainPage::shaderPickerClickHandler(IInspectable const&, RoutedEventArgs const&)
+	{
+		// Pick and read the shader data
+		winrt::Windows::Storage::Pickers::FileOpenPicker filePicker;
+		filePicker.FileTypeFilter().Append(L".hlsl");
+		auto file = co_await filePicker.PickSingleFileAsync();
+		if (file == nullptr)
+		{
+			return;
+		}
+
+		auto fileBuffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
+		auto dataReader = winrt::Windows::Storage::Streams::DataReader::FromBuffer(fileBuffer);
+
+		std::vector<unsigned char> file_bytes;
+		int fileSize = fileBuffer.Length();
+		file_bytes.assign(fileSize, 0);
+		dataReader.ReadBytes(file_bytes);
+
+		// compile the selected shader
+		UINT compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+		com_ptr<ID3DBlob> byteCode = nullptr;
+		com_ptr<ID3DBlob> errors = nullptr;
+
+		D3DCompile(
+			&file_bytes.front(),
+			fileSize,
+			nullptr,
+			nullptr,
+			nullptr,
+			"VS",
+			"vs_5_0",
+			compileFlags,
+			0,
+			byteCode.put(),
+			errors.put()
+		);
+
+		if (errors != nullptr)
+		{
+			auto errorBufferPtr = errors.get()->GetBufferPointer();
+			LPCSTR errorMessagePtr = (const char*)errorBufferPtr;
+			std::wstring title = L"Shader compilation error.";
+			std::string errorMessage(errorMessagePtr);
+			std::wstring message(errorMessage.begin(), errorMessage.end());
+
+			OutputDebugStringA(errorMessagePtr);
+			auto dialog = Windows::UI::Popups::MessageDialog(message, title);
+			co_await dialog.ShowAsync();
+		}
+		
+	}
 
 	Windows::Foundation::IAsyncAction MainPage::ui_thread_work()
 	{
@@ -351,34 +406,37 @@ namespace winrt::wzrd_editor::implementation
 			linearWrap, linearClamp,
 			anisotropicWrap, anisotropicClamp };
 	}
-	
-	//Windows::Foundation::IAsyncAction MainPage::ExampleFileAccess()
-	//{
-	//}
 
 	void MainPage::LoadTextures()
 	{
-		// create tmpUploadHeap
-		//Microsoft::WRL::ComPtr<ID3D12Resource> tmpResource;
-		//Microsoft::WRL::ComPtr<ID3D12Resource> tmpUploadHeap;
+	}
 
-		//auto woodCrateTexture = std::make_unique<Texture>();
-		//woodCrateTexture->Name = "woodCrateTexture";
+	void MainPage::BuildShaderResources()
+	{
+		D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
+		srvHeapDesc.NumDescriptors = 1;
+		srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+		srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+		check_hresult(m_device->CreateDescriptorHeap(&srvHeapDesc, __uuidof(m_srvDescriptorHeap), m_srvDescriptorHeap.put_void()));
 
-		//tmpResource = woodCrateTexture->Resource.get();
-		//tmpUploadHeap = woodCrateTexture->UploadHeap.get();
-		//woodCrateTexture->Filename = L"C:/Users/maxim/Source/Repos/wzrd_editor/wzrd_editor/Textures/WoodCrate01.dds";
+		CD3DX12_CPU_DESCRIPTOR_HANDLE hDescriptor(m_srvDescriptorHeap->GetCPUDescriptorHandleForHeapStart());
 
-		//check_hresult(
-		//	DirectX::CreateDDSTextureFromFile12(
-		//		m_device.get(),
-		//		m_graphicsCommandList.get(),
-		//		woodCrateTexture->Filename.c_str(),
-		//		tmpResource,
-		//		tmpUploadHeap
-		//	)
-		//);
+		auto woodcrateTexture = m_textures["woodCrateTexture"]->Resource;
 
+		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		srvDesc.Format = woodcrateTexture->GetDesc().Format;
+		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		srvDesc.Texture2D.MostDetailedMip = 0;
+		srvDesc.Texture2D.MipLevels = woodcrateTexture->GetDesc().MipLevels;
+		srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
+
+		m_device->CreateShaderResourceView(woodcrateTexture.get(), &srvDesc, hDescriptor);
+	}
+
+	void MainPage::BuildShadersAndInputLayout()
+	{
+		//m_shaders["standardVS"] = 
 	}
 
 	void MainPage::BuildRootSignature()

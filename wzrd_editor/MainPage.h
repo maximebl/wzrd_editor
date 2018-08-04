@@ -16,7 +16,9 @@ namespace winrt::wzrd_editor::implementation
 
         int32_t MyProperty();
         void MyProperty(int32_t value);
+
         Windows::Foundation::IAsyncAction texturePickerClickHandler(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
+		Windows::Foundation::IAsyncAction shaderPickerClickHandler(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 
 		Windows::UI::Core::CoreWindow m_window = nullptr;
 		Windows::Foundation::IAsyncAction m_renderLoopWorker;
@@ -34,6 +36,12 @@ namespace winrt::wzrd_editor::implementation
 		void WaitForGPU();
 		void BuildRootSignature();
 		void LoadTextures();
+		void BuildShaderResources();
+		void BuildShadersAndInputLayout();
+
+		std::unordered_map<std::string, std::unique_ptr<Texture>> m_textures;
+		std::unordered_map<std::string, com_ptr<ID3DBlob>> m_shaders;
+		com_ptr<ID3D12DescriptorHeap> m_srvDescriptorHeap = nullptr;
 
 		std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> GetStaticSamplers();
 		D3D12_CPU_DESCRIPTOR_HANDLE CurrentBackBufferView() const;

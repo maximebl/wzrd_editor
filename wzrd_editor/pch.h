@@ -7,6 +7,8 @@
 
 #define NOMINMAX
 
+//#include <atlbase.h>
+
 #include "winrt/Windows.Foundation.h"
 #include "winrt/Windows.ApplicationModel.Activation.h"
 #include "winrt/Windows.UI.Xaml.h"
@@ -18,6 +20,7 @@
 #include "winrt/Windows.UI.Xaml.Navigation.h"
 
 #include "winrt/Windows.UI.Core.h"
+#include "winrt/Windows.UI.Popups.h"
 #include <dxgi1_4.h>
 #include <d3d12.h>
 #include <dxgidebug.h>
@@ -26,3 +29,5 @@
 #include "winrt/Windows.System.Threading.h"
 #include "winrt/Windows.Storage.Pickers.h"
 #include "winrt/Windows.Storage.Streams.h"
+
+#include <d3dcompiler.h>
