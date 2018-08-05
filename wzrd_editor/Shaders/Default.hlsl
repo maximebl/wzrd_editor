@@ -18,7 +18,7 @@
 #endif
 
 // Include structures and functions for lighting.
-#include "LightingUtil.hlsl"
+#include "C:\Users\maxim\Documents\wzrd_editor\x64\Debug\wzrd_editor\AppX\LightingUtil.hlsl"
 
 Texture2D    gDiffuseMap : register(t0);
 SamplerState gsamLinear  : register(s0);

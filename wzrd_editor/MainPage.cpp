@@ -167,7 +167,8 @@ namespace winrt::wzrd_editor::implementation
 			fileSize,
 			nullptr,
 			nullptr,
-			nullptr,
+			//TODO: Replace with custom ID3DInclude
+			D3D_COMPILE_STANDARD_FILE_INCLUDE,
 			"VS",
 			"vs_5_0",
 			compileFlags,
@@ -175,12 +176,14 @@ namespace winrt::wzrd_editor::implementation
 			byteCode.put(),
 			errors.put()
 		);
-
+	
 		if (errors != nullptr)
 		{
 			auto errorBufferPtr = errors.get()->GetBufferPointer();
 			LPCSTR errorMessagePtr = (const char*)errorBufferPtr;
 			std::wstring title = L"Shader compilation error.";
+
+			//TODO: This is kind of ghetto string conversion, need to research this later if it's slow
 			std::string errorMessage(errorMessagePtr);
 			std::wstring message(errorMessage.begin(), errorMessage.end());
 
@@ -189,6 +192,7 @@ namespace winrt::wzrd_editor::implementation
 			co_await dialog.ShowAsync();
 		}
 		
+		m_shaders["woodCrate"] = std::move(byteCode);
 	}
 
 	Windows::Foundation::IAsyncAction MainPage::ui_thread_work()
