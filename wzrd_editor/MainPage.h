@@ -7,6 +7,7 @@
 #include "MainPage.g.h"
 #include "utilities.h"
 #include "DDSTextureLoader.h"
+#include "FrameResource.h"
 
 namespace winrt::wzrd_editor::implementation
 {
@@ -39,7 +40,9 @@ namespace winrt::wzrd_editor::implementation
 		void LoadTextures();
 		void BuildShaderResources();
 		void BuildShadersAndInputLayout();
+		void BuildBoxGeometry();
 
+		std::vector<D3D12_INPUT_ELEMENT_DESC> m_inputLayout;
 		std::unordered_map<std::string, std::unique_ptr<Texture>> m_textures;
 		std::unordered_map<std::string, com_ptr<ID3DBlob>> m_shaders;
 		com_ptr<ID3D12DescriptorHeap> m_srvDescriptorHeap = nullptr;

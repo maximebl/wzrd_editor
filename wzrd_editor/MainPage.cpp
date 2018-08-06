@@ -56,6 +56,7 @@ namespace winrt::wzrd_editor::implementation
 		CreateDepthStencilBufferAndView();
 
 		BuildRootSignature();
+		BuildBoxGeometry();
 
 		m_running = true;
 		m_window = Window::Current().CoreWindow().GetForCurrentThread();
@@ -137,6 +138,34 @@ namespace winrt::wzrd_editor::implementation
 
 		BuildShaderResources();
     }
+
+	void MainPage::BuildBoxGeometry()
+	{
+		GeometryGenerator geoGen;
+		GeometryGenerator::MeshData box = geoGen.CreateBox(1.0f, 1.0f, 1.0f, 3);
+
+		SubmeshGeometry boxSubmesh;
+		boxSubmesh.IndexCount = box.Indices32.size();
+		boxSubmesh.StartIndexLocation = 0;
+		boxSubmesh.BaseVertexLocation = 0;
+
+		std::vector<Vertex> vertices(box.Vertices.size());
+		
+		for (size_t i = 0; i < box.Vertices.size(); ++i)
+		{
+			vertices[i].Pos = box.Vertices[i].Position;
+			vertices[i].Normal = box.Vertices[i].Normal;
+			vertices[i].TexC = box.Vertices[i].TexC;
+		}
+
+		std::vector<std::uint16_t> indices = box.GetIndices16();
+
+		const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
+		const UINT ibByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
+		
+		auto geo = std::make_unique<MeshGeometry>();
+
+	}
 
 	Windows::Foundation::IAsyncAction MainPage::pixelShaderPicker_Click(IInspectable const&, RoutedEventArgs const&)
 	{
@@ -417,6 +446,13 @@ namespace winrt::wzrd_editor::implementation
 		srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
 
 		m_device->CreateShaderResourceView(woodcrateTexture.get(), &srvDesc, hDescriptor);
+
+		m_inputLayout = 
+		{
+			{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+			{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+			{"TEXCOORD", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
+		};
 	}
 
 	void MainPage::BuildShadersAndInputLayout()
