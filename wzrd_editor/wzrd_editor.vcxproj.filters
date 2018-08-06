@@ -17,6 +17,7 @@
     <ClCompile Include="Generated Files\module.g.cpp" />
     <ClCompile Include="DDSTextureLoader.h" />
     <ClCompile Include="DDSTextureLoader.cpp" />
+    <ClCompile Include="utilities.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

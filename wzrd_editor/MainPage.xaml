@@ -8,12 +8,20 @@
     mc:Ignorable="d">
 
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Height="700" Width="1099" Margin="0,0,0,0">
-
+        
         <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right">
-            <AppBarButton x:Name="texturePicker" Click="texturePickerClickHandler" Icon="OpenFile" Label="Texture"/>
-            <AppBarButton x:Name="shaderPicker" Click="shaderPickerClickHandler" Icon="Edit" Label="Shader"/>
+            <AppBarButton x:Name="texturePicker" Click="texturePicker_Click" Icon="OpenFile" Label="Texture"/>
+            <AppBarButton x:Name="shaderPicker" Icon="OpenFile" Label="Shaders">
+                <AppBarButton.Flyout>
+                    <MenuFlyout>
+                        <MenuFlyoutItem x:Name="pixelShaderPicker" Click="pixelShaderPicker_Click" Text="Pixel"></MenuFlyoutItem>
+                        <MenuFlyoutItem x:Name="vertexShaderPicker" Click="vertexShaderPicker_Click" Text="Vertex" ></MenuFlyoutItem>
+                    </MenuFlyout>
+                </AppBarButton.Flyout> 
+            </AppBarButton>            
+
             <CommandBar.SecondaryCommands>
-                <AppBarButton Icon="Setting" Label="Settings"/>
+                <AppBarButton Icon="Edit" Label="Settings"/>
             </CommandBar.SecondaryCommands>
         </CommandBar>
 
@@ -24,8 +32,6 @@
                      IsAlphaSliderVisible="False" 
                      ColorSpectrumComponents="HueSaturation" 
                      ColorSpectrumShape="Ring"/>
-
-        
 
         <SwapChainPanel x:Name="swapChainPanel" HorizontalAlignment="Left" Width="685" Margin="100,0,0,0" Height="548" VerticalAlignment="Center" />
     </StackPanel>

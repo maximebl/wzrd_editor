@@ -7,8 +7,6 @@
 
 #define NOMINMAX
 
-//#include <atlbase.h>
-
 #include "winrt/Windows.Foundation.h"
 #include "winrt/Windows.ApplicationModel.Activation.h"
 #include "winrt/Windows.UI.Xaml.h"
@@ -31,3 +29,4 @@
 #include "winrt/Windows.Storage.Streams.h"
 
 #include <d3dcompiler.h>
+#include <ppltasks.h>

@@ -17,8 +17,9 @@ namespace winrt::wzrd_editor::implementation
         int32_t MyProperty();
         void MyProperty(int32_t value);
 
-        Windows::Foundation::IAsyncAction texturePickerClickHandler(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
-		Windows::Foundation::IAsyncAction shaderPickerClickHandler(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
+        Windows::Foundation::IAsyncAction texturePicker_Click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
+		Windows::Foundation::IAsyncAction pixelShaderPicker_Click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
+		Windows::Foundation::IAsyncAction vertexShaderPicker_Click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 
 		Windows::UI::Core::CoreWindow m_window = nullptr;
 		Windows::Foundation::IAsyncAction m_renderLoopWorker;

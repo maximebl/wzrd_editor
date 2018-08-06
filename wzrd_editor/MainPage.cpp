@@ -89,7 +89,7 @@ namespace winrt::wzrd_editor::implementation
         throw hresult_not_implemented();
     }
 
-    Windows::Foundation::IAsyncAction MainPage::texturePickerClickHandler(IInspectable const&, RoutedEventArgs const&)
+    Windows::Foundation::IAsyncAction MainPage::texturePicker_Click(IInspectable const&, RoutedEventArgs const&)
     {
 		// Pick and read the file data
 		winrt::Windows::Storage::Pickers::FileOpenPicker filePicker;
@@ -138,7 +138,7 @@ namespace winrt::wzrd_editor::implementation
 		BuildShaderResources();
     }
 
-	Windows::Foundation::IAsyncAction MainPage::shaderPickerClickHandler(IInspectable const&, RoutedEventArgs const&)
+	Windows::Foundation::IAsyncAction MainPage::pixelShaderPicker_Click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// Pick and read the shader data
 		winrt::Windows::Storage::Pickers::FileOpenPicker filePicker;
@@ -150,49 +150,30 @@ namespace winrt::wzrd_editor::implementation
 		}
 
 		auto fileBuffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
-		auto dataReader = winrt::Windows::Storage::Streams::DataReader::FromBuffer(fileBuffer);
+		auto file_bytes = Utilities::read_shader_file(fileBuffer).get();
+		m_shaders["woodCratePS"] = Utilities::compile_shader("ps_5_0", file_bytes, "PS");
+	}
 
-		std::vector<unsigned char> file_bytes;
-		int fileSize = fileBuffer.Length();
-		file_bytes.assign(fileSize, 0);
-		dataReader.ReadBytes(file_bytes);
-
-		// compile the selected shader
-		UINT compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-		com_ptr<ID3DBlob> byteCode = nullptr;
-		com_ptr<ID3DBlob> errors = nullptr;
-
-		D3DCompile(
-			&file_bytes.front(),
-			fileSize,
-			nullptr,
-			nullptr,
-			//TODO: Replace with custom ID3DInclude
-			D3D_COMPILE_STANDARD_FILE_INCLUDE,
-			"VS",
-			"vs_5_0",
-			compileFlags,
-			0,
-			byteCode.put(),
-			errors.put()
-		);
-	
-		if (errors != nullptr)
+	Windows::Foundation::IAsyncAction MainPage::vertexShaderPicker_Click(IInspectable const&, RoutedEventArgs const&)
+	{
+		// Pick and read the shader data
+		winrt::Windows::Storage::Pickers::FileOpenPicker filePicker;
+		filePicker.FileTypeFilter().Append(L".hlsl");
+		auto file = co_await filePicker.PickSingleFileAsync();
+		if (file == nullptr)
 		{
-			auto errorBufferPtr = errors.get()->GetBufferPointer();
-			LPCSTR errorMessagePtr = (const char*)errorBufferPtr;
-			std::wstring title = L"Shader compilation error.";
-
-			//TODO: This is kind of ghetto string conversion, need to research this later if it's slow
-			std::string errorMessage(errorMessagePtr);
-			std::wstring message(errorMessage.begin(), errorMessage.end());
-
-			OutputDebugStringA(errorMessagePtr);
-			auto dialog = Windows::UI::Popups::MessageDialog(message, title);
-			co_await dialog.ShowAsync();
+			return;
 		}
-		
-		m_shaders["woodCrate"] = std::move(byteCode);
+
+		auto fileBuffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
+		//auto dataReader = winrt::Windows::Storage::Streams::DataReader::FromBuffer(fileBuffer);
+
+		//std::vector<unsigned char> file_bytes;
+		//int fileSize = fileBuffer.Length();
+		//file_bytes.assign(fileSize, 0);
+		//dataReader.ReadBytes(file_bytes);
+		auto file_bytes = Utilities::read_shader_file(fileBuffer).get();
+		m_shaders["woodCrateVS"] = Utilities::compile_shader("vs_5_0", file_bytes, "VS");
 	}
 
 	Windows::Foundation::IAsyncAction MainPage::ui_thread_work()
