@@ -55,6 +55,13 @@ namespace winrt::wzrd_editor::implementation
 
 		CreateDepthStencilBufferAndView();
 
+		m_inputLayout =
+		{
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+		};
+
 		BuildRootSignature();
 		BuildBoxGeometry();
 
@@ -139,34 +146,6 @@ namespace winrt::wzrd_editor::implementation
 		BuildShaderResources();
     }
 
-	void MainPage::BuildBoxGeometry()
-	{
-		GeometryGenerator geoGen;
-		GeometryGenerator::MeshData box = geoGen.CreateBox(1.0f, 1.0f, 1.0f, 3);
-
-		SubmeshGeometry boxSubmesh;
-		boxSubmesh.IndexCount = box.Indices32.size();
-		boxSubmesh.StartIndexLocation = 0;
-		boxSubmesh.BaseVertexLocation = 0;
-
-		std::vector<Vertex> vertices(box.Vertices.size());
-		
-		for (size_t i = 0; i < box.Vertices.size(); ++i)
-		{
-			vertices[i].Pos = box.Vertices[i].Position;
-			vertices[i].Normal = box.Vertices[i].Normal;
-			vertices[i].TexC = box.Vertices[i].TexC;
-		}
-
-		std::vector<std::uint16_t> indices = box.GetIndices16();
-
-		const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
-		const UINT ibByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
-		
-		auto geo = std::make_unique<MeshGeometry>();
-
-	}
-
 	Windows::Foundation::IAsyncAction MainPage::pixelShaderPicker_Click(IInspectable const&, RoutedEventArgs const&)
 	{
 		// Pick and read the shader data
@@ -204,6 +183,96 @@ namespace winrt::wzrd_editor::implementation
 		auto file_bytes = Utilities::read_shader_file(fileBuffer).get();
 		m_shaders["woodCrateVS"] = Utilities::compile_shader("vs_5_0", file_bytes, "VS");
 	}
+
+	void MainPage::buildPSO_Click(IInspectable const&, RoutedEventArgs const&)
+	{
+		BuildPSOs();
+	}
+
+	void MainPage::BuildBoxGeometry()
+	{
+		GeometryGenerator geoGen;
+		GeometryGenerator::MeshData box = geoGen.CreateBox(1.0f, 1.0f, 1.0f, 3);
+
+		SubmeshGeometry boxSubmesh;
+		boxSubmesh.IndexCount = box.Indices32.size();
+		boxSubmesh.StartIndexLocation = 0;
+		boxSubmesh.BaseVertexLocation = 0;
+
+		std::vector<Vertex> vertices(box.Vertices.size());
+		
+		for (size_t i = 0; i < box.Vertices.size(); ++i)
+		{
+			vertices[i].Pos = box.Vertices[i].Position;
+			vertices[i].Normal = box.Vertices[i].Normal;
+			vertices[i].TexC = box.Vertices[i].TexC;
+		}
+
+		std::vector<std::uint16_t> indices = box.GetIndices16();
+
+		const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
+		const UINT ibByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
+		
+		auto geo = std::make_unique<MeshGeometry>();
+		geo->Name = "crateGeo";
+
+		// TODO:: Bechmark those 2 methods to see whats the fastest
+		//auto bufferPtr = reinterpret_cast<Vertex *>(geo->VertexBufferCPU->GetBufferPointer());
+		//std::copy(vertices.begin(), vertices.end(), bufferPtr);
+		check_hresult(D3DCreateBlob(vbByteSize, geo->VertexBufferCPU.put()));
+		std::memcpy(geo->VertexBufferCPU->GetBufferPointer(), vertices.data(), vbByteSize);
+
+		check_hresult(D3DCreateBlob(ibByteSize, geo->IndexBufferCPU.put()));
+		std::memcpy(geo->IndexBufferCPU->GetBufferPointer(), indices.data(), ibByteSize);
+
+		geo->VertexBufferGPU = Utilities::create_default_buffer(m_device.get(),
+			m_graphicsCommandList.get(), vertices.data(), vbByteSize, geo->VertexBufferUploader);
+
+		geo->IndexBufferGPU = Utilities::create_default_buffer(m_device.get(),
+			m_graphicsCommandList.get(), indices.data(), ibByteSize, geo->IndexBufferUploader);
+
+		geo->VertexByteStride = sizeof(Vertex);
+		geo->VertexBufferByteSize = vbByteSize;
+		geo->IndexBufferByteSize = ibByteSize;
+		geo->IndexFormat = DXGI_FORMAT_R16_UINT;
+		
+		geo->DrawArgs["box"] = boxSubmesh;
+		
+		m_geometries[geo->Name] = std::move(geo);
+	}
+
+	void MainPage::BuildPSOs()
+	{
+		D3D12_GRAPHICS_PIPELINE_STATE_DESC opaque_pso_desc;
+		ZeroMemory(&opaque_pso_desc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
+
+		opaque_pso_desc.InputLayout = { m_inputLayout.data(), (UINT)m_inputLayout.size() };
+		opaque_pso_desc.pRootSignature = m_rootSignature.get();
+		opaque_pso_desc.VS = 
+		{
+			reinterpret_cast<unsigned char*>(m_shaders["woodCrateVS"]->GetBufferPointer()),
+			m_shaders["woodCrateVS"]->GetBufferSize()
+		};
+		opaque_pso_desc.PS =
+		{
+			reinterpret_cast<unsigned char*>(m_shaders["woodCratePS"]->GetBufferPointer()),
+			m_shaders["woodCratePS"]->GetBufferSize()
+		};
+		opaque_pso_desc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+		opaque_pso_desc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+		opaque_pso_desc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+		opaque_pso_desc.SampleMask = UINT_MAX;
+		opaque_pso_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+		opaque_pso_desc.NumRenderTargets = 1;
+		opaque_pso_desc.RTVFormats[0] = m_backBufferFormat;
+		opaque_pso_desc.SampleDesc.Count = 1;
+		opaque_pso_desc.SampleDesc.Quality = 0;
+		opaque_pso_desc.DSVFormat = m_depthStencilFormat;
+
+		check_hresult(m_device->CreateGraphicsPipelineState(&opaque_pso_desc, __uuidof(m_opaque_pso), m_opaque_pso.put_void()));
+	}
+
+
 
 	Windows::Foundation::IAsyncAction MainPage::ui_thread_work()
 	{
@@ -446,13 +515,6 @@ namespace winrt::wzrd_editor::implementation
 		srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
 
 		m_device->CreateShaderResourceView(woodcrateTexture.get(), &srvDesc, hDescriptor);
-
-		m_inputLayout = 
-		{
-			{"POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-			{"NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-			{"TEXCOORD", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
-		};
 	}
 
 	void MainPage::BuildShadersAndInputLayout()

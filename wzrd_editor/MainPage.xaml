@@ -19,7 +19,7 @@
                     </MenuFlyout>
                 </AppBarButton.Flyout> 
             </AppBarButton>            
-
+            <AppBarButton x:Name="build" Click="buildPSO_Click" Icon="Calculator" Label="Build"/>
             <CommandBar.SecondaryCommands>
                 <AppBarButton Icon="Edit" Label="Settings"/>
             </CommandBar.SecondaryCommands>

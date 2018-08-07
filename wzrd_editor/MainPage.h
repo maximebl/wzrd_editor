@@ -21,6 +21,7 @@ namespace winrt::wzrd_editor::implementation
         Windows::Foundation::IAsyncAction texturePicker_Click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 		Windows::Foundation::IAsyncAction pixelShaderPicker_Click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 		Windows::Foundation::IAsyncAction vertexShaderPicker_Click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
+		void buildPSO_Click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 
 		Windows::UI::Core::CoreWindow m_window = nullptr;
 		Windows::Foundation::IAsyncAction m_renderLoopWorker;
@@ -41,10 +42,13 @@ namespace winrt::wzrd_editor::implementation
 		void BuildShaderResources();
 		void BuildShadersAndInputLayout();
 		void BuildBoxGeometry();
+		void BuildPSOs();
 
 		std::vector<D3D12_INPUT_ELEMENT_DESC> m_inputLayout;
 		std::unordered_map<std::string, std::unique_ptr<Texture>> m_textures;
 		std::unordered_map<std::string, com_ptr<ID3DBlob>> m_shaders;
+		std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> m_geometries;
+
 		com_ptr<ID3D12DescriptorHeap> m_srvDescriptorHeap = nullptr;
 
 		std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> GetStaticSamplers();
@@ -64,7 +68,9 @@ namespace winrt::wzrd_editor::implementation
 		int m_currentBackBuffer = 0;
 		com_ptr<ID3D12Resource> m_swapChainBuffer[m_swapChainBufferCount];
 		com_ptr<ID3D12Resource> m_depthStencilBuffer;
+
 		DXGI_FORMAT m_depthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
+		DXGI_FORMAT m_backBufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 
 		com_ptr<IDXGISwapChain1> m_swapChain;
 		com_ptr<IDXGIFactory4> m_factory;
@@ -72,6 +78,7 @@ namespace winrt::wzrd_editor::implementation
 		com_ptr<ID3D12CommandAllocator> m_commandAllocator;
 		com_ptr<ID3D12GraphicsCommandList> m_graphicsCommandList;
 		com_ptr<ID3D12Device> m_device;
+		com_ptr<ID3D12PipelineState> m_opaque_pso = nullptr;
 
 		com_ptr<ID3D12RootSignature> m_rootSignature = nullptr;
 

@@ -71,4 +71,10 @@ public:
 	Utilities();
 	static concurrency::task<std::vector<unsigned char>> read_shader_file(winrt::Windows::Storage::Streams::IBuffer fileBuffer);
 	static winrt::com_ptr<ID3DBlob> compile_shader(const std::string& shaderType, const std::vector<unsigned char>& file_bytes, const std::string& entryPoint);
+	static winrt::com_ptr<ID3D12Resource> create_default_buffer(
+		ID3D12Device* device, 
+		ID3D12GraphicsCommandList* cmdList, 
+		const void* initData, 
+		UINT64 byteSize, 
+		winrt::com_ptr<ID3D12Resource>& uploadBuffer);
 };
