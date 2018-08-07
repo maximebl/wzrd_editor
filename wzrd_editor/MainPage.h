@@ -40,14 +40,15 @@ namespace winrt::wzrd_editor::implementation
 		void BuildRootSignature();
 		void LoadTextures();
 		void BuildShaderResources();
-		void BuildShadersAndInputLayout();
 		void BuildBoxGeometry();
 		void BuildPSOs();
+		void BuildMaterials();
 
 		std::vector<D3D12_INPUT_ELEMENT_DESC> m_inputLayout;
 		std::unordered_map<std::string, std::unique_ptr<Texture>> m_textures;
 		std::unordered_map<std::string, com_ptr<ID3DBlob>> m_shaders;
 		std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> m_geometries;
+		std::unordered_map<std::string, std::unique_ptr<Material>> m_materials;
 
 		com_ptr<ID3D12DescriptorHeap> m_srvDescriptorHeap = nullptr;
 

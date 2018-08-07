@@ -64,7 +64,8 @@ namespace winrt::wzrd_editor::implementation
 
 		BuildRootSignature();
 		BuildBoxGeometry();
-
+		BuildMaterials();
+			
 		m_running = true;
 		m_window = Window::Current().CoreWindow().GetForCurrentThread();
 
@@ -239,6 +240,19 @@ namespace winrt::wzrd_editor::implementation
 		geo->DrawArgs["box"] = boxSubmesh;
 		
 		m_geometries[geo->Name] = std::move(geo);
+	}
+
+	void MainPage::BuildMaterials()
+	{
+		auto woodCrate = std::make_unique<Material>();
+		woodCrate->name = "woodCrate";
+		woodCrate->mat_cb_index = 0;
+		woodCrate->diffuse_srv_heap_index = 0;
+		woodCrate->diffuse_albedo = DirectX::XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+		woodCrate->fresnel_r0 = DirectX::XMFLOAT3(0.05f, 0.05f, 0.05f);
+		woodCrate->roughness = 0.2f;
+
+		m_materials[woodCrate->name] = std::move(woodCrate);
 	}
 
 	void MainPage::BuildPSOs()
@@ -515,11 +529,6 @@ namespace winrt::wzrd_editor::implementation
 		srvDesc.Texture2D.ResourceMinLODClamp = 0.0f;
 
 		m_device->CreateShaderResourceView(woodcrateTexture.get(), &srvDesc, hDescriptor);
-	}
-
-	void MainPage::BuildShadersAndInputLayout()
-	{
-		//m_shaders["standardVS"] = 
 	}
 
 	void MainPage::BuildRootSignature()

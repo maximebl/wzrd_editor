@@ -3,6 +3,9 @@
 #include <d3d12.h>
 #include "winrt/Windows.Foundation.h"
 #include <DirectXCollision.h>
+#include "MathHelper.h"
+
+const int global_num_frame_resources = 3;
 
 struct Texture
 {
@@ -10,6 +13,19 @@ struct Texture
 	std::wstring Filename;
 	winrt::com_ptr<ID3D12Resource> Resource = nullptr;
 	winrt::com_ptr<ID3D12Resource> UploadHeap = nullptr;
+};
+
+struct Material
+{
+	std::string name;
+	int mat_cb_index = -1;
+	int diffuse_srv_heap_index = -1;
+	int normal_srv_heap_index = -1;
+	int num_frames_dirty = global_num_frame_resources;
+	DirectX::XMFLOAT4 diffuse_albedo = { 1.0f, 1.0f, 1.0f, 1.0f };
+	DirectX::XMFLOAT3 fresnel_r0 = { 0.01f, 0.01f, 0.01f };
+	float roughness = 0.25f;
+	DirectX::XMFLOAT4X4 mat_transform = MathHelper::Identity4x4();
 };
 
 struct SubmeshGeometry

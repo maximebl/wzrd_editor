@@ -20,6 +20,7 @@
     <ClCompile Include="utilities.cpp" />
     <ClCompile Include="GeometryGenerator.cpp" />
     <ClCompile Include="FrameResource.cpp" />
+    <ClCompile Include="MathHelper.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -29,6 +30,7 @@
     <ClInclude Include="utilities.h" />
     <ClInclude Include="GeometryGenerator.h" />
     <ClInclude Include="FrameResource.h" />
+    <ClInclude Include="MathHelper.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Wide310x150Logo.scale-200.png">
