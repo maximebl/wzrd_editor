@@ -8,6 +8,7 @@
 #include "utilities.h"
 #include "DDSTextureLoader.h"
 #include "FrameResource.h"
+#include "GameTimer.h"
 
 namespace winrt::wzrd_editor::implementation
 {
@@ -23,6 +24,7 @@ namespace winrt::wzrd_editor::implementation
 		Windows::Foundation::IAsyncAction vertexShaderPicker_Click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 		void buildPSO_Click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 
+		GameTimer m_timer;
 		Windows::UI::Core::CoreWindow m_window = nullptr;
 		Windows::Foundation::IAsyncAction m_renderLoopWorker;
 		bool m_windowVisible = false;
@@ -31,6 +33,12 @@ namespace winrt::wzrd_editor::implementation
 		Windows::Foundation::IAsyncAction ui_thread_work();
 
 		bool Render();
+		void Update(const GameTimer& gt);
+		void UpdateCamera(const GameTimer& gt);
+		void UpdateObjectCBs(const GameTimer& gt);
+		void UpdateMaterialCBs(const GameTimer& gt);
+		void UpdateMainPassCB(const GameTimer& gt);
+		void DrawRenderItems(ID3D12GraphicsCommandList* cmdList, std::vector<std::unique_ptr<render_item>>& render_items);
 		void EnableDebugLayer();
 		void CreateCommandObjects();
 		void CreateAndAssociateSwapChain();
@@ -43,13 +51,20 @@ namespace winrt::wzrd_editor::implementation
 		void BuildBoxGeometry();
 		void BuildPSOs();
 		void BuildMaterials();
+		void BuildRenderItems();
+		void BuildFrameResources();
 
-		std::vector<D3D12_INPUT_ELEMENT_DESC> m_inputLayout;
+		std::vector<std::unique_ptr<render_item>> m_render_items;
+		std::vector<std::unique_ptr<frame_resource>> m_frame_resources;
+		frame_resource* m_current_frame_resource = nullptr;
+		int m_current_frame_resource_index = 0;
+
 		std::unordered_map<std::string, std::unique_ptr<Texture>> m_textures;
 		std::unordered_map<std::string, com_ptr<ID3DBlob>> m_shaders;
 		std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> m_geometries;
 		std::unordered_map<std::string, std::unique_ptr<Material>> m_materials;
 
+		std::vector<D3D12_INPUT_ELEMENT_DESC> m_inputLayout;
 		com_ptr<ID3D12DescriptorHeap> m_srvDescriptorHeap = nullptr;
 
 		std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> GetStaticSamplers();
@@ -92,6 +107,15 @@ namespace winrt::wzrd_editor::implementation
 		UINT m_rtvDescriptorSize = 0;
 		UINT m_dsvDescriptorSize = 0;
 		UINT m_cbvSrvUavDescriptorSize = 0;
+
+		pass_constants m_main_pass_constants;
+		DirectX::XMFLOAT3 m_eye_position = { 0.0f, 0.0f, 0.0f };
+		DirectX::XMFLOAT4X4 m_view = MathHelper::Identity4x4();
+		DirectX::XMFLOAT4X4 m_proj = MathHelper::Identity4x4();
+
+		float m_theta = 1.3f * DirectX::XM_PI;
+		float m_phi = 0.4f * DirectX::XM_PI;
+		float m_radius = 2.5f;
     };
 }
 

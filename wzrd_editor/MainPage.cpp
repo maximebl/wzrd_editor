@@ -36,7 +36,7 @@ namespace winrt::wzrd_editor::implementation
 
 		CreateCommandObjects();
 
-		check_hresult(m_graphicsCommandList->Close());
+		//check_hresult(m_graphicsCommandList->Close());
 
 		CreateAndAssociateSwapChain();
 		CreateDescriptorHeaps();
@@ -62,9 +62,17 @@ namespace winrt::wzrd_editor::implementation
 			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 		};
 
+		m_cbvSrvUavDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+
 		BuildRootSignature();
 		BuildBoxGeometry();
 		BuildMaterials();
+		BuildRenderItems();
+		BuildFrameResources();
+
+		check_hresult(m_graphicsCommandList->Close());
+		ID3D12CommandList* cmdsLists[] = { m_graphicsCommandList.get() };
+		m_commandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
 			
 		m_running = true;
 		m_window = Window::Current().CoreWindow().GetForCurrentThread();
@@ -73,14 +81,17 @@ namespace winrt::wzrd_editor::implementation
 
 		auto workItem = WorkItemHandler([this](Windows::Foundation::IAsyncAction action)
 		{
+			m_timer.Reset();
+
 			while (m_running)
 			{
 				ui_thread_work();
+				m_timer.Tick();
 
 				if (m_windowVisible)
 				{
+					Update(m_timer);
 					Render();
-					WaitForGPU();
 				}
 			}
 		});
@@ -196,7 +207,7 @@ namespace winrt::wzrd_editor::implementation
 		GeometryGenerator::MeshData box = geoGen.CreateBox(1.0f, 1.0f, 1.0f, 3);
 
 		SubmeshGeometry boxSubmesh;
-		boxSubmesh.IndexCount = box.Indices32.size();
+		boxSubmesh.IndexCount = (UINT)box.Indices32.size();
 		boxSubmesh.StartIndexLocation = 0;
 		boxSubmesh.BaseVertexLocation = 0;
 
@@ -253,6 +264,29 @@ namespace winrt::wzrd_editor::implementation
 		woodCrate->roughness = 0.2f;
 
 		m_materials[woodCrate->name] = std::move(woodCrate);
+	}
+
+	void MainPage::BuildRenderItems()
+	{
+		auto box_render_item = std::make_unique<render_item>();
+		box_render_item->obj_cb_index = 0;
+		box_render_item->material = m_materials["woodCrate"].get();
+		box_render_item->mesh_geometry = m_geometries["crateGeo"].get();
+		box_render_item->primitive_topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+		box_render_item->index_count = box_render_item->mesh_geometry->DrawArgs["box"].IndexCount;
+		box_render_item->start_index_location = box_render_item->mesh_geometry->DrawArgs["box"].StartIndexLocation;
+		box_render_item->base_vertex_location = box_render_item->mesh_geometry->DrawArgs["box"].BaseVertexLocation;
+
+		m_render_items.push_back(std::move(box_render_item));
+	}
+
+	void MainPage::BuildFrameResources()
+	{
+		for (int i = 0; i < global_num_frame_resources; ++i)
+		{
+			m_frame_resources.push_back(std::make_unique<frame_resource>(m_device.get(),
+				1, (UINT)m_render_items.size(), (UINT)m_materials.size()));
+		}
 	}
 
 	void MainPage::BuildPSOs()
@@ -592,9 +626,156 @@ namespace winrt::wzrd_editor::implementation
 		);
 	}
 
+	void MainPage::DrawRenderItems(ID3D12GraphicsCommandList* cmdList, std::vector<std::unique_ptr<render_item>>& render_items)
+	{
+		UINT obj_cb_byte_size = Utilities::constant_buffer_byte_size(sizeof(object_constants));
+		UINT mat_cb_byte_size = Utilities::constant_buffer_byte_size(sizeof(material_constants));
+
+		auto object_cb = m_current_frame_resource->object_cb->get_resource();
+		auto mat_cb = m_current_frame_resource->material_cb->get_resource();
+
+		for (size_t i = 0; i < m_render_items.size(); ++i)
+		{
+			auto render_item = std::move(render_items[i]);
+
+			cmdList->IASetVertexBuffers(0, 1, &render_item->mesh_geometry->VertexBufferView());
+			cmdList->IASetIndexBuffer(&render_item->mesh_geometry->IndexBufferView());
+			cmdList->IASetPrimitiveTopology(render_item->primitive_topology);
+
+			CD3DX12_GPU_DESCRIPTOR_HANDLE tex(m_srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+			tex.Offset(render_item->material->diffuse_srv_heap_index, m_cbvSrvUavDescriptorSize);
+
+			D3D12_GPU_VIRTUAL_ADDRESS obj_cb_address = object_cb->GetGPUVirtualAddress() + (render_item->obj_cb_index * obj_cb_byte_size);
+			D3D12_GPU_VIRTUAL_ADDRESS mat_cb_address = mat_cb->GetGPUVirtualAddress() + (render_item->material->mat_cb_index * mat_cb_byte_size);
+
+			cmdList->SetGraphicsRootDescriptorTable(0, tex);
+			cmdList->SetGraphicsRootConstantBufferView(1, obj_cb_address);
+			cmdList->SetGraphicsRootConstantBufferView(3, mat_cb_address);
+
+			cmdList->DrawIndexedInstanced(render_item->index_count, 1, render_item->start_index_location, render_item->base_vertex_location, 0);
+		}
+	}
+
+	void MainPage::UpdateObjectCBs(const GameTimer& gt)
+	{
+		using namespace DirectX;
+
+		auto current_object_cb = m_current_frame_resource->object_cb.get();
+
+		for (auto& render_item : m_render_items)
+		{
+			if (render_item->num_frames_dirty > 0)
+			{
+				XMMATRIX world = XMLoadFloat4x4(&render_item->world);
+				XMMATRIX tex_transform = XMLoadFloat4x4(&render_item->tex_transform);
+
+				object_constants object_constants;
+				XMStoreFloat4x4(&object_constants.world, XMMatrixTranspose(world));
+				XMStoreFloat4x4(&object_constants.texture_transform, XMMatrixTranspose(tex_transform));
+
+				current_object_cb->copy_data(render_item->obj_cb_index, object_constants);
+
+				render_item->num_frames_dirty--;
+			}
+		}
+	}
+
+	void MainPage::UpdateMaterialCBs(const GameTimer& gt)
+	{
+		using namespace DirectX;
+
+		auto current_material_cb = m_current_frame_resource->material_cb.get();
+
+		for (auto& material : m_materials)
+		{
+			Material* mat_ptr = material.second.get();
+			if (mat_ptr->num_frames_dirty > 0)
+			{
+				XMMATRIX mat_transform = XMLoadFloat4x4(&mat_ptr->mat_transform);
+
+				material_constants material_constants;
+				material_constants.diffuse_albedo = mat_ptr->diffuse_albedo;
+				material_constants.fresnel_r0 = mat_ptr->fresnel_r0;
+				material_constants.roughness = mat_ptr->roughness;
+				XMStoreFloat4x4(&material_constants.mat_transform, XMMatrixTranspose(mat_transform));
+
+				current_material_cb->copy_data(mat_ptr->mat_cb_index, material_constants);
+
+				mat_ptr->num_frames_dirty--;
+			}
+		}
+	}
+
+	void MainPage::UpdateMainPassCB(const GameTimer& gt)
+	{
+		using namespace DirectX;
+
+		XMMATRIX view = XMLoadFloat4x4(&m_view);
+		XMMATRIX proj = XMLoadFloat4x4(&m_proj);
+
+		XMMATRIX view_proj = XMMatrixMultiply(view, proj);
+		XMMATRIX inv_view = XMMatrixInverse(&XMMatrixDeterminant(view), view);
+		XMMATRIX inv_proj = XMMatrixInverse(&XMMatrixDeterminant(proj), proj);
+		XMMATRIX inv_view_proj = XMMatrixInverse(&XMMatrixDeterminant(view_proj), view_proj);
+
+		XMStoreFloat4x4(&m_main_pass_constants.view, XMMatrixTranspose(view));
+		XMStoreFloat4x4(&m_main_pass_constants.inv_view, XMMatrixTranspose(inv_view));
+		XMStoreFloat4x4(&m_main_pass_constants.proj, XMMatrixTranspose(proj));
+		XMStoreFloat4x4(&m_main_pass_constants.inv_proj, XMMatrixTranspose(inv_proj));
+		XMStoreFloat4x4(&m_main_pass_constants.view_proj, XMMatrixTranspose(view_proj));
+		XMStoreFloat4x4(&m_main_pass_constants.inv_view_proj, XMMatrixTranspose(inv_view_proj));
+
+		m_main_pass_constants.eye_pos_w = m_eye_position;
+		m_main_pass_constants.render_target_size = XMFLOAT2((float)output_width, (float)output_height);
+		m_main_pass_constants.inv_render_target_size = XMFLOAT2(1.0f / output_width, 1.0f / output_height);
+		m_main_pass_constants.near_z = 1.0f;
+		m_main_pass_constants.far_z = 1000.0f;
+		m_main_pass_constants.total_time = gt.TotalTime();
+		m_main_pass_constants.delta_time = gt.DeltaTime();
+		m_main_pass_constants.ambient_light = { 0.25f, 0.25f, 0.35f, 1.0f };
+		m_main_pass_constants.lights[0].direction = { 0.57735f, -0.57735f, 0.57735f };
+		m_main_pass_constants.lights[0].strength = { 0.6f, 0.6f, 0.6f };
+		m_main_pass_constants.lights[1].direction = { -0.57735f, -0.57735f, 0.57735f };
+		m_main_pass_constants.lights[1].strength = { 0.3f, 0.3f, 0.3f };
+		m_main_pass_constants.lights[2].direction = { 0.0f, -0.707f, -0.707f };
+		m_main_pass_constants.lights[2].strength = { 0.15f, 0.15f, 0.15f };
+
+		auto current_pass_cb = m_current_frame_resource->pass_cb.get();
+		current_pass_cb->copy_data(0, m_main_pass_constants);
+	}
+
+	void MainPage::UpdateCamera(const GameTimer& gt)
+	{
+		// Convert spherical to cartesian coordinates.
+		m_eye_position.x = m_radius * sinf(m_phi) * cosf(m_theta);
+		m_eye_position.z = m_radius * sinf(m_phi) * sinf(m_theta);
+		m_eye_position.y = m_radius * cosf(m_phi);
+
+		// Build the view matrix.
+		DirectX::XMVECTOR position = DirectX::XMVectorSet(m_eye_position.x, m_eye_position.y, m_eye_position.z, 1.0f);
+		DirectX::XMVECTOR target = DirectX::XMVectorZero();
+		DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+		DirectX::XMMATRIX view = DirectX::XMMatrixLookAtLH(position, target, up);
+		DirectX::XMStoreFloat4x4(&m_view, view);
+	}
+
+	void MainPage::Update(const GameTimer& gt)
+	{
+		UpdateCamera(gt);
+
+		m_current_frame_resource_index = (m_current_frame_resource_index + 1) % global_num_frame_resources;
+		m_current_frame_resource = m_frame_resources[m_current_frame_resource_index].get();
+
+		WaitForGPU();
+
+		UpdateObjectCBs(gt);
+		UpdateMaterialCBs(gt);
+		UpdateMainPassCB(gt);
+	}
+
 	bool MainPage::Render()
 	{
-
 		check_hresult(m_commandAllocator->Reset());
 		check_hresult(m_graphicsCommandList->Reset(m_commandAllocator.get(), nullptr));
 
@@ -612,7 +793,6 @@ namespace winrt::wzrd_editor::implementation
 		m_graphicsCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(
 			m_depthStencilBuffer.get(), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE));
 
-		//winrt::Windows::UI::Color pickerColor = colorPicker().Color();
 		winrt::Windows::UI::Color pickerColor = m_currentSelectedColor;
 		FLOAT currentColor[4] = { pickerColor.R / 255.f, pickerColor.G / 255.f, pickerColor.B / 255.f, pickerColor.A / 255.f };
 
@@ -621,6 +801,16 @@ namespace winrt::wzrd_editor::implementation
 		m_graphicsCommandList->ClearRenderTargetView(CurrentBackBufferView(), currentColor, 0, nullptr);
 		m_graphicsCommandList->ClearDepthStencilView(m_dsvHeap->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 		m_graphicsCommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &m_dsvHeap->GetCPUDescriptorHandleForHeapStart());
+
+		ID3D12DescriptorHeap* descriptorHeaps[] = { m_srvDescriptorHeap.get() };
+		m_graphicsCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+
+		m_graphicsCommandList->SetGraphicsRootSignature(m_rootSignature.get());
+
+		auto pass_cb = m_current_frame_resource->pass_cb->get_resource();
+		m_graphicsCommandList->SetGraphicsRootConstantBufferView(2, pass_cb->GetGPUVirtualAddress());
+
+		DrawRenderItems(m_graphicsCommandList.get(), m_render_items);
 
 		m_graphicsCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
 			D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));

@@ -6,6 +6,11 @@ Utilities::Utilities()
 
 }
 
+UINT Utilities::constant_buffer_byte_size(UINT byte_size)
+{
+	return (byte_size + 255) & ~255;
+}
+
 concurrency::task<std::vector<unsigned char>> Utilities::read_shader_file(winrt::Windows::Storage::Streams::IBuffer fileBuffer)
 {
 	auto dataReader = winrt::Windows::Storage::Streams::DataReader::FromBuffer(fileBuffer);
@@ -104,4 +109,6 @@ winrt::com_ptr<ID3D12Resource> Utilities::create_default_buffer(
 	return default_buffer;
 	// Keep the uploadBuffer reference alive until the command list has performed the copy
 }
+
+
 

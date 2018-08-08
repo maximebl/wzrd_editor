@@ -31,3 +31,4 @@
 #include <d3dcompiler.h>
 #include <ppltasks.h>
 #include "GeometryGenerator.h"
+#include <cmath>

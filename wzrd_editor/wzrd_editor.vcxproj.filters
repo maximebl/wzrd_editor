@@ -31,6 +31,7 @@
     <ClInclude Include="GeometryGenerator.h" />
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="MathHelper.h" />
+    <ClInclude Include="GameTimer.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Wide310x150Logo.scale-200.png">
