@@ -32,3 +32,5 @@
 #include <ppltasks.h>
 #include "GeometryGenerator.h"
 #include <cmath>
+#include "GameTimer.h"
+#include <DirectXColors.h>

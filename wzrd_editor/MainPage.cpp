@@ -36,10 +36,11 @@ namespace winrt::wzrd_editor::implementation
 
 		CreateCommandObjects();
 
-		//check_hresult(m_graphicsCommandList->Close());
+		FlushCommandQueue();
 
 		CreateAndAssociateSwapChain();
 		CreateDescriptorHeaps();
+		simple_BuildDescriptorHeaps();
 
 		m_rtvDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
@@ -55,6 +56,12 @@ namespace winrt::wzrd_editor::implementation
 
 		CreateDepthStencilBufferAndView();
 
+		m_simple_input_layout =
+		{
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+			{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
+		};
+
 		m_inputLayout =
 		{
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
@@ -64,22 +71,29 @@ namespace winrt::wzrd_editor::implementation
 
 		m_cbvSrvUavDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 
-		BuildRootSignature();
-		BuildBoxGeometry();
-		BuildMaterials();
-		BuildRenderItems();
-		BuildFrameResources();
+		//BuildRootSignature();
+		simple_BuildConstantBuffers();
+		simple_BuildRootSignature();
+		simple_BuildGeometry();
+		//BuildBoxGeometry();
+		//BuildMaterials();
+		//BuildRenderItems();
+		//BuildFrameResources();
+
+		FlushCommandQueue();
 
 		check_hresult(m_graphicsCommandList->Close());
 		ID3D12CommandList* cmdsLists[] = { m_graphicsCommandList.get() };
 		m_commandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
-			
+
+		FlushCommandQueue();
+
 		m_running = true;
 		m_window = Window::Current().CoreWindow().GetForCurrentThread();
 
 		m_ui_thread = winrt::apartment_context();
 
-		auto workItem = WorkItemHandler([this](Windows::Foundation::IAsyncAction action)
+		m_render_loop_work_item = WorkItemHandler([this](Windows::Foundation::IAsyncAction action)
 		{
 			m_timer.Reset();
 
@@ -90,13 +104,17 @@ namespace winrt::wzrd_editor::implementation
 
 				if (m_windowVisible)
 				{
+					FlushCommandQueue();
+
 					Update(m_timer);
 					Render();
+
+					FlushCommandQueue();
+					WaitForGPU();
 				}
 			}
 		});
 
-		m_renderLoopWorker = ThreadPool::RunAsync(workItem);
     }
 
     int32_t MainPage::MyProperty()
@@ -198,59 +216,135 @@ namespace winrt::wzrd_editor::implementation
 
 	void MainPage::buildPSO_Click(IInspectable const&, RoutedEventArgs const&)
 	{
-		BuildPSOs();
+		//BuildPSOs();
+		simple_BuildPSOs();
+		m_renderLoopWorker = ThreadPool::RunAsync(m_render_loop_work_item);
+	}
+
+	void MainPage::simple_BuildGeometry()
+	{
+		using namespace DirectX;
+
+		std::array<Vertex, 8> vertices =
+		{
+			Vertex({ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(Colors::White) }),
+			Vertex({ XMFLOAT3(-1.0f, +1.0f, -1.0f), XMFLOAT4(Colors::Black) }),
+			Vertex({ XMFLOAT3(+1.0f, +1.0f, -1.0f), XMFLOAT4(Colors::Red) }),
+			Vertex({ XMFLOAT3(+1.0f, -1.0f, -1.0f), XMFLOAT4(Colors::Green) }),
+			Vertex({ XMFLOAT3(-1.0f, -1.0f, +1.0f), XMFLOAT4(Colors::Blue) }),
+			Vertex({ XMFLOAT3(-1.0f, +1.0f, +1.0f), XMFLOAT4(Colors::Yellow) }),
+			Vertex({ XMFLOAT3(+1.0f, +1.0f, +1.0f), XMFLOAT4(Colors::Cyan) }),
+			Vertex({ XMFLOAT3(+1.0f, -1.0f, +1.0f), XMFLOAT4(Colors::Magenta) })
+		};
+
+		std::array<std::uint16_t, 36> indices =
+		{
+			// front face
+			0, 1, 2,
+			0, 2, 3,
+
+			// back face
+			4, 6, 5,
+			4, 7, 6,
+
+			// left face
+			4, 5, 1,
+			4, 1, 0,
+
+			// right face
+			3, 2, 6,
+			3, 6, 7,
+
+			// top face
+			1, 5, 6,
+			1, 6, 2,
+
+			// bottom face
+			4, 0, 3,
+			4, 3, 7
+		};
+
+		const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
+		const UINT ibByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
+
+		mBoxGeo = std::make_unique<MeshGeometry>();
+		mBoxGeo->Name = "boxGeo";
+
+		check_hresult(D3DCreateBlob(vbByteSize, mBoxGeo->VertexBufferCPU.put()));
+		CopyMemory(mBoxGeo->VertexBufferCPU->GetBufferPointer(), vertices.data(), vbByteSize);
+
+		check_hresult(D3DCreateBlob(ibByteSize, mBoxGeo->IndexBufferCPU.put()));
+		CopyMemory(mBoxGeo->IndexBufferCPU->GetBufferPointer(), indices.data(), ibByteSize);
+
+		mBoxGeo->VertexBufferGPU = Utilities::create_default_buffer(m_device.get(),
+			m_graphicsCommandList.get(), vertices.data(), vbByteSize, mBoxGeo->VertexBufferUploader);
+
+		mBoxGeo->IndexBufferGPU = Utilities::create_default_buffer(m_device.get(),
+			m_graphicsCommandList.get(), indices.data(), ibByteSize, mBoxGeo->IndexBufferUploader);
+
+		mBoxGeo->VertexByteStride = sizeof(Vertex);
+		mBoxGeo->VertexBufferByteSize = vbByteSize;
+		mBoxGeo->IndexFormat = DXGI_FORMAT_R16_UINT;
+		mBoxGeo->IndexBufferByteSize = ibByteSize;
+
+		SubmeshGeometry submesh;
+		submesh.IndexCount = (UINT)indices.size();
+		submesh.StartIndexLocation = 0;
+		submesh.BaseVertexLocation = 0;
+
+		mBoxGeo->DrawArgs["box"] = submesh;
 	}
 
 	void MainPage::BuildBoxGeometry()
 	{
-		GeometryGenerator geoGen;
-		GeometryGenerator::MeshData box = geoGen.CreateBox(1.0f, 1.0f, 1.0f, 3);
+		//GeometryGenerator geoGen;
+		//GeometryGenerator::MeshData box = geoGen.CreateBox(1.0f, 1.0f, 1.0f, 3);
 
-		SubmeshGeometry boxSubmesh;
-		boxSubmesh.IndexCount = (UINT)box.Indices32.size();
-		boxSubmesh.StartIndexLocation = 0;
-		boxSubmesh.BaseVertexLocation = 0;
+		//SubmeshGeometry boxSubmesh;
+		//boxSubmesh.IndexCount = (UINT)box.Indices32.size();
+		//boxSubmesh.StartIndexLocation = 0;
+		//boxSubmesh.BaseVertexLocation = 0;
 
-		std::vector<Vertex> vertices(box.Vertices.size());
-		
-		for (size_t i = 0; i < box.Vertices.size(); ++i)
-		{
-			vertices[i].Pos = box.Vertices[i].Position;
-			vertices[i].Normal = box.Vertices[i].Normal;
-			vertices[i].TexC = box.Vertices[i].TexC;
-		}
+		//std::vector<Vertex> vertices(box.Vertices.size());
+		//
+		//for (size_t i = 0; i < box.Vertices.size(); ++i)
+		//{
+		//	vertices[i].Pos = box.Vertices[i].Position;
+		//	vertices[i].Normal = box.Vertices[i].Normal;
+		//	vertices[i].TexC = box.Vertices[i].TexC;
+		//}
 
-		std::vector<std::uint16_t> indices = box.GetIndices16();
+		//std::vector<std::uint16_t> indices = box.GetIndices16();
 
-		const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
-		const UINT ibByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
-		
-		auto geo = std::make_unique<MeshGeometry>();
-		geo->Name = "crateGeo";
+		//const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
+		//const UINT ibByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
+		//
+		//auto geo = std::make_unique<MeshGeometry>();
+		//geo->Name = "crateGeo";
 
-		// TODO:: Bechmark those 2 methods to see whats the fastest
-		//auto bufferPtr = reinterpret_cast<Vertex *>(geo->VertexBufferCPU->GetBufferPointer());
-		//std::copy(vertices.begin(), vertices.end(), bufferPtr);
-		check_hresult(D3DCreateBlob(vbByteSize, geo->VertexBufferCPU.put()));
-		std::memcpy(geo->VertexBufferCPU->GetBufferPointer(), vertices.data(), vbByteSize);
+		//// TODO:: Bechmark those 2 methods to see whats the fastest
+		////auto bufferPtr = reinterpret_cast<Vertex *>(geo->VertexBufferCPU->GetBufferPointer());
+		////std::copy(vertices.begin(), vertices.end(), bufferPtr);
+		//check_hresult(D3DCreateBlob(vbByteSize, geo->VertexBufferCPU.put()));
+		//std::memcpy(geo->VertexBufferCPU->GetBufferPointer(), vertices.data(), vbByteSize);
 
-		check_hresult(D3DCreateBlob(ibByteSize, geo->IndexBufferCPU.put()));
-		std::memcpy(geo->IndexBufferCPU->GetBufferPointer(), indices.data(), ibByteSize);
+		//check_hresult(D3DCreateBlob(ibByteSize, geo->IndexBufferCPU.put()));
+		//std::memcpy(geo->IndexBufferCPU->GetBufferPointer(), indices.data(), ibByteSize);
 
-		geo->VertexBufferGPU = Utilities::create_default_buffer(m_device.get(),
-			m_graphicsCommandList.get(), vertices.data(), vbByteSize, geo->VertexBufferUploader);
+		//geo->VertexBufferGPU = Utilities::create_default_buffer(m_device.get(),
+		//	m_graphicsCommandList.get(), vertices.data(), vbByteSize, geo->VertexBufferUploader);
 
-		geo->IndexBufferGPU = Utilities::create_default_buffer(m_device.get(),
-			m_graphicsCommandList.get(), indices.data(), ibByteSize, geo->IndexBufferUploader);
+		//geo->IndexBufferGPU = Utilities::create_default_buffer(m_device.get(),
+		//	m_graphicsCommandList.get(), indices.data(), ibByteSize, geo->IndexBufferUploader);
 
-		geo->VertexByteStride = sizeof(Vertex);
-		geo->VertexBufferByteSize = vbByteSize;
-		geo->IndexBufferByteSize = ibByteSize;
-		geo->IndexFormat = DXGI_FORMAT_R16_UINT;
-		
-		geo->DrawArgs["box"] = boxSubmesh;
-		
-		m_geometries[geo->Name] = std::move(geo);
+		//geo->VertexByteStride = sizeof(Vertex);
+		//geo->VertexBufferByteSize = vbByteSize;
+		//geo->IndexBufferByteSize = ibByteSize;
+		//geo->IndexFormat = DXGI_FORMAT_R16_UINT;
+		//
+		//geo->DrawArgs["box"] = boxSubmesh;
+		//
+		//m_geometries[geo->Name] = std::move(geo);
 	}
 
 	void MainPage::BuildMaterials()
@@ -278,6 +372,11 @@ namespace winrt::wzrd_editor::implementation
 		box_render_item->base_vertex_location = box_render_item->mesh_geometry->DrawArgs["box"].BaseVertexLocation;
 
 		m_render_items.push_back(std::move(box_render_item));
+
+		for (auto& render_item : m_render_items)
+		{
+			m_opaque_render_items.push_back(render_item.get());
+		}
 	}
 
 	void MainPage::BuildFrameResources()
@@ -287,6 +386,37 @@ namespace winrt::wzrd_editor::implementation
 			m_frame_resources.push_back(std::make_unique<frame_resource>(m_device.get(),
 				1, (UINT)m_render_items.size(), (UINT)m_materials.size()));
 		}
+	}
+
+	void MainPage::simple_BuildPSOs()
+	{
+		D3D12_GRAPHICS_PIPELINE_STATE_DESC opaque_pso_desc;
+		ZeroMemory(&opaque_pso_desc, sizeof(D3D12_GRAPHICS_PIPELINE_STATE_DESC));
+
+		opaque_pso_desc.InputLayout = { m_simple_input_layout.data(), (UINT)m_simple_input_layout.size() };
+		opaque_pso_desc.pRootSignature = m_rootSignature.get();
+		opaque_pso_desc.VS =
+		{
+			reinterpret_cast<unsigned char*>(m_shaders["woodCrateVS"]->GetBufferPointer()),
+			m_shaders["woodCrateVS"]->GetBufferSize()
+		};
+		opaque_pso_desc.PS =
+		{
+			reinterpret_cast<unsigned char*>(m_shaders["woodCratePS"]->GetBufferPointer()),
+			m_shaders["woodCratePS"]->GetBufferSize()
+		};
+		opaque_pso_desc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+		opaque_pso_desc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+		opaque_pso_desc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+		opaque_pso_desc.SampleMask = UINT_MAX;
+		opaque_pso_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+		opaque_pso_desc.NumRenderTargets = 1;
+		opaque_pso_desc.RTVFormats[0] = m_backBufferFormat;
+		opaque_pso_desc.SampleDesc.Count = 1;
+		opaque_pso_desc.SampleDesc.Quality = 0;
+		opaque_pso_desc.DSVFormat = m_depthStencilFormat;
+
+		check_hresult(m_device->CreateGraphicsPipelineState(&opaque_pso_desc, __uuidof(m_opaque_pso), m_opaque_pso.put_void()));
 	}
 
 	void MainPage::BuildPSOs()
@@ -320,8 +450,6 @@ namespace winrt::wzrd_editor::implementation
 		check_hresult(m_device->CreateGraphicsPipelineState(&opaque_pso_desc, __uuidof(m_opaque_pso), m_opaque_pso.put_void()));
 	}
 
-
-
 	Windows::Foundation::IAsyncAction MainPage::ui_thread_work()
 	{
 		// Switch to the UI thread
@@ -329,6 +457,10 @@ namespace winrt::wzrd_editor::implementation
 
 		m_windowVisible = m_window.Visible();
 		m_currentSelectedColor = colorPicker().Color();
+		m_current_slider_x = slider_x().Value();
+		m_current_slider_y = slider_y().Value();
+		m_current_slider_z = slider_z().Value();
+		m_current_radius_control = slider_radius().Value();
 
 		// Leaving this function switches back to the rendering thread
 	}
@@ -382,7 +514,7 @@ namespace winrt::wzrd_editor::implementation
 		DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
 		swapChainDesc.Width = output_width;
 		swapChainDesc.Height = output_height;
-		swapChainDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+		swapChainDesc.Format = m_backBufferFormat;
 		swapChainDesc.Stereo = false;
 		swapChainDesc.SampleDesc.Count = 1;
 		swapChainDesc.SampleDesc.Quality = 0;
@@ -405,6 +537,19 @@ namespace winrt::wzrd_editor::implementation
 		// associate DXGI swap chain with the XAML SwapChainPanel
 		check_hresult(
 			swapChainPanel().as<ISwapChainPanelNative>()->SetSwapChain(m_swapChain.get())
+		);
+	}
+
+	void MainPage::simple_BuildDescriptorHeaps()
+	{
+		D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc;
+		cbvHeapDesc.NumDescriptors = 1;
+		cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+		cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+		cbvHeapDesc.NodeMask = 0;
+
+		check_hresult(
+			m_device->CreateDescriptorHeap(&cbvHeapDesc, __uuidof(m_cbvHeap), m_cbvHeap.put_void())
 		);
 	}
 
@@ -565,6 +710,39 @@ namespace winrt::wzrd_editor::implementation
 		m_device->CreateShaderResourceView(woodcrateTexture.get(), &srvDesc, hDescriptor);
 	}
 
+	void MainPage::simple_BuildRootSignature()
+	{
+		CD3DX12_ROOT_PARAMETER slotRootParameter[1];
+		CD3DX12_DESCRIPTOR_RANGE cbvTable;
+		cbvTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
+		slotRootParameter[0].InitAsDescriptorTable(1, &cbvTable);
+
+		CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(1, slotRootParameter, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+
+		com_ptr<ID3DBlob> serializedRootSig = nullptr;
+		com_ptr<ID3DBlob> errorBlob = nullptr;
+		D3D12SerializeRootSignature(&rootSigDesc, D3D_ROOT_SIGNATURE_VERSION_1, serializedRootSig.put(), errorBlob.put());
+
+		m_device->CreateRootSignature(0, serializedRootSig->GetBufferPointer(), serializedRootSig->GetBufferSize(), __uuidof(m_rootSignature), m_rootSignature.put_void());
+	}
+
+	void MainPage::simple_BuildConstantBuffers()
+	{
+		m_simple_object_cb = std::make_unique<upload_buffer<simple_object_constants>>(m_device.get(), 1, true);
+		UINT objCBByteSize = Utilities::constant_buffer_byte_size(sizeof(simple_object_constants));
+		D3D12_GPU_VIRTUAL_ADDRESS cbAddress = m_simple_object_cb->get_resource()->GetGPUVirtualAddress();
+		int boxCBufIndex = 0;
+		cbAddress += boxCBufIndex * objCBByteSize;
+		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
+		cbvDesc.BufferLocation = cbAddress;
+		cbvDesc.SizeInBytes = Utilities::constant_buffer_byte_size(sizeof(simple_object_constants));
+
+		m_device->CreateConstantBufferView(
+			&cbvDesc,
+			m_cbvHeap->GetCPUDescriptorHandleForHeapStart()
+		);
+	}
+
 	void MainPage::BuildRootSignature()
 	{
 		CD3DX12_DESCRIPTOR_RANGE texTable;
@@ -603,10 +781,25 @@ namespace winrt::wzrd_editor::implementation
 	void MainPage::WaitForGPU()
 	{
 		// If the GPU's completed fence is not as high as the fence of the CPU, wait for the GPU to arrive at the latest fence point.
+		//if (m_current_frame_resource->fence != 0 && m_fence->GetCompletedValue() < m_current_frame_resource->fence)
+		//{
+			//HANDLE eventHandle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
+			//check_hresult(m_fence->SetEventOnCompletion(m_current_frame_resource->fence, eventHandle));
+			//WaitForSingleObject(eventHandle, INFINITE);
+			//CloseHandle(eventHandle);
+		//}
+	}
+
+	void MainPage::FlushCommandQueue()
+	{
+		m_currentFence++;
+		check_hresult(m_commandQueue->Signal(m_fence.get(), m_currentFence));
+
 		if (m_fence->GetCompletedValue() < m_currentFence)
 		{
 			HANDLE eventHandle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
 			check_hresult(m_fence->SetEventOnCompletion(m_currentFence, eventHandle));
+
 			WaitForSingleObject(eventHandle, INFINITE);
 			CloseHandle(eventHandle);
 		}
@@ -626,7 +819,7 @@ namespace winrt::wzrd_editor::implementation
 		);
 	}
 
-	void MainPage::DrawRenderItems(ID3D12GraphicsCommandList* cmdList, std::vector<std::unique_ptr<render_item>>& render_items)
+	void MainPage::DrawRenderItems(ID3D12GraphicsCommandList* cmdList, std::vector<render_item*>& render_items)
 	{
 		UINT obj_cb_byte_size = Utilities::constant_buffer_byte_size(sizeof(object_constants));
 		UINT mat_cb_byte_size = Utilities::constant_buffer_byte_size(sizeof(material_constants));
@@ -636,7 +829,7 @@ namespace winrt::wzrd_editor::implementation
 
 		for (size_t i = 0; i < m_render_items.size(); ++i)
 		{
-			auto render_item = std::move(render_items[i]);
+			auto render_item = render_items[i];
 
 			cmdList->IASetVertexBuffers(0, 1, &render_item->mesh_geometry->VertexBufferView());
 			cmdList->IASetIndexBuffer(&render_item->mesh_geometry->IndexBufferView());
@@ -746,38 +939,82 @@ namespace winrt::wzrd_editor::implementation
 
 	void MainPage::UpdateCamera(const GameTimer& gt)
 	{
+		using namespace DirectX;
+
 		// Convert spherical to cartesian coordinates.
 		m_eye_position.x = m_radius * sinf(m_phi) * cosf(m_theta);
 		m_eye_position.z = m_radius * sinf(m_phi) * sinf(m_theta);
 		m_eye_position.y = m_radius * cosf(m_phi);
 
 		// Build the view matrix.
-		DirectX::XMVECTOR position = DirectX::XMVectorSet(m_eye_position.x, m_eye_position.y, m_eye_position.z, 1.0f);
-		DirectX::XMVECTOR target = DirectX::XMVectorZero();
-		DirectX::XMVECTOR up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+		XMVECTOR position = XMVectorSet(m_eye_position.x, m_eye_position.y, m_eye_position.z, 1.0f);
+		XMVECTOR target = XMVectorZero();
+		XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 
-		DirectX::XMMATRIX view = DirectX::XMMatrixLookAtLH(position, target, up);
-		DirectX::XMStoreFloat4x4(&m_view, view);
+		XMMATRIX view = XMMatrixLookAtLH(position, target, up);
+		XMStoreFloat4x4(&m_view, view);
+
+		XMMATRIX proj = XMMatrixPerspectiveFovLH(0.25f * XM_PI, static_cast<float>(output_width) / output_height, 1.0f, 1000.0f);
+		XMStoreFloat4x4(&m_proj, proj);
 	}
 
 	void MainPage::Update(const GameTimer& gt)
 	{
-		UpdateCamera(gt);
+		using namespace DirectX;
 
-		m_current_frame_resource_index = (m_current_frame_resource_index + 1) % global_num_frame_resources;
-		m_current_frame_resource = m_frame_resources[m_current_frame_resource_index].get();
+		XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f * XM_PI, static_cast<float>(output_width) / output_height, 1.0f, 1000.0f);
+		XMStoreFloat4x4(&m_proj, P);
 
-		WaitForGPU();
+		double scale = 0.1;
 
-		UpdateObjectCBs(gt);
-		UpdateMaterialCBs(gt);
-		UpdateMainPassCB(gt);
+		m_radius = m_current_radius_control;
+
+		float x = m_radius * sinf(m_phi) * cosf(m_theta);
+		float z = m_radius * sinf(m_phi) * sinf(m_theta);
+		float y = m_radius * cosf(m_phi);
+
+		 //x *= m_current_slider_x * scale;
+		 //y *= m_current_slider_y * scale;
+		 //z *= m_current_slider_z * scale;
+
+		XMVECTOR pos = XMVectorSet(x, y, z, 1.0f);
+		XMVECTOR target = XMVectorZero();
+		XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+
+		XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
+		XMStoreFloat4x4(&m_view, view);
+
+		XMMATRIX world = XMLoadFloat4x4(&m_world);
+		XMMATRIX proj = XMLoadFloat4x4(&m_proj);
+		XMMATRIX worldViewProj = world * view * proj;
+
+		simple_object_constants objConstants;
+		XMStoreFloat4x4(&objConstants.WorldViewProj, XMMatrixTranspose(worldViewProj));
+		m_simple_object_cb->copy_data(0, objConstants);
+		//UpdateCamera(gt);
+
+		//m_current_frame_resource_index = (m_current_frame_resource_index + 1) % global_num_frame_resources;
+		//m_current_frame_resource = m_frame_resources[m_current_frame_resource_index].get();
+
+		//FlushCommandQueue();
+		//WaitForGPU();
+
+		//UpdateObjectCBs(gt);
+		//UpdateMaterialCBs(gt);
+		//UpdateMainPassCB(gt);
 	}
 
 	bool MainPage::Render()
 	{
+		FlushCommandQueue();
+		WaitForGPU();
+
+		/*auto cmd_list_alloc = m_current_frame_resource->cmd_list_allocator;
+
+		check_hresult(cmd_list_alloc->Reset());
+		check_hresult(m_graphicsCommandList->Reset(cmd_list_alloc.get(), m_opaque_pso.get()));*/
 		check_hresult(m_commandAllocator->Reset());
-		check_hresult(m_graphicsCommandList->Reset(m_commandAllocator.get(), nullptr));
+		check_hresult(m_graphicsCommandList->Reset(m_commandAllocator.get(), m_opaque_pso.get()));
 
 		m_screenViewport.TopLeftX = 0;
 		m_screenViewport.TopLeftY = 0;
@@ -802,15 +1039,23 @@ namespace winrt::wzrd_editor::implementation
 		m_graphicsCommandList->ClearDepthStencilView(m_dsvHeap->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 		m_graphicsCommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &m_dsvHeap->GetCPUDescriptorHandleForHeapStart());
 
-		ID3D12DescriptorHeap* descriptorHeaps[] = { m_srvDescriptorHeap.get() };
+		//ID3D12DescriptorHeap* descriptorHeaps[] = { m_srvDescriptorHeap.get() };
+		//m_graphicsCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+		ID3D12DescriptorHeap* descriptorHeaps[] = { m_cbvHeap.get() };
 		m_graphicsCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
 		m_graphicsCommandList->SetGraphicsRootSignature(m_rootSignature.get());
-
-		auto pass_cb = m_current_frame_resource->pass_cb->get_resource();
-		m_graphicsCommandList->SetGraphicsRootConstantBufferView(2, pass_cb->GetGPUVirtualAddress());
-
-		DrawRenderItems(m_graphicsCommandList.get(), m_render_items);
+		
+		m_graphicsCommandList->IASetVertexBuffers(0, 1, &mBoxGeo->VertexBufferView());
+		m_graphicsCommandList->IASetIndexBuffer(&mBoxGeo->IndexBufferView());
+		m_graphicsCommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		m_graphicsCommandList->SetGraphicsRootDescriptorTable(0, m_cbvHeap->GetGPUDescriptorHandleForHeapStart());
+		m_graphicsCommandList->DrawIndexedInstanced(
+			mBoxGeo->DrawArgs["box"].IndexCount,
+			1, 0, 0, 0);
+		//auto pass_cb = m_current_frame_resource->pass_cb->get_resource();
+		//m_graphicsCommandList->SetGraphicsRootConstantBufferView(2, pass_cb->GetGPUVirtualAddress());
+		//DrawRenderItems(m_graphicsCommandList.get(), m_opaque_render_items);
 
 		m_graphicsCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(CurrentBackBuffer(),
 			D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
@@ -819,14 +1064,17 @@ namespace winrt::wzrd_editor::implementation
 
 		check_hresult(m_graphicsCommandList->Close());
 
+		FlushCommandQueue();
+		WaitForGPU();
+
 		ID3D12CommandList* cmdsLists[] = { m_graphicsCommandList.get() };
 		m_commandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
 
-		m_swapChain->Present(0, 0);
+		check_hresult(m_swapChain->Present(0, 0));
 		m_currentBackBuffer = (m_currentBackBuffer + 1) % m_swapChainBufferCount;
 
 		// Set the new CPU fence point
-		m_currentFence++;
+		//m_current_frame_resource->fence = ++m_currentFence;
 
 		// Add an instruction to the command queue to set a new fence point. 
 		// Because we are on the GPU timeline, the new fence point won't be 

@@ -21,6 +21,7 @@
     <ClCompile Include="GeometryGenerator.cpp" />
     <ClCompile Include="FrameResource.cpp" />
     <ClCompile Include="MathHelper.cpp" />
+    <ClCompile Include="GameTimer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />

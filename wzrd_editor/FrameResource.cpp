@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "FrameResource.h"
 
 frame_resource::frame_resource(ID3D12Device* device, UINT pass_count, UINT object_count, UINT material_count)

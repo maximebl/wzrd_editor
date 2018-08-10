@@ -8,7 +8,6 @@
 #include "utilities.h"
 #include "DDSTextureLoader.h"
 #include "FrameResource.h"
-#include "GameTimer.h"
 
 namespace winrt::wzrd_editor::implementation
 {
@@ -27,7 +26,12 @@ namespace winrt::wzrd_editor::implementation
 		GameTimer m_timer;
 		Windows::UI::Core::CoreWindow m_window = nullptr;
 		Windows::Foundation::IAsyncAction m_renderLoopWorker;
+		Windows::System::Threading::WorkItemHandler m_render_loop_work_item = nullptr;
 		bool m_windowVisible = false;
+		double m_current_slider_x = 0;
+		double m_current_slider_y = 0;
+		double m_current_slider_z = 0;
+		double m_current_radius_control = 2.5;
 		winrt::Windows::UI::Color m_currentSelectedColor;
 		winrt::apartment_context m_ui_thread;
 		Windows::Foundation::IAsyncAction ui_thread_work();
@@ -38,13 +42,12 @@ namespace winrt::wzrd_editor::implementation
 		void UpdateObjectCBs(const GameTimer& gt);
 		void UpdateMaterialCBs(const GameTimer& gt);
 		void UpdateMainPassCB(const GameTimer& gt);
-		void DrawRenderItems(ID3D12GraphicsCommandList* cmdList, std::vector<std::unique_ptr<render_item>>& render_items);
+		void DrawRenderItems(ID3D12GraphicsCommandList* cmdList, std::vector<render_item*>& render_items);
 		void EnableDebugLayer();
 		void CreateCommandObjects();
 		void CreateAndAssociateSwapChain();
 		void CreateDescriptorHeaps();
 		void CreateDepthStencilBufferAndView();
-		void WaitForGPU();
 		void BuildRootSignature();
 		void LoadTextures();
 		void BuildShaderResources();
@@ -54,7 +57,22 @@ namespace winrt::wzrd_editor::implementation
 		void BuildRenderItems();
 		void BuildFrameResources();
 
+		// test simplified
+		void simple_BuildRootSignature();
+		void simple_BuildConstantBuffers();
+		void simple_BuildDescriptorHeaps();
+		void simple_BuildPSOs();
+		void simple_BuildGeometry();
+		std::unique_ptr<upload_buffer<simple_object_constants>> m_simple_object_cb;
+		com_ptr<ID3D12DescriptorHeap> m_cbvHeap = nullptr;
+		std::vector<D3D12_INPUT_ELEMENT_DESC> m_simple_input_layout;
+		std::unique_ptr<MeshGeometry> mBoxGeo = nullptr;
+		///////////////////////////////////////////////////////////////////////
+		void WaitForGPU();
+		void FlushCommandQueue();
+
 		std::vector<std::unique_ptr<render_item>> m_render_items;
+		std::vector<render_item*> m_opaque_render_items;
 		std::vector<std::unique_ptr<frame_resource>> m_frame_resources;
 		frame_resource* m_current_frame_resource = nullptr;
 		int m_current_frame_resource_index = 0;
@@ -74,8 +92,8 @@ namespace winrt::wzrd_editor::implementation
 		D3D12_CPU_DESCRIPTOR_HANDLE GetDepthStencilView() const;
 
 		bool m_running = false;
-		int output_width = 500;
-		int output_height = 500;
+		int output_width = 700;
+		int output_height = 700;
 
 		D3D12_VIEWPORT m_screenViewport;
 		D3D12_RECT m_scissorsRect;
@@ -112,10 +130,11 @@ namespace winrt::wzrd_editor::implementation
 		DirectX::XMFLOAT3 m_eye_position = { 0.0f, 0.0f, 0.0f };
 		DirectX::XMFLOAT4X4 m_view = MathHelper::Identity4x4();
 		DirectX::XMFLOAT4X4 m_proj = MathHelper::Identity4x4();
+		DirectX::XMFLOAT4X4 m_world = MathHelper::Identity4x4();
 
-		float m_theta = 1.3f * DirectX::XM_PI;
-		float m_phi = 0.4f * DirectX::XM_PI;
-		float m_radius = 2.5f;
+		float m_theta = 1.5f * DirectX::XM_PI;
+		float m_phi = 0.4f * DirectX::XM_PIDIV4;
+		float m_radius = 5.0f;
     };
 }
 

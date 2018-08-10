@@ -1,13 +1,23 @@
 #pragma once
-#include "pch.h"
 #include "MathHelper.h"
 #include "utilities.h"
+
+//struct Vertex
+//{
+//	DirectX::XMFLOAT3 Pos;
+//	DirectX::XMFLOAT3 Normal;
+//	DirectX::XMFLOAT2 TexC;
+//};
 
 struct Vertex
 {
 	DirectX::XMFLOAT3 Pos;
-	DirectX::XMFLOAT3 Normal;
-	DirectX::XMFLOAT2 TexC;
+	DirectX::XMFLOAT4 Color;
+};
+
+struct simple_object_constants
+{
+	DirectX::XMFLOAT4X4 WorldViewProj = MathHelper::Identity4x4();
 };
 
 struct Light
@@ -43,7 +53,7 @@ struct pass_constants
 	float total_time = 0.0f;
 	float delta_time = 0.0f;
 	DirectX::XMFLOAT4 ambient_light = { 0.0f,0.0f,0.0f,1.0f };
-	Light lights[16];
+	Light lights[3];
 };
 
 struct material_constants
