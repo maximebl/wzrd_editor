@@ -65,6 +65,7 @@ namespace winrt::wzrd_editor::implementation
 		void simple_BuildGeometry();
 		std::unique_ptr<upload_buffer<simple_object_constants>> m_simple_object_cb;
 		com_ptr<ID3D12DescriptorHeap> m_cbvHeap = nullptr;
+		com_ptr<ID3D12DescriptorHeap> m_srvHeap = nullptr;
 		std::vector<D3D12_INPUT_ELEMENT_DESC> m_simple_input_layout;
 		std::unique_ptr<MeshGeometry> mBoxGeo = nullptr;
 		///////////////////////////////////////////////////////////////////////

@@ -37,7 +37,7 @@
             <Slider x:Name="slider_x" Minimum="-20" Maximum="20" HorizontalAlignment="Center" VerticalAlignment="Top" Width="200" Value="1"/>
             <Slider x:Name="slider_y" Minimum="-20" Maximum="20" HorizontalAlignment="Center" VerticalAlignment="Top" Width="200" Value="1"/>
             <Slider x:Name="slider_z" Minimum="-20" Maximum="20" HorizontalAlignment="Center" VerticalAlignment="Top" Width="200" Value="1"/>
-            <Slider x:Name="slider_radius" Minimum="5" Maximum="500" HorizontalAlignment="Center" VerticalAlignment="Top" Width="200" Value="5"/>
+            <Slider x:Name="slider_radius" Minimum="5" Maximum="15" HorizontalAlignment="Center" VerticalAlignment="Top" Width="200" Value="5"/>
         </StackPanel>
 
         <SwapChainPanel x:Name="swapChainPanel" HorizontalAlignment="Left" Width="700" Margin="100,0,0,0" Height="700

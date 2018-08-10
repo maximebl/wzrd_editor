@@ -36,8 +36,6 @@ namespace winrt::wzrd_editor::implementation
 
 		CreateCommandObjects();
 
-		FlushCommandQueue();
-
 		CreateAndAssociateSwapChain();
 		CreateDescriptorHeaps();
 		simple_BuildDescriptorHeaps();
@@ -59,7 +57,8 @@ namespace winrt::wzrd_editor::implementation
 		m_simple_input_layout =
 		{
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-			{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0}
+			{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 		};
 
 		m_inputLayout =
@@ -80,13 +79,9 @@ namespace winrt::wzrd_editor::implementation
 		//BuildRenderItems();
 		//BuildFrameResources();
 
-		FlushCommandQueue();
-
 		check_hresult(m_graphicsCommandList->Close());
 		ID3D12CommandList* cmdsLists[] = { m_graphicsCommandList.get() };
 		m_commandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
-
-		FlushCommandQueue();
 
 		m_running = true;
 		m_window = Window::Current().CoreWindow().GetForCurrentThread();
@@ -104,13 +99,8 @@ namespace winrt::wzrd_editor::implementation
 
 				if (m_windowVisible)
 				{
-					FlushCommandQueue();
-
 					Update(m_timer);
 					Render();
-
-					FlushCommandQueue();
-					WaitForGPU();
 				}
 			}
 		});
@@ -551,6 +541,16 @@ namespace winrt::wzrd_editor::implementation
 		check_hresult(
 			m_device->CreateDescriptorHeap(&cbvHeapDesc, __uuidof(m_cbvHeap), m_cbvHeap.put_void())
 		);
+
+		D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc;
+		srvHeapDesc.NumDescriptors = 1;
+		srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+		srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+		srvHeapDesc.NodeMask = 0;
+
+		check_hresult(
+			m_device->CreateDescriptorHeap(&srvHeapDesc, __uuidof(m_srvHeap), m_srvHeap.put_void())
+		);
 	}
 
 	void MainPage::CreateDescriptorHeaps()
@@ -683,10 +683,6 @@ namespace winrt::wzrd_editor::implementation
 			anisotropicWrap, anisotropicClamp };
 	}
 
-	void MainPage::LoadTextures()
-	{
-	}
-
 	void MainPage::BuildShaderResources()
 	{
 		D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
@@ -712,12 +708,14 @@ namespace winrt::wzrd_editor::implementation
 
 	void MainPage::simple_BuildRootSignature()
 	{
-		CD3DX12_ROOT_PARAMETER slotRootParameter[1];
 		CD3DX12_DESCRIPTOR_RANGE cbvTable;
 		cbvTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
-		slotRootParameter[0].InitAsDescriptorTable(1, &cbvTable);
 
-		CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(1, slotRootParameter, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+		CD3DX12_ROOT_PARAMETER slotRootParameter[2];
+		slotRootParameter[0].InitAsDescriptorTable(1, &cbvTable);
+		slotRootParameter[1].InitAsShaderResourceView(0);
+
+		CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(2, slotRootParameter, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
 		com_ptr<ID3DBlob> serializedRootSig = nullptr;
 		com_ptr<ID3DBlob> errorBlob = nullptr;
@@ -741,6 +739,8 @@ namespace winrt::wzrd_editor::implementation
 			&cbvDesc,
 			m_cbvHeap->GetCPUDescriptorHandleForHeapStart()
 		);
+
+
 	}
 
 	void MainPage::BuildRootSignature()
@@ -965,17 +965,11 @@ namespace winrt::wzrd_editor::implementation
 		XMMATRIX P = XMMatrixPerspectiveFovLH(0.25f * XM_PI, static_cast<float>(output_width) / output_height, 1.0f, 1000.0f);
 		XMStoreFloat4x4(&m_proj, P);
 
-		double scale = 0.1;
-
 		m_radius = m_current_radius_control;
 
 		float x = m_radius * sinf(m_phi) * cosf(m_theta);
 		float z = m_radius * sinf(m_phi) * sinf(m_theta);
 		float y = m_radius * cosf(m_phi);
-
-		 //x *= m_current_slider_x * scale;
-		 //y *= m_current_slider_y * scale;
-		 //z *= m_current_slider_z * scale;
 
 		XMVECTOR pos = XMVectorSet(x, y, z, 1.0f);
 		XMVECTOR target = XMVectorZero();
@@ -1007,7 +1001,6 @@ namespace winrt::wzrd_editor::implementation
 	bool MainPage::Render()
 	{
 		FlushCommandQueue();
-		WaitForGPU();
 
 		/*auto cmd_list_alloc = m_current_frame_resource->cmd_list_allocator;
 
@@ -1050,6 +1043,7 @@ namespace winrt::wzrd_editor::implementation
 		m_graphicsCommandList->IASetIndexBuffer(&mBoxGeo->IndexBufferView());
 		m_graphicsCommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		m_graphicsCommandList->SetGraphicsRootDescriptorTable(0, m_cbvHeap->GetGPUDescriptorHandleForHeapStart());
+
 		m_graphicsCommandList->DrawIndexedInstanced(
 			mBoxGeo->DrawArgs["box"].IndexCount,
 			1, 0, 0, 0);
@@ -1065,7 +1059,6 @@ namespace winrt::wzrd_editor::implementation
 		check_hresult(m_graphicsCommandList->Close());
 
 		FlushCommandQueue();
-		WaitForGPU();
 
 		ID3D12CommandList* cmdsLists[] = { m_graphicsCommandList.get() };
 		m_commandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
