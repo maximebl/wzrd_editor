@@ -38,7 +38,6 @@ namespace winrt::wzrd_editor::implementation
 
 		CreateAndAssociateSwapChain();
 		CreateDescriptorHeaps();
-		simple_BuildDescriptorHeaps();
 
 		m_rtvDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 
@@ -530,29 +529,6 @@ namespace winrt::wzrd_editor::implementation
 		);
 	}
 
-	void MainPage::simple_BuildDescriptorHeaps()
-	{
-		D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc;
-		cbvHeapDesc.NumDescriptors = 1;
-		cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-		cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-		cbvHeapDesc.NodeMask = 0;
-
-		check_hresult(
-			m_device->CreateDescriptorHeap(&cbvHeapDesc, __uuidof(m_cbvHeap), m_cbvHeap.put_void())
-		);
-
-		D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc;
-		srvHeapDesc.NumDescriptors = 1;
-		srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-		srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-		srvHeapDesc.NodeMask = 0;
-
-		check_hresult(
-			m_device->CreateDescriptorHeap(&srvHeapDesc, __uuidof(m_srvHeap), m_srvHeap.put_void())
-		);
-	}
-
 	void MainPage::CreateDescriptorHeaps()
 	{
 		D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc;
@@ -580,6 +556,16 @@ namespace winrt::wzrd_editor::implementation
 				m_dsvHeap.put_void()
 			)
 		);
+
+/*		D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc;
+		cbvHeapDesc.NumDescriptors = 1;
+		cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+		cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+		cbvHeapDesc.NodeMask = 0;
+
+		check_hresult(
+			m_device->CreateDescriptorHeap(&cbvHeapDesc, __uuidof(m_cbvHeap), m_cbvHeap.put_void())
+		)*/;
 	}
 
 	void MainPage::CreateDepthStencilBufferAndView()
@@ -708,12 +694,12 @@ namespace winrt::wzrd_editor::implementation
 
 	void MainPage::simple_BuildRootSignature()
 	{
-		CD3DX12_DESCRIPTOR_RANGE cbvTable;
-		cbvTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0);
+		CD3DX12_DESCRIPTOR_RANGE srvTable;
+		srvTable.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
 
 		CD3DX12_ROOT_PARAMETER slotRootParameter[2];
-		slotRootParameter[0].InitAsDescriptorTable(1, &cbvTable);
-		slotRootParameter[1].InitAsShaderResourceView(0);
+		slotRootParameter[0].InitAsDescriptorTable(1, &srvTable, D3D12_SHADER_VISIBILITY_PIXEL);
+		slotRootParameter[1].InitAsConstantBufferView(0);
 
 		CD3DX12_ROOT_SIGNATURE_DESC rootSigDesc(2, slotRootParameter, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
@@ -726,21 +712,23 @@ namespace winrt::wzrd_editor::implementation
 
 	void MainPage::simple_BuildConstantBuffers()
 	{
+
 		m_simple_object_cb = std::make_unique<upload_buffer<simple_object_constants>>(m_device.get(), 1, true);
-		UINT objCBByteSize = Utilities::constant_buffer_byte_size(sizeof(simple_object_constants));
-		D3D12_GPU_VIRTUAL_ADDRESS cbAddress = m_simple_object_cb->get_resource()->GetGPUVirtualAddress();
-		int boxCBufIndex = 0;
-		cbAddress += boxCBufIndex * objCBByteSize;
-		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
-		cbvDesc.BufferLocation = cbAddress;
-		cbvDesc.SizeInBytes = Utilities::constant_buffer_byte_size(sizeof(simple_object_constants));
 
-		m_device->CreateConstantBufferView(
-			&cbvDesc,
-			m_cbvHeap->GetCPUDescriptorHandleForHeapStart()
-		);
+		// Unnecessary because its already initialized as a ConstantBufferView in the root parameters
 
+		//UINT objCBByteSize = Utilities::constant_buffer_byte_size(sizeof(simple_object_constants));
+		//D3D12_GPU_VIRTUAL_ADDRESS cbAddress = m_simple_object_cb->get_resource()->GetGPUVirtualAddress();
+		//int boxCBufIndex = 0;
+		//cbAddress += boxCBufIndex * objCBByteSize;
+		//D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
+		//cbvDesc.BufferLocation = cbAddress;
+		//cbvDesc.SizeInBytes = Utilities::constant_buffer_byte_size(sizeof(simple_object_constants));
 
+		//m_device->CreateConstantBufferView(
+		//	&cbvDesc,
+		//	m_cbvHeap->GetCPUDescriptorHandleForHeapStart()
+		//);
 	}
 
 	void MainPage::BuildRootSignature()
@@ -982,8 +970,12 @@ namespace winrt::wzrd_editor::implementation
 		XMMATRIX proj = XMLoadFloat4x4(&m_proj);
 		XMMATRIX worldViewProj = world * view * proj;
 
+		XMFLOAT4X4 texTransform_floats = MathHelper::Identity4x4();
+		XMMATRIX texTransform = XMLoadFloat4x4(&texTransform_floats);
+
 		simple_object_constants objConstants;
 		XMStoreFloat4x4(&objConstants.WorldViewProj, XMMatrixTranspose(worldViewProj));
+		XMStoreFloat4x4(&objConstants.TexTransform, XMMatrixTranspose(texTransform));
 		m_simple_object_cb->copy_data(0, objConstants);
 		//UpdateCamera(gt);
 
@@ -1032,9 +1024,7 @@ namespace winrt::wzrd_editor::implementation
 		m_graphicsCommandList->ClearDepthStencilView(m_dsvHeap->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 		m_graphicsCommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &m_dsvHeap->GetCPUDescriptorHandleForHeapStart());
 
-		//ID3D12DescriptorHeap* descriptorHeaps[] = { m_srvDescriptorHeap.get() };
-		//m_graphicsCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
-		ID3D12DescriptorHeap* descriptorHeaps[] = { m_cbvHeap.get() };
+		ID3D12DescriptorHeap* descriptorHeaps[] = { m_srvDescriptorHeap.get() };
 		m_graphicsCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
 		m_graphicsCommandList->SetGraphicsRootSignature(m_rootSignature.get());
@@ -1042,7 +1032,9 @@ namespace winrt::wzrd_editor::implementation
 		m_graphicsCommandList->IASetVertexBuffers(0, 1, &mBoxGeo->VertexBufferView());
 		m_graphicsCommandList->IASetIndexBuffer(&mBoxGeo->IndexBufferView());
 		m_graphicsCommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		m_graphicsCommandList->SetGraphicsRootDescriptorTable(0, m_cbvHeap->GetGPUDescriptorHandleForHeapStart());
+
+		m_graphicsCommandList->SetGraphicsRootDescriptorTable(0, m_srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+		m_graphicsCommandList->SetGraphicsRootConstantBufferView(1, m_simple_object_cb->get_resource()->GetGPUVirtualAddress());
 
 		m_graphicsCommandList->DrawIndexedInstanced(
 			mBoxGeo->DrawArgs["box"].IndexCount,

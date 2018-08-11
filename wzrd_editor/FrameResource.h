@@ -18,6 +18,12 @@ struct Vertex
 struct simple_object_constants
 {
 	DirectX::XMFLOAT4X4 WorldViewProj = MathHelper::Identity4x4();
+	DirectX::XMFLOAT4X4 TexTransform = MathHelper::Identity4x4();
+};
+
+struct simple_texture_constants
+{
+	DirectX::XMFLOAT4X4 texture_transform = MathHelper::Identity4x4();
 };
 
 struct Light
