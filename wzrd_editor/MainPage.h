@@ -36,6 +36,8 @@ namespace winrt::wzrd_editor::implementation
 		winrt::apartment_context m_ui_thread;
 		Windows::Foundation::IAsyncAction ui_thread_work();
 
+		void activate_debug_window();
+
 		bool Render();
 		void Update(const GameTimer& gt);
 		void UpdateCamera(const GameTimer& gt);

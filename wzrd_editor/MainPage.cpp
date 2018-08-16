@@ -103,7 +103,6 @@ namespace winrt::wzrd_editor::implementation
 				}
 			}
 		});
-
     }
 
     int32_t MainPage::MyProperty()
@@ -205,9 +204,10 @@ namespace winrt::wzrd_editor::implementation
 
 	void MainPage::buildPSO_Click(IInspectable const&, RoutedEventArgs const&)
 	{
+		activate_debug_window();
 		//BuildPSOs();
-		simple_BuildPSOs();
-		m_renderLoopWorker = ThreadPool::RunAsync(m_render_loop_work_item);
+		//simple_BuildPSOs();
+		//m_renderLoopWorker = ThreadPool::RunAsync(m_render_loop_work_item);
 	}
 
 	void MainPage::simple_BuildGeometry()
@@ -465,6 +465,37 @@ namespace winrt::wzrd_editor::implementation
 		debugController->EnableDebugLayer();
 	}
 
+	void MainPage::activate_debug_window()
+	{
+		using namespace winrt::Windows;
+
+		UI::ViewManagement::ApplicationView currentApplicationView = UI::ViewManagement::ApplicationView::GetForCurrentView();
+		ApplicationModel::Core::CoreApplicationView newApplicationView = Windows::ApplicationModel::Core::CoreApplication::CreateNewView();
+		
+		newApplicationView.Dispatcher().RunAsync(
+			UI::Core::CoreDispatcherPriority::High,
+
+			[currentApplicationView]() -> Foundation::IAsyncAction {
+			auto newWindow = Window::Current();
+			auto newAppView = UI::ViewManagement::ApplicationView::GetForCurrentView();
+
+			hstring newTitle = L"cool new title";
+			newAppView.Title(newTitle);
+
+			UI::Xaml::Controls::Frame newFrame{ nullptr };
+			newFrame.Navigate(xaml_typename<wzrd_editor::MainPage>(), nullptr);
+			newWindow.Content(newFrame);
+			newWindow.Activate();
+
+			co_await UI::ViewManagement::ApplicationViewSwitcher::TryShowAsStandaloneAsync(
+				newAppView.Id(),
+				UI::ViewManagement::ViewSizePreference::UseMinimum,
+				currentApplicationView.Id(),
+				UI::ViewManagement::ViewSizePreference::UseMinimum
+			);
+		});
+	}
+
 	void MainPage::CreateCommandObjects()
 	{
 		D3D12_COMMAND_QUEUE_DESC commandQueueDesc = {};
@@ -520,8 +551,7 @@ namespace winrt::wzrd_editor::implementation
 				&swapChainDesc,
 				nullptr,
 				m_swapChain.put()
-			)
-		);
+		));
 
 		// associate DXGI swap chain with the XAML SwapChainPanel
 		check_hresult(
