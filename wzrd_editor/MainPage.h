@@ -15,16 +15,27 @@ namespace winrt::wzrd_editor::implementation
     {
         MainPage();
 
+		void PrintActivationMode();
+
         int32_t MyProperty();
         void MyProperty(int32_t value);
 
         Windows::Foundation::IAsyncAction texturePicker_Click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 		Windows::Foundation::IAsyncAction pixelShaderPicker_Click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 		Windows::Foundation::IAsyncAction vertexShaderPicker_Click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
-		void buildPSO_Click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
+		Windows::Foundation::IAsyncAction buildPSO_Click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
+
+		winrt::event_token token;
 
 		GameTimer m_timer;
 		Windows::UI::Core::CoreWindow m_window = nullptr;
+		Windows::UI::Core::CoreWindow m_window_debug = nullptr;
+
+		int m_main_view_id = 0;
+		int m_new_view_id = 0;
+		Windows::Foundation::IAsyncAction ShowWindow();
+		bool m_window_shown = false;
+
 		Windows::Foundation::IAsyncAction m_renderLoopWorker;
 		Windows::System::Threading::WorkItemHandler m_render_loop_work_item = nullptr;
 		bool m_windowVisible = false;
@@ -36,7 +47,7 @@ namespace winrt::wzrd_editor::implementation
 		winrt::apartment_context m_ui_thread;
 		Windows::Foundation::IAsyncAction ui_thread_work();
 
-		void activate_debug_window();
+		Windows::Foundation::IAsyncAction activate_debug_window();
 
 		bool Render();
 		void Update(const GameTimer& gt);
@@ -47,7 +58,9 @@ namespace winrt::wzrd_editor::implementation
 		void DrawRenderItems(ID3D12GraphicsCommandList* cmdList, std::vector<render_item*>& render_items);
 		void EnableDebugLayer();
 		void CreateCommandObjects();
-		void CreateAndAssociateSwapChain();
+		void CreateXamlSwapChain();
+		void CreateSwapchain(bool window_shown);
+		void CreateRenderTargets();
 		void CreateDescriptorHeaps();
 		void CreateDepthStencilBufferAndView();
 		void BuildRootSignature();
@@ -59,6 +72,7 @@ namespace winrt::wzrd_editor::implementation
 		void BuildRenderItems();
 		void BuildFrameResources();
 
+		void debug_CreateSwapchain(bool is_window_shown);
 		// test simplified
 		void simple_BuildRootSignature();
 		void simple_BuildConstantBuffers();
@@ -108,7 +122,7 @@ namespace winrt::wzrd_editor::implementation
 
 		DXGI_FORMAT m_depthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 		DXGI_FORMAT m_backBufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
-
+		
 		com_ptr<IDXGISwapChain1> m_swapChain;
 		com_ptr<IDXGIFactory4> m_factory;
 		com_ptr<ID3D12CommandQueue> m_commandQueue;
