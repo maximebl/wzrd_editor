@@ -28,7 +28,7 @@
 #include "winrt/Windows.System.Threading.h"
 #include "winrt/Windows.Storage.Pickers.h"
 #include "winrt/Windows.Storage.Streams.h"
-#include <winrt/Windows.UI.ViewManagement.h>
+#include "winrt/Windows.UI.ViewManagement.h"
 
 #include <d3dcompiler.h>
 #include <ppltasks.h>

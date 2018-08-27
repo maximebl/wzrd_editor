@@ -82,6 +82,13 @@ void App::OnLaunched(LaunchActivatedEventArgs const& e)
             Window::Current().Content(rootFrame);
             // Ensure the current window is active
             Window::Current().Activate();
+
+			//Window::Current().Activated([&, this, e](auto&& sender, auto&& ev) {
+			//	OutputDebugStringW((L"\n App Activated : " + std::to_wstring(GetCurrentThreadId()) + L"\n").c_str());
+			//	auto boxedParams = box_value(e.Arguments());
+			//	auto xamlType = xaml_typename<wzrd_editor::MainPage>();
+			//	rootFrame.Navigate(xamlType, boxedParams);
+			//});
         }
     }
     else

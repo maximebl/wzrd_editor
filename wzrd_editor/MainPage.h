@@ -14,7 +14,6 @@ namespace winrt::wzrd_editor::implementation
     struct MainPage : MainPageT<MainPage>
     {
         MainPage();
-
 		void PrintActivationMode();
 
         int32_t MyProperty();
@@ -30,6 +29,11 @@ namespace winrt::wzrd_editor::implementation
 		GameTimer m_timer;
 		Windows::UI::Core::CoreWindow m_window = nullptr;
 		Windows::UI::Core::CoreWindow m_window_debug = nullptr;
+
+		Windows::UI::ViewManagement::ApplicationView m_currentApplicationView = nullptr;
+		Windows::ApplicationModel::Core::CoreApplicationView m_newCoreApplicationView = nullptr;
+		Windows::UI::Core::CoreWindow m_newWindow = nullptr;
+		Windows::UI::ViewManagement::ApplicationView m_newAppView = nullptr;
 
 		int m_main_view_id = 0;
 		int m_new_view_id = 0;

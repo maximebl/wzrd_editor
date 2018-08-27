@@ -9,6 +9,8 @@ namespace winrt::wzrd_editor::implementation
 {
 	MainPage::MainPage()
 	{
+		OutputDebugStringW((L"\n Entering constructor : " + std::to_wstring(GetCurrentThreadId()) + L"\n").c_str());
+
 		InitializeComponent();
 		m_ui_thread = winrt::apartment_context();
 		EnableDebugLayer();
@@ -42,7 +44,6 @@ namespace winrt::wzrd_editor::implementation
 		m_rtvDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 		CreateDescriptorHeaps();
 
-		//activate_debug_window();
 		//CreateXamlSwapChain();
 
 		CreateDepthStencilBufferAndView();
@@ -71,7 +72,7 @@ namespace winrt::wzrd_editor::implementation
 		//BuildMaterials();
 		//BuildRenderItems();
 		//BuildFrameResources();
-	
+
 		m_render_loop_work_item = WorkItemHandler([this](Windows::Foundation::IAsyncAction action)
 		{
 			m_timer.Reset();
@@ -88,6 +89,10 @@ namespace winrt::wzrd_editor::implementation
 				}
 			}
 		});
+
+		activate_debug_window();
+
+		OutputDebugStringW((L"\n Leaving constructor : " + std::to_wstring(GetCurrentThreadId()) + L"\n").c_str());
 	}
 
 	int32_t MainPage::MyProperty()
@@ -185,20 +190,12 @@ namespace winrt::wzrd_editor::implementation
 	{
 		//BuildPSOs();
 		//simple_BuildPSOs();
-		//co_await ShowWindow();
+		co_await winrt::resume_foreground(m_newCoreApplicationView.Dispatcher());
+		m_window_debug.Activate();
 
-		OutputDebugStringW(L"1\n");
-		auto coreView = Windows::ApplicationModel::Core::CoreApplication::CreateNewView();
-		OutputDebugStringW(L"2\n");
-		co_await resume_foreground(coreView.Dispatcher());
-		OutputDebugStringW(L"3\n");
-		auto appView = Windows::UI::ViewManagement::ApplicationView::GetForCurrentView();
-		OutputDebugStringW(L"4\n");
-		hstring newTitle = L"kenny's window";
-		appView.Title(newTitle);
-		co_await Windows::UI::ViewManagement::ApplicationViewSwitcher::TryShowAsStandaloneAsync(appView.Id());
-		OutputDebugStringW(L"5\n");
-
+		int x = 2;
+		auto result = m_window_debug.ActivationMode();
+		int c = 2;
 	}
 
 	void MainPage::simple_BuildGeometry()
@@ -459,37 +456,71 @@ namespace winrt::wzrd_editor::implementation
 	Windows::Foundation::IAsyncAction MainPage::activate_debug_window()
 	{
 		using namespace winrt::Windows;
+		OutputDebugStringW((L"\n Entering function : " + std::to_wstring(GetCurrentThreadId()) + L"\n").c_str());
+		m_currentApplicationView = UI::ViewManagement::ApplicationView::GetForCurrentView();
+		m_newCoreApplicationView = Windows::ApplicationModel::Core::CoreApplication::CreateNewView();
 
-		UI::ViewManagement::ApplicationView currentApplicationView = UI::ViewManagement::ApplicationView::GetForCurrentView();
-		ApplicationModel::Core::CoreApplicationView newCoreApplicationView = Windows::ApplicationModel::Core::CoreApplication::CreateNewView();
+		OutputDebugStringW((L"\n Resume foreground 1 newCoreApplicationView: " + std::to_wstring(GetCurrentThreadId()) + L"\n").c_str());
+		co_await winrt::resume_foreground(m_newCoreApplicationView.Dispatcher());
+		OutputDebugStringW((L"\n Resume foreground 2 newCoreApplicationView: " + std::to_wstring(GetCurrentThreadId()) + L"\n").c_str());
 
-		co_await winrt::resume_foreground(newCoreApplicationView.Dispatcher());
-
-		auto newWindow = Windows::UI::Core::CoreWindow::GetForCurrentThread();
-		auto newAppView = UI::ViewManagement::ApplicationView::GetForCurrentView();
-
-		m_new_view_id = newAppView.Id();
-		m_main_view_id = currentApplicationView.Id();
-
-		hstring newTitle = L"Debugging window";
-		newAppView.Title(newTitle);
-		newWindow.Activate();
+		/*m_newCoreApplicationView.Activated([&, this](auto&& sender, auto&& e) {
+			OutputDebugStringW((L"\n m_newCoreApplicationView Activated : " + std::to_wstring(GetCurrentThreadId()) + L"\n").c_str());
+		});*/
 
 		m_window_debug = Windows::UI::Core::CoreWindow::GetForCurrentThread();
+		m_newAppView = UI::ViewManagement::ApplicationView::GetForCurrentView();
+
+		m_new_view_id = m_newAppView.Id();
+		m_main_view_id = m_currentApplicationView.Id();
+
+		hstring newTitle = L"Debugging window";
+		m_newAppView.Title(newTitle);
+		//m_window_debug.Activate();
+		OutputDebugStringW((L"\n After activation line: " + std::to_wstring(GetCurrentThreadId()) + L"\n").c_str());
+	
+		//m_newCoreApplicationView.Activated([&, this](auto&& coreAppView, auto& e) {
+		//	OutputDebugStringW((L"\n CoreApp activated callback : " + std::to_wstring(GetCurrentThreadId()) + L"\n").c_str());
+
+		//	m_window_debug = Windows::UI::Core::CoreWindow::GetForCurrentThread();
+		//	m_newAppView = UI::ViewManagement::ApplicationView::GetForCurrentView();
+
+		//	m_new_view_id = m_newAppView.Id();
+		//	m_main_view_id = m_currentApplicationView.Id();
+
+		//	hstring newTitle = L"Debugging window";
+		//	m_newAppView.Title(newTitle);
+
+		//	m_window_debug.Activate();
+		//});
+
+		m_window_debug.Activated([&, this](auto&& sender, auto&& e) {
+
+			OutputDebugStringW((L"\n m_window_debug Activated : " + std::to_wstring(GetCurrentThreadId()) + L"\n").c_str());
+
+			auto actv = m_window_debug.ActivationMode();
+			
+			
+			OutputDebugStringW((L"\n m_window_debug ActivationMode : " + std::to_wstring(static_cast<int>(actv)) + L"\n").c_str());
+
+			ShowWindow();
+			//CreateSwapchain(true);
+			//m_renderLoopWorker = ThreadPool::RunAsync(m_render_loop_work_item);
+		});
+
+		//OutputDebugStringW((L"\n Resume foreground 1 m_window: " + std::to_wstring(GetCurrentThreadId()) + L"\n").c_str());
+		//co_await winrt::resume_foreground(m_window.Dispatcher());
+		//OutputDebugStringW((L"\n Resume foreground 2 m_window: " + std::to_wstring(GetCurrentThreadId()) + L"\n").c_str());
+
 	}
 
 	Windows::Foundation::IAsyncAction MainPage::ShowWindow()
 	{
-		m_window_shown = co_await Windows::UI::ViewManagement::ApplicationViewSwitcher::TryShowAsStandaloneAsync(
-			//newAppView.Id(),
-			m_new_view_id/*,
-			Windows::UI::ViewManagement::ViewSizePreference::UseMinimum,
-			//currentApplicationView.Id(),
-			m_main_view_id,
-			Windows::UI::ViewManagement::ViewSizePreference::UseMinimum
-		*/);
-		CreateSwapchain(true);
-		m_renderLoopWorker = ThreadPool::RunAsync(m_render_loop_work_item);
+		OutputDebugStringW((L"\n Before TryShowWindow : " + std::to_wstring(GetCurrentThreadId()) + L"\n").c_str());
+		// wait for activationmode to not be None
+		m_window_shown = co_await Windows::UI::ViewManagement::ApplicationViewSwitcher::TryShowAsViewModeAsync(m_new_view_id, Windows::UI::ViewManagement::ApplicationViewMode::CompactOverlay);
+
+		OutputDebugStringW((L"\n After TryShowWindow : " + std::to_wstring(GetCurrentThreadId()) + L"\n").c_str());
 	}
 
 	void MainPage::CreateSwapchain(bool window_shown)
@@ -509,6 +540,9 @@ namespace winrt::wzrd_editor::implementation
 			swapChainDesc.Flags = 0;
 			swapChainDesc.Scaling = DXGI_SCALING_ASPECT_RATIO_STRETCH;
 			swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
+
+			std::wstring abc = L"\n before CreateSwapChain \n";
+			OutputDebugStringW(abc.c_str());
 
 			IUnknown* pWindow = static_cast<IUnknown*>(get_abi(m_window_debug));
 			check_hresult(
