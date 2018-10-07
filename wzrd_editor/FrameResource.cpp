@@ -6,7 +6,7 @@ frame_resource::frame_resource(ID3D12Device* device, UINT pass_count, UINT objec
 	winrt::check_hresult(
 		device->CreateCommandAllocator(
 			D3D12_COMMAND_LIST_TYPE_DIRECT,
-			__uuidof(cmd_list_allocator),
+			winrt::guid_of<ID3D12CommandAllocator>(),
 			cmd_list_allocator.put_void()
 		));
 

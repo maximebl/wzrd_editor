@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Height="821" Width="1438" Margin="0,0,0,0">
+    <StackPanel x:Name="outer_stackpanel" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Height="821" Width="1438" Margin="0,0,0,0">
 
 
 
@@ -34,9 +34,24 @@
                     <AppBarButton Icon="Edit" Label="Settings"/>
                 </CommandBar.SecondaryCommands>
             </CommandBar>
-            <Slider x:Name="slider_x" Minimum="-20" Maximum="20" HorizontalAlignment="Center" VerticalAlignment="Top" Width="200" Value="1"/>
-            <Slider x:Name="slider_y" Minimum="-20" Maximum="20" HorizontalAlignment="Center" VerticalAlignment="Top" Width="200" Value="1"/>
-            <Slider x:Name="slider_z" Minimum="-20" Maximum="20" HorizontalAlignment="Center" VerticalAlignment="Top" Width="200" Value="1"/>
+
+            <RelativePanel Margin="10">
+                <TextBlock x:Name="position_x_label" Text="Position"/>
+                <TextBox x:Name="position_x_value"
+                         Text="hello" 
+                         Width="50" 
+                         RelativePanel.RightOf="position_x_label" 
+                         RelativePanel.AlignRightWithPanel="True" 
+                         HorizontalAlignment="Right"/>
+                <Slider x:Name="slider_x" Minimum="-20" Maximum="20" Value="1"
+                        RelativePanel.Below="position_x_value"
+                        RelativePanel.AlignLeftWith="position_x_label"
+                        RelativePanel.AlignRightWith="position_x_value"/>
+            </RelativePanel>
+
+            <Slider x:Name="slider_y" Minimum="-20" Maximum="20" Value="1"/>
+            <Slider x:Name="slider_z" Minimum="-20" Maximum="20" Value="1"/>
+
             <Slider x:Name="slider_radius" Minimum="5" Maximum="15" HorizontalAlignment="Center" VerticalAlignment="Top" Width="200" Value="5"/>
         </StackPanel>
 

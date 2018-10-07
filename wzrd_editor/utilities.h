@@ -56,7 +56,7 @@ public:
 				&CD3DX12_RESOURCE_DESC::Buffer(m_element_byte_size*element_count),
 				D3D12_RESOURCE_STATE_GENERIC_READ,
 				nullptr,
-				__uuidof(m_upload_buffer),
+				winrt::guid_of<ID3D12Resource>(),
 				m_upload_buffer.put_void()
 			));
 
@@ -139,6 +139,8 @@ struct MeshGeometry
 	}
 };
 
+
+
 class Utilities
 {
 public:
@@ -152,6 +154,8 @@ public:
 		UINT64 byteSize, 
 		winrt::com_ptr<ID3D12Resource>& uploadBuffer);
 	static UINT constant_buffer_byte_size(UINT byte_size);
+	static std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> get_static_samplers();
+	static void print_coordinates(float x, float y);
 };
 
 struct render_item

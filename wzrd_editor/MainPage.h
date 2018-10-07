@@ -8,6 +8,7 @@
 #include "utilities.h"
 #include "DDSTextureLoader.h"
 #include "FrameResource.h"
+#include "GraphicsResources.h"
 
 namespace winrt::wzrd_editor::implementation
 {
@@ -15,8 +16,10 @@ namespace winrt::wzrd_editor::implementation
     {
         MainPage();
 
-		void PrintActivationMode();
+	private:
+		GraphicsResources m_graphics_resources;
 
+	public:
         int32_t MyProperty();
         void MyProperty(int32_t value);
 
@@ -24,16 +27,15 @@ namespace winrt::wzrd_editor::implementation
 		Windows::Foundation::IAsyncAction pixelShaderPicker_Click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 		Windows::Foundation::IAsyncAction vertexShaderPicker_Click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 		Windows::Foundation::IAsyncAction buildPSO_Click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
-
+		
 		winrt::event_token token;
-
 		GameTimer m_timer;
 		Windows::UI::Core::CoreWindow m_window = nullptr;
 		Windows::UI::Core::CoreWindow m_window_debug = nullptr;
+		Windows::ApplicationModel::Core::CoreApplicationView newCoreApplicationView = nullptr;
 
 		int m_main_view_id = 0;
 		int m_new_view_id = 0;
-		Windows::Foundation::IAsyncAction ShowWindow();
 		bool m_window_shown = false;
 
 		Windows::Foundation::IAsyncAction m_renderLoopWorker;
@@ -59,12 +61,10 @@ namespace winrt::wzrd_editor::implementation
 		void EnableDebugLayer();
 		void CreateCommandObjects();
 		void CreateXamlSwapChain();
-		void CreateSwapchain(bool window_shown);
 		void CreateRenderTargets();
 		void CreateDescriptorHeaps();
 		void CreateDepthStencilBufferAndView();
 		void BuildRootSignature();
-		void LoadTextures();
 		void BuildShaderResources();
 		void BuildBoxGeometry();
 		void BuildPSOs();
@@ -72,11 +72,9 @@ namespace winrt::wzrd_editor::implementation
 		void BuildRenderItems();
 		void BuildFrameResources();
 
-		void debug_CreateSwapchain(bool is_window_shown);
 		// test simplified
 		void simple_BuildRootSignature();
 		void simple_BuildConstantBuffers();
-		void simple_BuildDescriptorHeaps();
 		void simple_BuildPSOs();
 		void simple_BuildGeometry();
 		std::unique_ptr<upload_buffer<simple_object_constants>> m_simple_object_cb;

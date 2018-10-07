@@ -10,68 +10,52 @@ namespace winrt::wzrd_editor::implementation
 	MainPage::MainPage()
 	{
 		InitializeComponent();
+		
 		m_ui_thread = winrt::apartment_context();
-		EnableDebugLayer();
 
-		check_hresult(
-			CreateDXGIFactory1(__uuidof(m_factory), m_factory.put_void())
-		);
+		swapChainPanel().PointerMoved([this](IInspectable sender, winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs args) {
 
-		check_hresult(
-			D3D12CreateDevice(
-				nullptr,
-				D3D_FEATURE_LEVEL_11_0,
-				__uuidof(m_device),
-				m_device.put_void()
-			)
-		);
+			auto current_point = args.GetCurrentPoint(sender.try_as<winrt::Windows::UI::Xaml::Controls::SwapChainPanel>());
 
-		check_hresult(
-			m_device->CreateFence(
-				0,
-				D3D12_FENCE_FLAG_NONE,
-				__uuidof(m_fence),
-				m_fence.put_void()
-			)
-		);
+			if (current_point.Properties().IsLeftButtonPressed())
+			{
+				auto point = current_point.Position();
+				m_graphics_resources.last_mouse_position = m_graphics_resources.current_mouse_position;
+				m_graphics_resources.current_mouse_position = point;
+			}
+			else
+			{
+				m_graphics_resources.last_mouse_position = { 0.0f, 0.0f };
+				m_graphics_resources.current_mouse_position = { 0.0f, 0.0f };
+			}
 
-		m_window = Window::Current().CoreWindow().GetForCurrentThread();
+		});
 
-		CreateCommandObjects();
+		swapChainPanel().PointerReleased([this](IInspectable sender, winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs args) {
+			m_graphics_resources.last_mouse_position = { 0.0f, 0.0f };
+			m_graphics_resources.current_mouse_position = { 0.0f, 0.0f };
+		});
 
-		m_rtvDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-		CreateDescriptorHeaps();
+		swapChainPanel().PointerExited([this](IInspectable sender, winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs args) {
+			m_graphics_resources.last_mouse_position = { 0.0f, 0.0f };
+			m_graphics_resources.current_mouse_position = { 0.0f, 0.0f };
+		});
 
-		//activate_debug_window();
-		//CreateXamlSwapChain();
+		m_graphics_resources.enable_debug_layer();
+		m_graphics_resources.create_factory();
+		m_graphics_resources.create_device();
+		m_graphics_resources.create_fence();
+		m_graphics_resources.create_cmd_objects();
+		m_graphics_resources.create_descriptor_heaps();
+		m_graphics_resources.create_depthstencil_buffer();
+		m_graphics_resources.create_swapchain_xamlpanel(swapChainPanel());
+		m_graphics_resources.create_render_targets();
+		m_graphics_resources.create_constant_buffers();
+		m_graphics_resources.create_rootsignature();
+		//m_graphics_resources.create_vertex_colored_box_geometry();
+		m_graphics_resources.create_texture_geometry();
+		m_graphics_resources.execute_cmd_list();
 
-		CreateDepthStencilBufferAndView();
-
-		m_simple_input_layout =
-		{
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-			{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
-		};
-
-		m_inputLayout =
-		{
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-			{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
-		};
-
-		m_cbvSrvUavDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-
-		//BuildRootSignature();
-		simple_BuildConstantBuffers();
-		simple_BuildRootSignature();
-		simple_BuildGeometry();
-		//BuildBoxGeometry();
-		//BuildMaterials();
-		//BuildRenderItems();
-		//BuildFrameResources();
-	
 		m_render_loop_work_item = WorkItemHandler([this](Windows::Foundation::IAsyncAction action)
 		{
 			m_timer.Reset();
@@ -83,11 +67,12 @@ namespace winrt::wzrd_editor::implementation
 
 				if (m_windowVisible)
 				{
-					Update(m_timer);
-					Render();
+					m_graphics_resources.update();
+					m_graphics_resources.render();
 				}
 			}
 		});
+		m_window = Window::Current().CoreWindow().GetForCurrentThread();
 	}
 
 	int32_t MainPage::MyProperty()
@@ -119,34 +104,11 @@ namespace winrt::wzrd_editor::implementation
 		file_bytes.assign(fileSize, 0);
 		dataReader.ReadBytes(file_bytes);
 
-		// Create the texture 
-		auto woodCrateTexture = std::make_unique<Texture>();
-		woodCrateTexture->Name = "woodCrateTexture";
-
-		Microsoft::WRL::ComPtr<ID3D12Resource> tmpResource = woodCrateTexture->Resource.get();
-		Microsoft::WRL::ComPtr<ID3D12Resource> tmpUploadHeap = woodCrateTexture->UploadHeap.get();
-
-		check_hresult(m_graphicsCommandList->Reset(m_commandAllocator.get(), nullptr));
-		// Create the dds texture
-		check_hresult(
-			DirectX::CreateDDSTextureFromMemory12(
-				m_device.get(),
-				m_graphicsCommandList.get(),
-				&file_bytes.front(),
-				fileSize,
-				tmpResource,
-				tmpUploadHeap
-			)
-		);
-
-		woodCrateTexture->Resource.attach(tmpResource.Get());
-		woodCrateTexture->UploadHeap.attach(tmpUploadHeap.Get());
-
-		m_textures[woodCrateTexture->Name] = std::move(woodCrateTexture);
-
-		check_hresult(m_graphicsCommandList->Close());
-
-		BuildShaderResources();
+		//auto texture_file = co_await winrt::Windows::Storage::ApplicationData::Current().LocalFolder().GetFileAsync(L"WoodCrate01.dds");
+		//std::unique_ptr<Texture> woodcrate_texture(m_graphics_resources.create_texture_from_file_async("woodCrateTexture", texture_file).get());
+		auto woodcrate_texture = m_graphics_resources.create_texture(file_bytes, fileSize, "woodCrateTexture");
+		m_textures["woodCrateTexture"] = std::move(woodcrate_texture);
+		m_graphics_resources.create_shader_resources(m_textures["woodCrateTexture"]->Resource.get());
 	}
 
 	Windows::Foundation::IAsyncAction MainPage::pixelShaderPicker_Click(IInspectable const&, RoutedEventArgs const&)
@@ -185,20 +147,16 @@ namespace winrt::wzrd_editor::implementation
 	{
 		//BuildPSOs();
 		//simple_BuildPSOs();
-		//co_await ShowWindow();
+		
+		//m_graphics_resources.create_basic_input_layout();
+		//m_graphics_resources.create_opaque_pso(m_shaders["woodCrateVS"], m_shaders["woodCratePS"]);
 
-		OutputDebugStringW(L"1\n");
-		auto coreView = Windows::ApplicationModel::Core::CoreApplication::CreateNewView();
-		OutputDebugStringW(L"2\n");
-		co_await resume_foreground(coreView.Dispatcher());
-		OutputDebugStringW(L"3\n");
-		auto appView = Windows::UI::ViewManagement::ApplicationView::GetForCurrentView();
-		OutputDebugStringW(L"4\n");
-		hstring newTitle = L"kenny's window";
-		appView.Title(newTitle);
-		co_await Windows::UI::ViewManagement::ApplicationViewSwitcher::TryShowAsStandaloneAsync(appView.Id());
-		OutputDebugStringW(L"5\n");
+		m_graphics_resources.create_texture_input_layout();
+		m_graphics_resources.create_texture_pso(m_shaders["woodCrateVS"], m_shaders["woodCratePS"]);
 
+		m_running = true;
+		ThreadPool::RunAsync(m_render_loop_work_item);
+		co_return;
 	}
 
 	void MainPage::simple_BuildGeometry()
@@ -460,78 +418,28 @@ namespace winrt::wzrd_editor::implementation
 	{
 		using namespace winrt::Windows;
 
-		UI::ViewManagement::ApplicationView currentApplicationView = UI::ViewManagement::ApplicationView::GetForCurrentView();
-		ApplicationModel::Core::CoreApplicationView newCoreApplicationView = Windows::ApplicationModel::Core::CoreApplication::CreateNewView();
+		newCoreApplicationView = Windows::ApplicationModel::Core::CoreApplication::CreateNewView();
 
 		co_await winrt::resume_foreground(newCoreApplicationView.Dispatcher());
 
-		auto newWindow = Windows::UI::Core::CoreWindow::GetForCurrentThread();
+		winrt::Windows::UI::Xaml::Controls::Frame rootFrame{ nullptr };
+		rootFrame = winrt::Windows::UI::Xaml::Controls::Frame();
+		auto azure_color = Windows::UI::Colors::Black();
+		auto azure_brush = Windows::UI::Xaml::Media::SolidColorBrush(azure_color);
+		rootFrame.Background(azure_brush);
+		Window::Current().Content(rootFrame);
+		Window::Current().Activate();
+
 		auto newAppView = UI::ViewManagement::ApplicationView::GetForCurrentView();
-
 		m_new_view_id = newAppView.Id();
-		m_main_view_id = currentApplicationView.Id();
-
 		hstring newTitle = L"Debugging window";
 		newAppView.Title(newTitle);
-		newWindow.Activate();
-
 		m_window_debug = Windows::UI::Core::CoreWindow::GetForCurrentThread();
-	}
 
-	Windows::Foundation::IAsyncAction MainPage::ShowWindow()
-	{
-		m_window_shown = co_await Windows::UI::ViewManagement::ApplicationViewSwitcher::TryShowAsStandaloneAsync(
-			//newAppView.Id(),
-			m_new_view_id/*,
-			Windows::UI::ViewManagement::ViewSizePreference::UseMinimum,
-			//currentApplicationView.Id(),
-			m_main_view_id,
-			Windows::UI::ViewManagement::ViewSizePreference::UseMinimum
-		*/);
-		CreateSwapchain(true);
-		m_renderLoopWorker = ThreadPool::RunAsync(m_render_loop_work_item);
-	}
+		co_await resume_foreground(m_window.Dispatcher());
+		m_window_shown = co_await Windows::UI::ViewManagement::ApplicationViewSwitcher::TryShowAsStandaloneAsync(m_new_view_id);
 
-	void MainPage::CreateSwapchain(bool window_shown)
-	{
-		if (m_swapChain == nullptr && window_shown == true)
-		{
-			DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
-			swapChainDesc.BufferCount = m_swapChainBufferCount; // triple buffering
-			swapChainDesc.Width = output_width;
-			swapChainDesc.Height = output_height;
-			swapChainDesc.Format = m_backBufferFormat;
-			swapChainDesc.Stereo = false;
-			swapChainDesc.SampleDesc.Count = 1;
-			swapChainDesc.SampleDesc.Quality = 0;
-			swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-			swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-			swapChainDesc.Flags = 0;
-			swapChainDesc.Scaling = DXGI_SCALING_ASPECT_RATIO_STRETCH;
-			swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
-
-			IUnknown* pWindow = static_cast<IUnknown*>(get_abi(m_window_debug));
-			check_hresult(
-				m_factory->CreateSwapChainForCoreWindow(
-					m_commandQueue.get(), pWindow, &swapChainDesc, nullptr, m_swapChain.put()
-				)
-			);
-
-			CreateRenderTargets();
-		}
-		check_hresult(m_graphicsCommandList->Close());
-		ID3D12CommandList* cmdsLists[] = { m_graphicsCommandList.get() };
-		m_commandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);
-
-		m_running = true;
-	}
-
-	void MainPage::PrintActivationMode()
-	{
-		int result = static_cast<int>(m_window_debug.ActivationMode());
-		auto resultString = std::to_wstring(result);
-		auto finalResult = L"mydebug--" + resultString;
-		OutputDebugStringW(finalResult.c_str());
+		co_await winrt::resume_foreground(newCoreApplicationView.Dispatcher());
 	}
 
 	void MainPage::CreateCommandObjects()
@@ -565,32 +473,6 @@ namespace winrt::wzrd_editor::implementation
 				m_graphicsCommandList.put_void()
 			)
 		);
-	}
-
-	void MainPage::debug_CreateSwapchain(bool is_window_shown)
-	{
-		//DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
-		//swapChainDesc.Width = output_width;
-		//swapChainDesc.Height = output_height;
-		//swapChainDesc.Format = m_backBufferFormat;
-		//swapChainDesc.Stereo = false;
-		//swapChainDesc.SampleDesc.Count = 1;
-		//swapChainDesc.SampleDesc.Quality = 0;
-		//swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-		//swapChainDesc.BufferCount = m_swapChainBufferCount; // triple buffering
-		//swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL;
-		//swapChainDesc.Flags = 0;
-		//swapChainDesc.Scaling = DXGI_SCALING_STRETCH;
-		//swapChainDesc.AlphaMode = DXGI_ALPHA_MODE_IGNORE;
-
-		//if (is_window_shown)
-		//{
-		//	check_hresult(
-		//		m_factory->CreateSwapChainForCoreWindow(
-		//			m_commandQueue.get(), reinterpret_cast<IUnknown*>(&m_window_debug), &swapChainDesc, nullptr, m_swapChain.put()
-		//		)
-		//	);
-		//}
 	}
 
 	void MainPage::CreateXamlSwapChain()
@@ -665,16 +547,6 @@ namespace winrt::wzrd_editor::implementation
 				m_dsvHeap.put_void()
 			)
 		);
-
-		/*		D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc;
-				cbvHeapDesc.NumDescriptors = 1;
-				cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-				cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-				cbvHeapDesc.NodeMask = 0;
-
-				check_hresult(
-					m_device->CreateDescriptorHeap(&cbvHeapDesc, __uuidof(m_cbvHeap), m_cbvHeap.put_void())
-				)*/;
 	}
 
 	void MainPage::CreateDepthStencilBufferAndView()
@@ -1107,9 +979,10 @@ namespace winrt::wzrd_editor::implementation
 		check_hresult(cmd_list_alloc->Reset());
 		check_hresult(m_graphicsCommandList->Reset(cmd_list_alloc.get(), m_opaque_pso.get()));*/
 
+		//check_hresult(m_graphicsCommandList->Close());
 		check_hresult(m_commandAllocator->Reset());
-		//check_hresult(m_graphicsCommandList->Reset(m_commandAllocator.get(), m_opaque_pso.get()));
-		check_hresult(m_graphicsCommandList->Reset(m_commandAllocator.get(), nullptr));
+		//check_hresult(m_graphicsCommandList->Reset(m_commandAllocator.get(), nullptr));
+		check_hresult(m_graphicsCommandList->Reset(m_commandAllocator.get(), m_opaque_pso.get()));
 
 		m_screenViewport.TopLeftX = 0;
 		m_screenViewport.TopLeftY = 0;
@@ -1134,8 +1007,8 @@ namespace winrt::wzrd_editor::implementation
 		m_graphicsCommandList->ClearDepthStencilView(m_dsvHeap->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 		m_graphicsCommandList->OMSetRenderTargets(1, &CurrentBackBufferView(), true, &m_dsvHeap->GetCPUDescriptorHandleForHeapStart());
 
-		//ID3D12DescriptorHeap* descriptorHeaps[] = { m_srvDescriptorHeap.get() };
-		//m_graphicsCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
+		ID3D12DescriptorHeap* descriptorHeaps[] = { m_srvDescriptorHeap.get() };
+		m_graphicsCommandList->SetDescriptorHeaps(_countof(descriptorHeaps), descriptorHeaps);
 
 		m_graphicsCommandList->SetGraphicsRootSignature(m_rootSignature.get());
 
@@ -1143,12 +1016,12 @@ namespace winrt::wzrd_editor::implementation
 		m_graphicsCommandList->IASetIndexBuffer(&mBoxGeo->IndexBufferView());
 		m_graphicsCommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
-		//m_graphicsCommandList->SetGraphicsRootDescriptorTable(0, m_srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
+		m_graphicsCommandList->SetGraphicsRootDescriptorTable(0, m_srvDescriptorHeap->GetGPUDescriptorHandleForHeapStart());
 		m_graphicsCommandList->SetGraphicsRootConstantBufferView(1, m_simple_object_cb->get_resource()->GetGPUVirtualAddress());
 
-		//m_graphicsCommandList->DrawIndexedInstanced(
-			//mBoxGeo->DrawArgs["box"].IndexCount,
-			//1, 0, 0, 0);
+		m_graphicsCommandList->DrawIndexedInstanced(
+			mBoxGeo->DrawArgs["box"].IndexCount,
+			1, 0, 0, 0);
 
 		//auto pass_cb = m_current_frame_resource->pass_cb->get_resource();
 		//m_graphicsCommandList->SetGraphicsRootConstantBufferView(2, pass_cb->GetGPUVirtualAddress());
@@ -1159,8 +1032,8 @@ namespace winrt::wzrd_editor::implementation
 		m_graphicsCommandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_depthStencilBuffer.get(),
 			D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_COMMON));
 
-		check_hresult(m_graphicsCommandList->Close());
 
+		check_hresult(m_graphicsCommandList->Close());
 		FlushCommandQueue();
 		ID3D12CommandList* cmdsLists[] = { m_graphicsCommandList.get() };
 		m_commandQueue->ExecuteCommandLists(_countof(cmdsLists), cmdsLists);

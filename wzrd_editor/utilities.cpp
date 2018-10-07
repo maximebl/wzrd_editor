@@ -3,7 +3,6 @@
 
 Utilities::Utilities()
 {
-
 }
 
 UINT Utilities::constant_buffer_byte_size(UINT byte_size)
@@ -80,7 +79,7 @@ winrt::com_ptr<ID3D12Resource> Utilities::create_default_buffer(
 			&CD3DX12_RESOURCE_DESC::Buffer(byteSize),
 			D3D12_RESOURCE_STATE_COMMON,
 			nullptr,
-			__uuidof(default_buffer),
+			winrt::guid_of<ID3D12Resource>(),
 			default_buffer.put_void()));
 
 	winrt::check_hresult(
@@ -90,7 +89,7 @@ winrt::com_ptr<ID3D12Resource> Utilities::create_default_buffer(
 			&CD3DX12_RESOURCE_DESC::Buffer(byteSize),
 			D3D12_RESOURCE_STATE_GENERIC_READ,
 			nullptr,
-			__uuidof(uploadBuffer),
+			winrt::guid_of<ID3D12Resource>(),
 			uploadBuffer.put_void()));
 
 	D3D12_SUBRESOURCE_DATA subresource_data = {};
@@ -110,5 +109,63 @@ winrt::com_ptr<ID3D12Resource> Utilities::create_default_buffer(
 	// Keep the uploadBuffer reference alive until the command list has performed the copy
 }
 
+std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> Utilities::get_static_samplers()
+{
+	const CD3DX12_STATIC_SAMPLER_DESC point_wrap(
+		0, // shaderRegister
+		D3D12_FILTER_MIN_MAG_MIP_POINT, // filter
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,  // addressU
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,  // addressV
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP); // addressW
 
+	const CD3DX12_STATIC_SAMPLER_DESC point_clamp(
+		1, // shaderRegister
+		D3D12_FILTER_MIN_MAG_MIP_POINT, // filter
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,  // addressU
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,  // addressV
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP); // addressW
 
+	const CD3DX12_STATIC_SAMPLER_DESC linear_wrap(
+		2, // shaderRegister
+		D3D12_FILTER_MIN_MAG_MIP_LINEAR, // filter
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,  // addressU
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,  // addressV
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP); // addressW
+
+	const CD3DX12_STATIC_SAMPLER_DESC linear_clamp(
+		3, // shaderRegister
+		D3D12_FILTER_MIN_MAG_MIP_LINEAR, // filter
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,  // addressU
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,  // addressV
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP); // addressW
+
+	const CD3DX12_STATIC_SAMPLER_DESC anisotropic_wrap(
+		4, // shaderRegister
+		D3D12_FILTER_ANISOTROPIC, // filter
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,  // addressU
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,  // addressV
+		D3D12_TEXTURE_ADDRESS_MODE_WRAP,  // addressW
+		0.0f,                             // mipLODBias
+		8);                               // maxAnisotropy
+
+	const CD3DX12_STATIC_SAMPLER_DESC anisotropic_clamp(
+		5, // shaderRegister
+		D3D12_FILTER_ANISOTROPIC, // filter
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,  // addressU
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,  // addressV
+		D3D12_TEXTURE_ADDRESS_MODE_CLAMP,  // addressW
+		0.0f,                              // mipLODBias
+		8);                                // maxAnisotropy
+
+	return {
+		point_wrap, point_clamp,
+		linear_wrap, linear_clamp,
+		anisotropic_wrap, anisotropic_clamp };
+}
+
+void Utilities::print_coordinates(float x, float y)
+{
+	std::wstringstream wstringstream;
+	wstringstream << L"\n" << L"(" << x << L", " << y << L")" << L"\n" << std::endl;
+	OutputDebugStringW(wstringstream.str().c_str());	
+}
