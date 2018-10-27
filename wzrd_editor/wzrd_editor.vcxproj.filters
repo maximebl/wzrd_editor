@@ -9,6 +9,15 @@
   <ItemGroup>
     <Midl Include="App.idl" />
     <Midl Include="MainPage.idl" />
+    <Midl Include="Geometry.idl">
+      <Filter>Models</Filter>
+    </Midl>
+    <Midl Include="GeometryViewModel.idl">
+      <Filter>Models</Filter>
+    </Midl>
+    <Midl Include="wzrd_vec3.idl">
+      <Filter>Models</Filter>
+    </Midl>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -22,8 +31,18 @@
     <ClCompile Include="FrameResource.cpp" />
     <ClCompile Include="MathHelper.cpp" />
     <ClCompile Include="GameTimer.cpp" />
-    <ClCompile Include="DebugWindow.cpp" />
     <ClCompile Include="GraphicsResources.cpp" />
+    <ClCompile Include="Geometry.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="GeometryViewModel.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="wzrd_vec3.cpp">
+      <Filter>Models</Filter>
+    </ClCompile>
+    <ClCompile Include="VertexBufferGenerator.cpp" />
+    <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -35,8 +54,17 @@
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="MathHelper.h" />
     <ClInclude Include="GameTimer.h" />
-    <ClInclude Include="DebugWindow.h" />
     <ClInclude Include="GraphicsResources.h" />
+    <ClInclude Include="Geometry.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="GeometryViewModel.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="wzrd_vec3.h">
+      <Filter>Models</Filter>
+    </ClInclude>
+    <ClInclude Include="VertexBufferGenerator.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Wide310x150Logo.scale-200.png">
@@ -73,6 +101,9 @@
     </Filter>
     <Filter Include="views">
       <UniqueIdentifier>{66a95b7e-03a9-4066-aef3-6f40cdfdf90d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Models">
+      <UniqueIdentifier>{490f3483-9785-47ea-9215-771ad4e35684}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

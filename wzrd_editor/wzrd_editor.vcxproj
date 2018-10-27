@@ -92,10 +92,11 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="d3dx12.h" />
-    <ClInclude Include="DebugWindow.h" />
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="GameTimer.h" />
+    <ClInclude Include="Geometry.h" />
     <ClInclude Include="GeometryGenerator.h" />
+    <ClInclude Include="GeometryViewModel.h" />
     <ClInclude Include="GraphicsResources.h" />
     <ClInclude Include="MathHelper.h" />
     <ClInclude Include="pch.h" />
@@ -106,6 +107,8 @@
       <DependentUpon>MainPage.xaml</DependentUpon>
     </ClInclude>
     <ClInclude Include="utilities.h" />
+    <ClInclude Include="VertexBufferGenerator.h" />
+    <ClInclude Include="wzrd_vec3.h" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -143,7 +146,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="DebugWindow.cpp" />
     <ClCompile Include="FrameResource.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
@@ -153,11 +155,13 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="GeometryGenerator.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="GeometryViewModel.cpp" />
     <ClCompile Include="GraphicsResources.cpp" />
     <ClCompile Include="MathHelper.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
@@ -174,15 +178,21 @@
       <DependentUpon>MainPage.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="Generated Files\module.g.cpp" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="utilities.cpp" />
+    <ClCompile Include="VertexBufferGenerator.cpp" />
+    <ClCompile Include="wzrd_vec3.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Midl Include="App.idl">
       <DependentUpon>App.xaml</DependentUpon>
     </Midl>
+    <Midl Include="Geometry.idl" />
+    <Midl Include="GeometryViewModel.idl" />
     <Midl Include="MainPage.idl">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Midl>
+    <Midl Include="wzrd_vec3.idl" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="readme.txt">
