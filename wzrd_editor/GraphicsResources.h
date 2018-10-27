@@ -6,6 +6,7 @@
 class GraphicsResources
 {
 private:
+
 	DXGI_FORMAT m_backbuffer_format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	DXGI_FORMAT m_depthstencil_format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
@@ -42,14 +43,18 @@ private:
 
 	// pipeline states
 	winrt::com_ptr<ID3D12PipelineState> m_opaque_pso = nullptr;
+	winrt::com_ptr<ID3D12PipelineState> m_flat_color_pso = nullptr;
 	winrt::com_ptr<ID3D12PipelineState> m_texture_pso = nullptr;
 
 	std::vector<D3D12_INPUT_ELEMENT_DESC> m_basic_input_layout;
 	std::vector<D3D12_INPUT_ELEMENT_DESC> m_texture_input_layout;
 	std::unique_ptr<MeshGeometry> m_box_geo = nullptr;
 	std::unique_ptr<upload_buffer<object_constants>> m_object_cb;
+	std::unique_ptr<upload_buffer<Vertex_tex>> m_dynamic_vertex_buffer;
+	std::unique_ptr<upload_buffer<std::uint16_t>> m_dynamic_index_buffer;
 
 	// synchronization
+	int m_vertex_count = 0;
 	winrt::com_ptr<ID3D12Fence> m_gpu_fence;
 	UINT64 m_cpu_fence = 0;
 
@@ -76,16 +81,19 @@ public:
 	void create_shader_resources(ID3D12Resource* resource);
 	void create_opaque_pso(winrt::com_ptr<ID3D10Blob> vertex_shader, winrt::com_ptr<ID3D10Blob> pixel_shader);
 	void create_texture_pso(winrt::com_ptr<ID3D10Blob> vertex_shader, winrt::com_ptr<ID3D10Blob> pixel_shader);
+	void create_flat_color_pso(winrt::com_ptr<ID3D10Blob> vertex_shader, winrt::com_ptr<ID3D10Blob> pixel_shader);
 	void create_basic_input_layout();
 	void create_texture_input_layout();
+	void init_dynamic_buffer();
 
 	void flush_cmd_queue();
 	void execute_cmd_list();
 
 	D3D12_CPU_DESCRIPTOR_HANDLE current_backbuffer_view() const;
 
-	void create_texture_geometry();
+	void create_texture_geometry(std::vector<Vertex_tex>& vertices);
 	void create_vertex_colored_box_geometry();
+	void update_vbv_content(std::vector<Vertex_tex>& vertices);
 
 	void update();
 	void render();

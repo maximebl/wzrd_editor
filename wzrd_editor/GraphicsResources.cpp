@@ -217,6 +217,9 @@ void GraphicsResources::create_depthstencil_buffer()
 void GraphicsResources::create_constant_buffers()
 {
 	m_object_cb = std::make_unique<upload_buffer<object_constants>>(m_device.get(), 1, true);
+
+	m_dynamic_vertex_buffer = std::make_unique<upload_buffer<Vertex_tex>>(m_device.get(), 6, false);
+	m_dynamic_index_buffer = std::make_unique<upload_buffer<std::uint16_t>>(m_device.get(), 6, false);
 }
 
 void GraphicsResources::create_rootsignature()
@@ -282,7 +285,6 @@ std::unique_ptr<Texture> GraphicsResources::create_texture(std::vector<unsigned 
 	Microsoft::WRL::ComPtr<ID3D12Resource> tmpResource = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12Resource> tmpUploadHeap = nullptr;
 
-	winrt::check_hresult(m_graphics_cmdlist->Reset(m_cmd_allocator.get(), nullptr));
 	winrt::check_hresult(
 		DirectX::CreateDDSTextureFromMemory12(
 			m_device.get(),
@@ -293,8 +295,6 @@ std::unique_ptr<Texture> GraphicsResources::create_texture(std::vector<unsigned 
 			tmpUploadHeap
 		)
 	);
-
-	winrt::check_hresult(m_graphics_cmdlist->Close());
 
 	woodcrate_texture->Resource.copy_from(tmpResource.Get());
 	woodcrate_texture->UploadHeap.copy_from(tmpUploadHeap.Get());
@@ -352,6 +352,39 @@ void GraphicsResources::create_texture_pso(winrt::com_ptr<ID3D10Blob> vertex_sha
 	};
 
 	winrt::check_hresult(m_device->CreateGraphicsPipelineState(&texture_pso_desc, winrt::guid_of<ID3D12PipelineState>(), m_texture_pso.put_void()));
+}
+
+void GraphicsResources::create_flat_color_pso(winrt::com_ptr<ID3D10Blob> vertex_shader, winrt::com_ptr<ID3D10Blob> pixel_shader)
+{
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC flat_color_pso_desc = {};
+
+	flat_color_pso_desc.InputLayout = { m_basic_input_layout.data(), static_cast<UINT>(m_basic_input_layout.size()) };
+	flat_color_pso_desc.pRootSignature = m_rootsig.get();
+	flat_color_pso_desc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+	flat_color_pso_desc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	flat_color_pso_desc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+	flat_color_pso_desc.SampleMask = UINT_MAX;
+	flat_color_pso_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	flat_color_pso_desc.NumRenderTargets = 1;
+	flat_color_pso_desc.RTVFormats[0] = m_backbuffer_format;
+	flat_color_pso_desc.SampleDesc.Count = 1;
+	flat_color_pso_desc.SampleDesc.Quality = 0;
+	flat_color_pso_desc.DSVFormat = m_depthstencil_format;
+
+	// shaders
+	flat_color_pso_desc.VS =
+	{
+		reinterpret_cast<unsigned char*>(vertex_shader->GetBufferPointer()),
+		vertex_shader->GetBufferSize()
+	};
+
+	flat_color_pso_desc.PS =
+	{
+		reinterpret_cast<unsigned char*>(pixel_shader->GetBufferPointer()),
+		pixel_shader->GetBufferSize()
+	};
+
+	winrt::check_hresult(m_device->CreateGraphicsPipelineState(&flat_color_pso_desc, winrt::guid_of<ID3D12PipelineState>(), m_flat_color_pso.put_void()));
 }
 
 void GraphicsResources::create_opaque_pso(winrt::com_ptr<ID3D10Blob> vertex_shader, winrt::com_ptr<ID3D10Blob> pixel_shader)
@@ -513,21 +546,12 @@ void GraphicsResources::create_vertex_colored_box_geometry()
 	m_box_geo->DrawArgs["box"] = submesh;
 }
 
-void GraphicsResources::create_texture_geometry()
+void GraphicsResources::create_texture_geometry(std::vector<Vertex_tex>& vertices)
 {
 	using namespace DirectX;
 
-	std::array<Vertex_tex, 3> vertices = 
-	{
-		Vertex_tex({XMFLOAT3(0.0f, 0.25f, 0.0f), XMFLOAT2(0.5f, 0.0f)}),
-		Vertex_tex({XMFLOAT3(0.25f, -0.25, 0.0f), XMFLOAT2(1.0f, 1.0f)}),
-		Vertex_tex({XMFLOAT3(-0.25f, -0.25f, 0.0f), XMFLOAT2(0.0f, 1.0f)})
-	};
+	std::vector<std::uint16_t> indices = {0,1,2,3,4,5};
 
-	std::array<std::uint16_t, 3> indices =
-	{
-		0,1,2
-	};
 	const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex_tex);
 	const UINT ibByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
 
@@ -536,6 +560,7 @@ void GraphicsResources::create_texture_geometry()
 
 	winrt::check_hresult(D3DCreateBlob(vbByteSize, m_box_geo->VertexBufferCPU.put()));
 	CopyMemory(m_box_geo->VertexBufferCPU->GetBufferPointer(), vertices.data(), vbByteSize);
+
 	m_box_geo->VertexBufferGPU = Utilities::create_default_buffer(
 		m_device.get(),
 		m_graphics_cmdlist.get(),
@@ -556,11 +581,39 @@ void GraphicsResources::create_texture_geometry()
 
 	m_box_geo->VertexByteStride = sizeof(Vertex_tex);
 	m_box_geo->VertexBufferByteSize = vbByteSize;
+	m_box_geo->VertexBufferByteSize = sizeof(Vertex_tex) * vertices.size();
 	m_box_geo->IndexFormat = DXGI_FORMAT_R16_UINT;
 	m_box_geo->IndexBufferByteSize = ibByteSize;
 
 	SubmeshGeometry submesh;
 	submesh.IndexCount = (UINT)indices.size();
+	submesh.StartIndexLocation = 0;
+	submesh.BaseVertexLocation = 0;
+
+	m_box_geo->DrawArgs["box"] = submesh;
+}
+
+void GraphicsResources::init_dynamic_buffer()
+{
+	using namespace DirectX;
+
+	int tmp_element_count = 6;
+
+	const UINT vbByteSize = tmp_element_count * sizeof(Vertex_tex);
+	const UINT ibByteSize = tmp_element_count * sizeof(std::uint16_t);
+
+	m_box_geo = std::make_unique<MeshGeometry>();
+	m_box_geo->VertexBufferGPU.attach(m_dynamic_vertex_buffer->get_resource());
+	m_box_geo->IndexBufferGPU.attach(m_dynamic_index_buffer->get_resource());
+	m_box_geo->Name = "boxGeo";
+
+	m_box_geo->VertexByteStride = sizeof(Vertex_tex);
+	m_box_geo->VertexBufferByteSize = vbByteSize;
+	m_box_geo->IndexFormat = DXGI_FORMAT_R16_UINT;
+	m_box_geo->IndexBufferByteSize = ibByteSize;
+
+	SubmeshGeometry submesh;
+	submesh.IndexCount = tmp_element_count;
 	submesh.StartIndexLocation = 0;
 	submesh.BaseVertexLocation = 0;
 
@@ -574,6 +627,15 @@ D3D12_CPU_DESCRIPTOR_HANDLE GraphicsResources::current_backbuffer_view() const
 		m_current_backbuffer,
 		m_rtv_descriptor_size
 	);
+}
+
+void GraphicsResources::update_vbv_content(std::vector<Vertex_tex>& vertices)
+{
+	for (size_t i = 0; i < vertices.size(); ++i)
+	{
+		m_dynamic_vertex_buffer->copy_data(i, vertices[i]);
+		m_dynamic_index_buffer->copy_data(i, i);
+	}
 }
 
 void GraphicsResources::update() 
@@ -659,11 +721,8 @@ void GraphicsResources::render()
 	m_graphics_cmdlist->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(
 		m_depthstencil_buffer.get(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_COMMON));
 
-	//winrt::check_hresult(m_graphics_cmdlist->Close());
 	flush_cmd_queue();
 	execute_cmd_list();
-	//ID3D12CommandList* cmd_lists[] = { m_graphics_cmdlist.get() };
-	//m_cmd_queue->ExecuteCommandLists(_countof(cmd_lists), cmd_lists);
 
 	winrt::check_hresult(m_swapchain->Present(0, 0));
 	m_current_backbuffer = (m_current_backbuffer + 1) % m_swapchain_buffer_count;

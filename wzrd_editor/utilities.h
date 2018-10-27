@@ -46,6 +46,8 @@ public:
 
 		if (is_constant_buffer)
 		{
+			// Constant data reads must be a multiple of 256 bytes from the beginning of the heap. (aka 256 bytes aligned)
+			// https://docs.microsoft.com/en-ca/windows/desktop/direct3d12/upload-and-readback-of-texture-data
 			m_element_byte_size = Utilities::constant_buffer_byte_size(sizeof(T));
 		}
 		

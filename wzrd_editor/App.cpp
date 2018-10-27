@@ -4,7 +4,6 @@
 //
 
 #include "pch.h"
-
 #include "App.h"
 #include "MainPage.h"
 
