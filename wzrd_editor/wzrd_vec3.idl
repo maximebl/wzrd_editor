@@ -1,0 +1,9 @@
+namespace wzrd_editor
+{
+	runtimeclass wzrd_vec3 : Windows.UI.Xaml.Data.INotifyPropertyChanged
+	{
+		Single x;
+		Single y;
+		Single z;
+	}
+}

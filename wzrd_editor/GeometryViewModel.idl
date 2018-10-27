@@ -1,0 +1,9 @@
+import "Geometry.idl";
+
+namespace wzrd_editor
+{
+	runtimeclass GeometryViewModel
+	{
+		Geometry Geometry{get; };
+	}
+}

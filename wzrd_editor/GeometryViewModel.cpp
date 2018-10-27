@@ -1,0 +1,16 @@
+﻿#include "pch.h"
+#include "GeometryViewModel.h"
+#include "Geometry.h"
+#include "wzrd_vec3.h"
+
+namespace winrt::wzrd_editor::implementation
+{
+	GeometryViewModel::GeometryViewModel() : m_geometry{ winrt::make<wzrd_editor::implementation::Geometry>(L"Atticus", L"SomeOther", winrt::make<wzrd_editor::implementation::wzrd_vec3>(0.0f, 0.0f, 0.0f)) }
+	{
+	}
+
+    wzrd_editor::Geometry GeometryViewModel::Geometry()
+    {
+		return m_geometry;
+    }
+}
