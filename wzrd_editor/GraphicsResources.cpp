@@ -364,7 +364,7 @@ void GraphicsResources::create_flat_color_pso(winrt::com_ptr<ID3D10Blob> vertex_
 	flat_color_pso_desc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
 	flat_color_pso_desc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
 	flat_color_pso_desc.SampleMask = UINT_MAX;
-	flat_color_pso_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	flat_color_pso_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
 	flat_color_pso_desc.NumRenderTargets = 1;
 	flat_color_pso_desc.RTVFormats[0] = m_backbuffer_format;
 	flat_color_pso_desc.SampleDesc.Count = 1;
@@ -597,7 +597,7 @@ void GraphicsResources::init_dynamic_buffer()
 {
 	using namespace DirectX;
 
-	int tmp_element_count = 6;
+	int tmp_element_count = 1;
 
 	const UINT vbByteSize = tmp_element_count * sizeof(Vertex_tex);
 	const UINT ibByteSize = tmp_element_count * sizeof(std::uint16_t);
@@ -633,6 +633,9 @@ void GraphicsResources::update_vbv_content(std::vector<Vertex_tex>& vertices)
 {
 	for (size_t i = 0; i < vertices.size(); ++i)
 	{
+		m_box_geo->VertexBufferByteSize = i * sizeof(Vertex_tex);
+		m_box_geo->IndexBufferByteSize = i * sizeof(std::uint16_t);
+		m_box_geo->DrawArgs["box"].IndexCount = i;
 		m_dynamic_vertex_buffer->copy_data(i, vertices[i]);
 		m_dynamic_index_buffer->copy_data(i, i);
 	}
@@ -683,7 +686,7 @@ void GraphicsResources::render()
 {
 	flush_cmd_queue();
 	winrt::check_hresult(m_cmd_allocator->Reset());
-	winrt::check_hresult(m_graphics_cmdlist->Reset(m_cmd_allocator.get(), m_texture_pso.get()));
+	winrt::check_hresult(m_graphics_cmdlist->Reset(m_cmd_allocator.get(), m_flat_color_pso.get()));
 
 	m_screen_viewport.TopLeftX = 0;
 	m_screen_viewport.TopLeftY = 0;
@@ -712,7 +715,7 @@ void GraphicsResources::render()
 
 	m_graphics_cmdlist->IASetVertexBuffers(0, 1, &m_box_geo->VertexBufferView());
 	m_graphics_cmdlist->IASetIndexBuffer(&m_box_geo->IndexBufferView());
-	m_graphics_cmdlist->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	m_graphics_cmdlist->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
 
 	m_graphics_cmdlist->DrawIndexedInstanced(m_box_geo->DrawArgs["box"].IndexCount, 1, 0, 0, 0);
 
