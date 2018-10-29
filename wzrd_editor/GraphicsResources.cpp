@@ -425,14 +425,15 @@ void GraphicsResources::set_triangles_wireframe()
 	if (m_triangles_pso.get() != nullptr)
 	{
 		m_graphics_cmdlist->SetPipelineState(m_triangles_pso.get());
-		m_current_pso.attach(m_triangles_pso.get());
+		//m_current_pso.attach(m_triangles_pso.get());
 	}
 	else {
 		create_triangles_pso(m_shaders["woodCrateVS"], m_shaders["woodCratePS"]);
 		winrt::check_hresult(m_graphics_cmdlist->Reset(m_cmd_allocator.get(), nullptr));
 		m_graphics_cmdlist->SetPipelineState(m_triangles_pso.get());
-		execute_cmd_list();
-		m_current_pso.attach(m_triangles_pso.get());
+		winrt::check_hresult(m_graphics_cmdlist->Close());
+		//execute_cmd_list();
+		//m_current_pso.attach(m_triangles_pso.get());
 	}
 }
 
@@ -441,14 +442,14 @@ void GraphicsResources::set_points_wireframe()
 	if (m_points_pso.get() != nullptr)
 	{
 		m_graphics_cmdlist->SetPipelineState(m_points_pso.get());
-		m_current_pso.attach(m_points_pso.get());
+		//m_current_pso.attach(m_points_pso.get());
 	}
 	else {
 		create_points_pso(m_shaders["woodCrateVS"], m_shaders["woodCratePS"]);
-		winrt::check_hresult(m_graphics_cmdlist->Reset(m_cmd_allocator.get(), nullptr));
+		//winrt::check_hresult(m_graphics_cmdlist->Reset(m_cmd_allocator.get(), nullptr));
 		m_graphics_cmdlist->SetPipelineState(m_points_pso.get());
-		execute_cmd_list();
-		m_current_pso.attach(m_points_pso.get());
+		//execute_cmd_list();
+		//m_current_pso.attach(m_points_pso.get());
 	}
 }
 
@@ -750,10 +751,9 @@ void GraphicsResources::update()
 
 void GraphicsResources::render()
 {
-	flush_cmd_queue();
-	// why am I even doing this?
+	//flush_cmd_queue();
 	winrt::check_hresult(m_cmd_allocator->Reset());
-	winrt::check_hresult(m_graphics_cmdlist->Reset(m_cmd_allocator.get(), m_current_pso.get()));
+	winrt::check_hresult(m_graphics_cmdlist->Reset(m_cmd_allocator.get(), nullptr));
 
 	m_screen_viewport.TopLeftX = 0;
 	m_screen_viewport.TopLeftY = 0;
