@@ -150,8 +150,6 @@ void GraphicsResources::create_swapchain_xamlpanel(winrt::Windows::UI::Xaml::Con
 		winrt::check_hresult(
 			xaml_swapchain_panel.as<ISwapChainPanelNative>()->SetSwapChain(m_swapchain.get())
 		);
-
-		//m_rendering_surface = xaml_swapchain_panel;
 	}
 }
 void GraphicsResources::create_render_targets()
@@ -354,37 +352,104 @@ void GraphicsResources::create_texture_pso(winrt::com_ptr<ID3D10Blob> vertex_sha
 	winrt::check_hresult(m_device->CreateGraphicsPipelineState(&texture_pso_desc, winrt::guid_of<ID3D12PipelineState>(), m_texture_pso.put_void()));
 }
 
-void GraphicsResources::create_flat_color_pso(winrt::com_ptr<ID3D10Blob> vertex_shader, winrt::com_ptr<ID3D10Blob> pixel_shader)
+void GraphicsResources::create_points_pso(winrt::com_ptr<ID3D10Blob> vertex_shader, winrt::com_ptr<ID3D10Blob> pixel_shader)
 {
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC flat_color_pso_desc = {};
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC points_pso_desc = {};
 
-	flat_color_pso_desc.InputLayout = { m_basic_input_layout.data(), static_cast<UINT>(m_basic_input_layout.size()) };
-	flat_color_pso_desc.pRootSignature = m_rootsig.get();
-	flat_color_pso_desc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
-	flat_color_pso_desc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-	flat_color_pso_desc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
-	flat_color_pso_desc.SampleMask = UINT_MAX;
-	flat_color_pso_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
-	flat_color_pso_desc.NumRenderTargets = 1;
-	flat_color_pso_desc.RTVFormats[0] = m_backbuffer_format;
-	flat_color_pso_desc.SampleDesc.Count = 1;
-	flat_color_pso_desc.SampleDesc.Quality = 0;
-	flat_color_pso_desc.DSVFormat = m_depthstencil_format;
+	points_pso_desc.InputLayout = { m_basic_input_layout.data(), static_cast<UINT>(m_basic_input_layout.size()) };
+	points_pso_desc.pRootSignature = m_rootsig.get();
+	points_pso_desc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+	points_pso_desc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	points_pso_desc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+	points_pso_desc.SampleMask = UINT_MAX;
+	points_pso_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
+	points_pso_desc.NumRenderTargets = 1;
+	points_pso_desc.RTVFormats[0] = m_backbuffer_format;
+	points_pso_desc.SampleDesc.Count = 1;
+	points_pso_desc.SampleDesc.Quality = 0;
+	points_pso_desc.DSVFormat = m_depthstencil_format;
 
 	// shaders
-	flat_color_pso_desc.VS =
+	points_pso_desc.VS =
 	{
 		reinterpret_cast<unsigned char*>(vertex_shader->GetBufferPointer()),
 		vertex_shader->GetBufferSize()
 	};
 
-	flat_color_pso_desc.PS =
+	points_pso_desc.PS =
 	{
 		reinterpret_cast<unsigned char*>(pixel_shader->GetBufferPointer()),
 		pixel_shader->GetBufferSize()
 	};
 
-	winrt::check_hresult(m_device->CreateGraphicsPipelineState(&flat_color_pso_desc, winrt::guid_of<ID3D12PipelineState>(), m_flat_color_pso.put_void()));
+	m_current_topology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
+	winrt::check_hresult(m_device->CreateGraphicsPipelineState(&points_pso_desc, winrt::guid_of<ID3D12PipelineState>(), m_points_pso.put_void()));
+}
+
+void GraphicsResources::create_triangles_pso(winrt::com_ptr<ID3D10Blob> vertex_shader, winrt::com_ptr<ID3D10Blob> pixel_shader)
+{
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC triangles_pso_desc = {};
+
+	triangles_pso_desc.InputLayout = { m_basic_input_layout.data(), static_cast<UINT>(m_basic_input_layout.size()) };
+	triangles_pso_desc.pRootSignature = m_rootsig.get();
+	triangles_pso_desc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+	triangles_pso_desc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	triangles_pso_desc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+	triangles_pso_desc.SampleMask = UINT_MAX;
+	triangles_pso_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+	triangles_pso_desc.NumRenderTargets = 1;
+	triangles_pso_desc.RTVFormats[0] = m_backbuffer_format;
+	triangles_pso_desc.SampleDesc.Count = 1;
+	triangles_pso_desc.SampleDesc.Quality = 0;
+	triangles_pso_desc.DSVFormat = m_depthstencil_format;
+
+	// shaders
+	triangles_pso_desc.VS =
+	{
+		reinterpret_cast<unsigned char*>(vertex_shader->GetBufferPointer()),
+		vertex_shader->GetBufferSize()
+	};
+
+	triangles_pso_desc.PS =
+	{
+		reinterpret_cast<unsigned char*>(pixel_shader->GetBufferPointer()),
+		pixel_shader->GetBufferSize()
+	};
+
+	m_current_topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
+	winrt::check_hresult(m_device->CreateGraphicsPipelineState(&triangles_pso_desc, winrt::guid_of<ID3D12PipelineState>(), m_triangles_pso.put_void()));
+}
+
+void GraphicsResources::set_triangles_wireframe()
+{
+	if (m_triangles_pso.get() != nullptr)
+	{
+		m_graphics_cmdlist->SetPipelineState(m_triangles_pso.get());
+		m_current_pso.attach(m_triangles_pso.get());
+	}
+	else {
+		create_triangles_pso(m_shaders["woodCrateVS"], m_shaders["woodCratePS"]);
+		winrt::check_hresult(m_graphics_cmdlist->Reset(m_cmd_allocator.get(), nullptr));
+		m_graphics_cmdlist->SetPipelineState(m_triangles_pso.get());
+		execute_cmd_list();
+		m_current_pso.attach(m_triangles_pso.get());
+	}
+}
+
+void GraphicsResources::set_points_wireframe()
+{
+	if (m_points_pso.get() != nullptr)
+	{
+		m_graphics_cmdlist->SetPipelineState(m_points_pso.get());
+		m_current_pso.attach(m_points_pso.get());
+	}
+	else {
+		create_points_pso(m_shaders["woodCrateVS"], m_shaders["woodCratePS"]);
+		winrt::check_hresult(m_graphics_cmdlist->Reset(m_cmd_allocator.get(), nullptr));
+		m_graphics_cmdlist->SetPipelineState(m_points_pso.get());
+		execute_cmd_list();
+		m_current_pso.attach(m_points_pso.get());
+	}
 }
 
 void GraphicsResources::create_opaque_pso(winrt::com_ptr<ID3D10Blob> vertex_shader, winrt::com_ptr<ID3D10Blob> pixel_shader)
@@ -550,7 +615,7 @@ void GraphicsResources::create_texture_geometry(std::vector<Vertex_tex>& vertice
 {
 	using namespace DirectX;
 
-	std::vector<std::uint16_t> indices = {0,1,2,3,4,5};
+	std::vector<std::uint16_t> indices = { 0,1,2,3,4,5 };
 
 	const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex_tex);
 	const UINT ibByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
@@ -597,7 +662,7 @@ void GraphicsResources::init_dynamic_buffer()
 {
 	using namespace DirectX;
 
-	int tmp_element_count = 1;
+	int tmp_element_count = 0;
 
 	const UINT vbByteSize = tmp_element_count * sizeof(Vertex_tex);
 	const UINT ibByteSize = tmp_element_count * sizeof(std::uint16_t);
@@ -633,15 +698,16 @@ void GraphicsResources::update_vbv_content(std::vector<Vertex_tex>& vertices)
 {
 	for (size_t i = 0; i < vertices.size(); ++i)
 	{
-		m_box_geo->VertexBufferByteSize = i * sizeof(Vertex_tex);
-		m_box_geo->IndexBufferByteSize = i * sizeof(std::uint16_t);
-		m_box_geo->DrawArgs["box"].IndexCount = i;
+		auto current_size = vertices.size();
+		m_box_geo->VertexBufferByteSize = current_size * sizeof(Vertex_tex);
+		m_box_geo->IndexBufferByteSize = current_size * sizeof(std::uint16_t);
+		m_box_geo->DrawArgs["box"].IndexCount = current_size;
 		m_dynamic_vertex_buffer->copy_data(i, vertices[i]);
 		m_dynamic_index_buffer->copy_data(i, i);
 	}
 }
 
-void GraphicsResources::update() 
+void GraphicsResources::update()
 {
 	using namespace DirectX;
 
@@ -685,8 +751,9 @@ void GraphicsResources::update()
 void GraphicsResources::render()
 {
 	flush_cmd_queue();
+	// why am I even doing this?
 	winrt::check_hresult(m_cmd_allocator->Reset());
-	winrt::check_hresult(m_graphics_cmdlist->Reset(m_cmd_allocator.get(), m_flat_color_pso.get()));
+	winrt::check_hresult(m_graphics_cmdlist->Reset(m_cmd_allocator.get(), m_current_pso.get()));
 
 	m_screen_viewport.TopLeftX = 0;
 	m_screen_viewport.TopLeftY = 0;
@@ -715,7 +782,7 @@ void GraphicsResources::render()
 
 	m_graphics_cmdlist->IASetVertexBuffers(0, 1, &m_box_geo->VertexBufferView());
 	m_graphics_cmdlist->IASetIndexBuffer(&m_box_geo->IndexBufferView());
-	m_graphics_cmdlist->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_POINTLIST);
+	m_graphics_cmdlist->IASetPrimitiveTopology(m_current_topology);
 
 	m_graphics_cmdlist->DrawIndexedInstanced(m_box_geo->DrawArgs["box"].IndexCount, 1, 0, 0, 0);
 

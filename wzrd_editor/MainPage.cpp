@@ -51,6 +51,7 @@ namespace winrt::wzrd_editor::implementation
 		m_graphics_resources.create_render_targets();
 		m_graphics_resources.create_constant_buffers();
 		m_graphics_resources.create_rootsignature();
+		m_graphics_resources.init_dynamic_buffer();
 
 		m_render_loop_work_item = WorkItemHandler([this](Windows::Foundation::IAsyncAction action)
 		{
@@ -89,11 +90,6 @@ namespace winrt::wzrd_editor::implementation
 
 		set_vertices_list_visibility();
 
-		if (!buffers_initialized)
-		{
-			m_graphics_resources.init_dynamic_buffer();
-			buffers_initialized = true;
-		}
 		m_graphics_resources.update_vbv_content(m_vertex_generator.vertices());
 		co_return;
 	}
@@ -154,7 +150,7 @@ namespace winrt::wzrd_editor::implementation
 		}
 		auto fileBuffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
 		auto file_bytes = Utilities::read_shader_file(fileBuffer).get();
-		m_shaders["woodCratePS"] = Utilities::compile_shader("ps_5_0", file_bytes, "PS");
+		m_graphics_resources.m_shaders["woodCratePS"] = Utilities::compile_shader("ps_5_0", file_bytes, "PS");
 	}
 
 	Windows::Foundation::IAsyncAction MainPage::vertexShaderPicker_Click(IInspectable const&, RoutedEventArgs const&)
@@ -169,21 +165,39 @@ namespace winrt::wzrd_editor::implementation
 		}
 		auto fileBuffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
 		auto file_bytes = Utilities::read_shader_file(fileBuffer).get();
-		m_shaders["woodCrateVS"] = Utilities::compile_shader("vs_5_0", file_bytes, "VS");
+		m_graphics_resources.m_shaders["woodCrateVS"] = Utilities::compile_shader("vs_5_0", file_bytes, "VS");
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::buildPSO_Click(IInspectable const&, RoutedEventArgs const&)
+	Windows::Foundation::IAsyncAction MainPage::onclick_build_pointlist(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
-		m_graphics_resources.execute_cmd_list();
+		if (m_running) {
+			m_graphics_resources.set_points_wireframe();
+		}
+		else {
+			m_graphics_resources.create_basic_input_layout();
+			m_graphics_resources.set_points_wireframe();
 
-		m_graphics_resources.create_texture_input_layout();
-		m_graphics_resources.create_texture_pso(m_shaders["woodCrateVS"], m_shaders["woodCratePS"]);
+			m_graphics_resources.execute_cmd_list();
+			m_running = true;
+			ThreadPool::RunAsync(m_render_loop_work_item);
+		}
+		co_return;
+	}
 
-		m_graphics_resources.create_basic_input_layout();
-		m_graphics_resources.create_flat_color_pso(m_shaders["woodCrateVS"], m_shaders["woodCratePS"]);
+	Windows::Foundation::IAsyncAction MainPage::onclick_build_trianglelist(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
+	{
+		if (m_running)
+		{
+			m_graphics_resources.set_triangles_wireframe();
+		}
+		else {
+			m_graphics_resources.create_basic_input_layout();
+			m_graphics_resources.set_triangles_wireframe();
 
-		m_running = true;
-		ThreadPool::RunAsync(m_render_loop_work_item);
+			m_graphics_resources.execute_cmd_list();
+			m_running = true;
+			ThreadPool::RunAsync(m_render_loop_work_item);
+		}
 		co_return;
 	}
 

@@ -36,6 +36,7 @@
         <StackPanel Orientation="Vertical">
             <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right">
                 <AppBarButton x:Name="texturePicker" Click="texturePicker_Click" Icon="OpenFile" Label="Texture"/>
+
                 <AppBarButton x:Name="shaderPicker" Icon="OpenFile" Label="Shaders" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <AppBarButton.Flyout>
                         <MenuFlyout>
@@ -44,7 +45,16 @@
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-                <AppBarButton x:Name="build" Click="buildPSO_Click" Icon="Calculator" Label="build"/>
+
+                <AppBarButton x:Name="render" Icon="Calculator" Label="render" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <AppBarButton.Flyout>
+                        <MenuFlyout>
+                            <MenuFlyoutItem x:Name="render_triangles" Click="onclick_build_trianglelist" Text="Triangles"></MenuFlyoutItem>
+                            <MenuFlyoutItem x:Name="render_points" Click="onclick_build_pointlist" Text="Points" ></MenuFlyoutItem>
+                        </MenuFlyout>
+                    </AppBarButton.Flyout>
+                </AppBarButton>
+
                 <CommandBar.SecondaryCommands>
                     <AppBarButton Icon="Edit" Label="Settings"/>
                 </CommandBar.SecondaryCommands>
@@ -56,12 +66,9 @@
                      IsAlphaSliderVisible="False" 
                      ColorSpectrumComponents="HueSaturation" 
                      ColorSpectrumShape="Ring"/>
-            
         </StackPanel>
         
         <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Top" Height="500" Width="320" Margin="0,162,0,0">
-            
-
             <RelativePanel>
                 <TextBlock x:Name="position_x_label" 
                            Text="X"
