@@ -14,7 +14,7 @@ concurrency::task<std::vector<unsigned char>> Utilities::read_shader_file(winrt:
 {
 	auto dataReader = winrt::Windows::Storage::Streams::DataReader::FromBuffer(fileBuffer);
 
-	return concurrency::create_task([fileBuffer, dataReader] () -> std::vector<unsigned char>
+	return concurrency::create_task([fileBuffer, dataReader]() -> std::vector<unsigned char>
 	{
 		std::vector<unsigned char> file_bytes;
 		int fileSize = fileBuffer.Length();
@@ -97,7 +97,7 @@ winrt::com_ptr<ID3D12Resource> Utilities::create_default_buffer(
 	subresource_data.RowPitch = byteSize;
 	subresource_data.SlicePitch = subresource_data.RowPitch;
 
-	cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(default_buffer.get(), 
+	cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(default_buffer.get(),
 		D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST));
 
 	UpdateSubresources<1>(cmdList, default_buffer.get(), uploadBuffer.get(), 0, 0, 1, &subresource_data);
@@ -167,5 +167,24 @@ void Utilities::print_coordinates(float x, float y)
 {
 	std::wstringstream wstringstream;
 	wstringstream << L"\n" << L"(" << x << L", " << y << L")" << L"\n" << std::endl;
-	OutputDebugStringW(wstringstream.str().c_str());	
+	OutputDebugStringW(wstringstream.str().c_str());
+}
+
+winrt::Windows::Foundation::IAsyncAction Utilities::pick_file_buffer(winrt::hstring file_extension, pick_modes pick_mode)
+{
+	winrt::Windows::Storage::Pickers::FileOpenPicker filePicker;
+	filePicker.FileTypeFilter().Append(file_extension);
+	auto file = co_await filePicker.PickSingleFileAsync();
+	co_return;
+	//return winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
+	//switch (pick_mode)
+	//{
+	//case pick_modes::single_file_async:
+	//	auto file = co_await filePicker.PickSingleFileAsync();
+	//	//if (file == nullptr)
+	//	//{
+	//	//	return;
+	//	//}
+	//	return winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
+	//}
 }

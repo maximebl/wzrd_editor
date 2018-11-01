@@ -1,9 +1,11 @@
 import "Geometry.idl";
+import "Shader.idl";
 
 namespace wzrd_editor
 {
 	runtimeclass GeometryViewModel
 	{
 		Geometry Geometry{get; };
+		Windows.Foundation.Collections.IObservableVector<IInspectable> Shaders{ get; };
 	}
 }

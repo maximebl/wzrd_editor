@@ -4,8 +4,6 @@ namespace wzrd_editor
 {
 	runtimeclass Geometry : Windows.UI.Xaml.Data.INotifyPropertyChanged
 	{
-		String Title;
-		String OtherTitle;
 		wzrd_vec3 Position{ get; };
 
 		Windows.Foundation.Collections.IObservableVector<IInspectable> Positions{ get;};

@@ -5,7 +5,7 @@
 
 namespace winrt::wzrd_editor::implementation
 {
-	GeometryViewModel::GeometryViewModel() : m_geometry{ winrt::make<wzrd_editor::implementation::Geometry>(L"Atticus", L"SomeOther", winrt::make<wzrd_editor::implementation::wzrd_vec3>(0.0f, 0.0f, 0.0f)) }
+	GeometryViewModel::GeometryViewModel() : m_geometry{ winrt::make<wzrd_editor::implementation::Geometry>(winrt::make<wzrd_editor::implementation::wzrd_vec3>(0.0f, 0.0f, 0.0f)) }
 	{
 	}
 
@@ -13,4 +13,9 @@ namespace winrt::wzrd_editor::implementation
     {
 		return m_geometry;
     }
+
+	Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> GeometryViewModel::Shaders()
+	{
+		return m_shaders;
+	}
 }

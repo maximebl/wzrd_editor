@@ -15,7 +15,8 @@
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0" Text="Vertices" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
             </Grid>
-        </DataTemplate> 
+        </DataTemplate>
+
         <DataTemplate x:Key="vertices_list_template" x:DataType="local:wzrd_vec3">
             <ListViewItem HorizontalContentAlignment="Stretch" >
                 <Grid HorizontalAlignment="Stretch">
@@ -30,8 +31,20 @@
                 </Grid>
             </ListViewItem>
         </DataTemplate>
+
+        <DataTemplate x:Key="shaders_list_template" x:DataType="local:Shader">
+            <RelativePanel>
+                <Image x:Name="image" Height="36" Width="36" Margin="0,8,0,8"></Image>
+                <FontIcon Glyph="&#xE768;"> </FontIcon>
+                <StackPanel Orientation="Vertical" VerticalAlignment="Top" Margin="8,8,0,0" RelativePanel.RightOf="image">
+                    <TextBlock Text="{x:Bind Name}"></TextBlock>
+                    <TextBlock Text="bottom text for vertex shader "></TextBlock>
+                </StackPanel>
+            </RelativePanel>
+        </DataTemplate>
+
     </Page.Resources>
-     
+
     <StackPanel x:Name="outer_stackpanel" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Height="821" Width="1438" Margin="0,0,0,0">
         <StackPanel Orientation="Vertical">
             <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right">
@@ -40,8 +53,31 @@
                 <AppBarButton x:Name="shaderPicker" Icon="OpenFile" Label="Shaders" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <AppBarButton.Flyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem x:Name="pixelShaderPicker" Click="pixelShaderPicker_Click" Text="Pixel"></MenuFlyoutItem>
-                            <MenuFlyoutItem x:Name="vertexShaderPicker" Click="vertexShaderPicker_Click" Text="Vertex" ></MenuFlyoutItem>
+                            <MenuFlyoutItem x:Name="pixelShaderPicker" Click="pixelShaderPicker_Click">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xE74C;"/>
+                                </MenuFlyoutItem.Icon>
+                                <MenuFlyoutItem.Text>Pixel</MenuFlyoutItem.Text>
+                                <MenuFlyoutItem.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="P" Modifiers="Shift"/>
+                                </MenuFlyoutItem.KeyboardAccelerators>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem x:Name="vertexShaderPicker" Click="vertexShaderPicker_Click">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xE768;"/>
+                                </MenuFlyoutItem.Icon>
+                                <MenuFlyoutItem.Text>Vertex</MenuFlyoutItem.Text>
+                                <MenuFlyoutItem.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="V" Modifiers="Shift"/>
+                                </MenuFlyoutItem.KeyboardAccelerators>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutSeparator/>
+                            <MenuFlyoutItem x:Name="menuflyout_clear_shaders" Click="menuflyout_clear_shaders_click" IsEnabled="True">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xE75C;"/>
+                                </MenuFlyoutItem.Icon>
+                                <MenuFlyoutItem.Text>Clear shaders</MenuFlyoutItem.Text>
+                            </MenuFlyoutItem>
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
@@ -49,8 +85,11 @@
                 <AppBarButton x:Name="render" Icon="Calculator" Label="render" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <AppBarButton.Flyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem x:Name="render_triangles" Click="onclick_build_trianglelist" Text="Triangles"></MenuFlyoutItem>
-                            <MenuFlyoutItem x:Name="render_points" Click="onclick_build_pointlist" Text="Points" ></MenuFlyoutItem>
+                            <MenuFlyoutItem x:Name="render_triangles" Click="onclick_build_trianglelist" Text="Triangles list"></MenuFlyoutItem>
+                            <MenuFlyoutItem x:Name="render_points" Click="onclick_build_pointlist" Text="Points list" ></MenuFlyoutItem>
+                            <MenuFlyoutItem x:Name="render_lines" Click="onclick_build_lineslist" Text="Lines list" ></MenuFlyoutItem>
+                            <MenuFlyoutItem x:Name="render_linestrips" Click="onclick_build_linestrips" Text="Line strips" ></MenuFlyoutItem>
+                            <MenuFlyoutItem x:Name="render_trianglestrips" Click="onclick_build_trianglestrips" Text="Triangle strips" ></MenuFlyoutItem>
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
@@ -59,6 +98,14 @@
                     <AppBarButton Icon="Edit" Label="Settings"/>
                 </CommandBar.SecondaryCommands>
             </CommandBar>
+
+            <ListView x:Name="shaders_list" HorizontalAlignment="Stretch" Width="268" Height="153" VerticalAlignment="Center"
+                      Visibility="Collapsed"
+                      ItemsSource="{x:Bind GeometryViewModel.Shaders}" 
+                      ItemTemplate="{StaticResource shaders_list_template}"
+                      >
+            </ListView>
+
             <ColorPicker x:Name="colorPicker"
                      HorizontalAlignment="Center" 
                      VerticalAlignment="Top" 
@@ -66,8 +113,10 @@
                      IsAlphaSliderVisible="False" 
                      ColorSpectrumComponents="HueSaturation" 
                      ColorSpectrumShape="Ring"/>
+
+            
         </StackPanel>
-        
+
         <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Top" Height="500" Width="320" Margin="0,162,0,0">
             <RelativePanel>
                 <TextBlock x:Name="position_x_label" 
@@ -82,8 +131,12 @@
                     RelativePanel.AlignRightWithPanel="True"/>
 
                 <Slider x:Name="slider_x" 
-                        Minimum="-20" 
-                        Maximum="20" 
+                        Minimum="-2" 
+                        Maximum="2" 
+                        TickPlacement="Inline"
+                        TickFrequency="0.1"
+                        SnapsTo="Ticks"
+                        IsTabStop="False"
                         Value="{x:Bind GeometryViewModel.Geometry.Position.x, Mode=TwoWay}"
                         RelativePanel.Below="position_x_value"
                         RelativePanel.AlignLeftWith="position_x_label"
@@ -104,13 +157,17 @@
                          RelativePanel.AlignRightWithPanel="True" />
 
                 <Slider x:Name="slider_y" 
-                        Minimum="-20" 
-                        Maximum="20" 
+                        Minimum="-2" 
+                        Maximum="2" 
+                        TickPlacement="Inline"
+                        TickFrequency="0.1"
+                        IsTabStop="False"
+                        SnapsTo="Ticks"
                         RelativePanel.Below="position_y_value"
                         RelativePanel.AlignLeftWith="position_y_label"
                         RelativePanel.AlignRightWith="position_y_value"
                         RelativePanel.AlignRightWithPanel="True"
-                        Value="0"/>
+                        Value="{x:Bind GeometryViewModel.Geometry.Position.y, Mode=TwoWay}"/>
             </RelativePanel>
             <RelativePanel>
 
@@ -126,9 +183,13 @@
                          RelativePanel.AlignRightWithPanel="True"/>
 
                 <Slider x:Name="slider_z" 
-                        Minimum="-20" 
-                        Maximum="20" 
-                        Value="0"
+                        Minimum="-2" 
+                        Maximum="2" 
+                        SnapsTo="Ticks"
+                        Value="{x:Bind GeometryViewModel.Geometry.Position.z, Mode=TwoWay}"
+                        TickPlacement="Inline"
+                        TickFrequency="0.1"
+                        IsTabStop="False"
                         RelativePanel.Below="position_z_value"
                         RelativePanel.AlignLeftWith="position_z_label"
                         RelativePanel.AlignRightWith="position_z_value"
@@ -150,6 +211,7 @@
                       HeaderTemplate="{StaticResource vertices_list_header}" 
                       ItemTemplate="{StaticResource vertices_list_template}">
             </ListView>
+
         </StackPanel>
 
         <SwapChainPanel x:Name="swapChainPanel" HorizontalAlignment="Left" Width="700" Margin="100,0,0,0" Height="700" VerticalAlignment="Center" />

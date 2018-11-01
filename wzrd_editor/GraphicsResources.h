@@ -42,12 +42,9 @@ private:
 	winrt::com_ptr<ID3D12RootSignature> m_rootsig = nullptr;
 
 	// pipeline states
-	winrt::com_ptr<ID3D12PipelineState> m_current_pso = nullptr;
-	winrt::com_ptr<ID3D12PipelineState> m_opaque_pso = nullptr;
-	winrt::com_ptr<ID3D12PipelineState> m_flat_color_pso = nullptr;
 	winrt::com_ptr<ID3D12PipelineState> m_points_pso = nullptr;
 	winrt::com_ptr<ID3D12PipelineState> m_triangles_pso = nullptr;
-	winrt::com_ptr<ID3D12PipelineState> m_texture_pso = nullptr;
+	winrt::com_ptr<ID3D12PipelineState> m_lines_pso = nullptr;
 
 	std::vector<D3D12_INPUT_ELEMENT_DESC> m_basic_input_layout;
 	std::vector<D3D12_INPUT_ELEMENT_DESC> m_texture_input_layout;
@@ -55,8 +52,6 @@ private:
 	std::unique_ptr<upload_buffer<object_constants>> m_object_cb;
 	std::unique_ptr<upload_buffer<Vertex_tex>> m_dynamic_vertex_buffer;
 	std::unique_ptr<upload_buffer<std::uint16_t>> m_dynamic_index_buffer;
-
-	D3D12_PRIMITIVE_TOPOLOGY m_current_topology = D3D12_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_UNDEFINED;
 
 	// synchronization
 	int m_vertex_count = 0;
@@ -84,13 +79,10 @@ public:
 	void create_rootsignature();
 	std::unique_ptr<Texture> create_texture(std::vector<unsigned char> bytes, int file_size, std::string texture_name);
 	void create_shader_resources(ID3D12Resource* resource);
-	void create_opaque_pso(winrt::com_ptr<ID3D10Blob> vertex_shader, winrt::com_ptr<ID3D10Blob> pixel_shader);
-	void create_texture_pso(winrt::com_ptr<ID3D10Blob> vertex_shader, winrt::com_ptr<ID3D10Blob> pixel_shader);
 	void create_points_pso(winrt::com_ptr<ID3D10Blob> vertex_shader, winrt::com_ptr<ID3D10Blob> pixel_shader);
 	void create_triangles_pso(winrt::com_ptr<ID3D10Blob> vertex_shader, winrt::com_ptr<ID3D10Blob> pixel_shader);
+	void create_lines_pso(winrt::com_ptr<ID3D10Blob> vertex_shader, winrt::com_ptr<ID3D10Blob> pixel_shader);
 
-	void set_triangles_wireframe();
-	void set_points_wireframe();
 	void create_basic_input_layout();
 	void create_texture_input_layout();
 	void init_dynamic_buffer();
@@ -104,9 +96,20 @@ public:
 	void create_texture_geometry(std::vector<Vertex_tex>& vertices);
 	void create_vertex_colored_box_geometry();
 	void update_vbv_content(std::vector<Vertex_tex>& vertices);
+	void init_psos();
 
 	void update();
 	void render();
+
+	enum class rendering_modes {
+		points = 0,
+		triangles = 1,
+		lines = 2,
+		trianglestrips = 3,
+		linestrips = 4
+	};
+
+	rendering_modes m_current_rendering_mode{ rendering_modes::points };
 
 	concurrency::task<Texture*> create_texture_from_file_async(std::string texture_name, winrt::Windows::Storage::StorageFile texture_file);
 };

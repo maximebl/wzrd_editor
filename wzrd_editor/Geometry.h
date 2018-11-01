@@ -7,13 +7,7 @@ namespace winrt::wzrd_editor::implementation
 	struct Geometry : GeometryT<Geometry>
 	{
 		Geometry() = delete;
-		Geometry(winrt::hstring const& title, winrt::hstring const& other_title, wzrd_editor::wzrd_vec3 const& position);
-
-		hstring Title();
-		void Title(hstring const& value);
-
-		hstring OtherTitle();
-		void OtherTitle(hstring const& value);
+		Geometry(wzrd_editor::wzrd_vec3 const& position);
 
 		wzrd_editor::wzrd_vec3 Position();
 
@@ -23,8 +17,6 @@ namespace winrt::wzrd_editor::implementation
 		void PropertyChanged(winrt::event_token const& token) noexcept;
 
 	private:
-		winrt::hstring m_title;
-		winrt::hstring m_other_title;
 		wzrd_editor::wzrd_vec3 m_position;
 		Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> m_positions;
 		winrt::event<Windows::UI::Xaml::Data::PropertyChangedEventHandler> m_propertyChanged;

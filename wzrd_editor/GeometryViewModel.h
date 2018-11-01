@@ -9,8 +9,10 @@ namespace winrt::wzrd_editor::implementation
         GeometryViewModel();
 
         wzrd_editor::Geometry Geometry();
+		Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> Shaders();
 
 	private:
 		wzrd_editor::Geometry m_geometry;
+		Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> m_shaders = winrt::single_threaded_observable_vector<Windows::Foundation::IInspectable>();
     };
 }

@@ -34,9 +34,13 @@
 #include "winrt/Windows.Storage.Streams.h"
 #include <winrt/Windows.UI.ViewManagement.h>
 #include <winrt/Windows.ApplicationModel.DataTransfer.h>
-
 #include <d3dcompiler.h>
+
 #include <ppltasks.h>
+// allows us to use concurrency::task as a coroutine awaitable type
+#include <experimental/resumable>
+#include <pplawait.h>
+
 #include "GeometryGenerator.h"
 #include <cmath>
 #include "GameTimer.h"

@@ -11,33 +11,49 @@
 #include "GraphicsResources.h"
 #include "GeometryViewModel.h"
 #include "Geometry.h"
+#include "Shader.h"
 #include "wzrd_vec3.h"
 #include "VertexBufferGenerator.h"
 
 namespace winrt::wzrd_editor::implementation
 {
-    struct MainPage : MainPageT<MainPage>
-    {
-        MainPage();
+	struct MainPage : MainPageT<MainPage>
+	{
+		MainPage();
 
 	private:
 		GraphicsResources m_graphics_resources;
 		VertexBufferGenerator m_vertex_generator;
+
 		wzrd_editor::GeometryViewModel m_geometryViewModel = winrt::make<wzrd_editor::implementation::GeometryViewModel>();
+		wzrd_editor::Shader m_shaderViewModel = winrt::make<wzrd_editor::implementation::Shader>(hstring(L"SuperShader"));
+
 		bool buffers_initialized = false;
 		void set_vertices_list_visibility();
+		void set_shaders_list_visibility();
+		void start_render_loop();
 
 	public:
-		wzrd_editor::GeometryViewModel GeometryViewModel();
 
-        Windows::Foundation::IAsyncAction texturePicker_Click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
+		wzrd_editor::GeometryViewModel GeometryViewModel();
+		wzrd_editor::Shader Shader();
+
+		Windows::Foundation::IAsyncAction onclick_texture_picker(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
+		Windows::Foundation::IAsyncAction onclick_pixelshader_picker(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
+		Windows::Foundation::IAsyncAction onclick_vertexshader_picker(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
+
+		Windows::Foundation::IAsyncAction texturePicker_Click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 		Windows::Foundation::IAsyncAction pixelShaderPicker_Click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 		Windows::Foundation::IAsyncAction vertexShaderPicker_Click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 		Windows::Foundation::IAsyncAction onclick_create_vertex(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 		Windows::Foundation::IAsyncAction onclick_clear_vertex(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
+		Windows::Foundation::IAsyncAction menuflyout_clear_shaders_click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 
 		Windows::Foundation::IAsyncAction onclick_build_pointlist(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 		Windows::Foundation::IAsyncAction onclick_build_trianglelist(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
+		Windows::Foundation::IAsyncAction onclick_build_lineslist(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
+		Windows::Foundation::IAsyncAction onclick_build_linestrips(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
+		Windows::Foundation::IAsyncAction onclick_build_trianglestrips(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 
 		GameTimer m_timer;
 		Windows::UI::Core::CoreWindow m_window = nullptr;
@@ -61,12 +77,12 @@ namespace winrt::wzrd_editor::implementation
 		bool m_running = false;
 		int output_width = 700;
 		int output_height = 700;
-    };
+	};
 }
 
 namespace winrt::wzrd_editor::factory_implementation
 {
-    struct MainPage : MainPageT<MainPage, implementation::MainPage>
-    {
-    };
+	struct MainPage : MainPageT<MainPage, implementation::MainPage>
+	{
+	};
 }

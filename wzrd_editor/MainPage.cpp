@@ -77,6 +77,11 @@ namespace winrt::wzrd_editor::implementation
 		return m_geometryViewModel;
 	}
 
+	wzrd_editor::Shader MainPage::Shader()
+	{
+		return m_shaderViewModel;
+	}
+
 	Windows::Foundation::IAsyncAction MainPage::onclick_create_vertex(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
 		auto pos_x = m_geometryViewModel.Geometry().Position().x();
@@ -106,41 +111,66 @@ namespace winrt::wzrd_editor::implementation
 		}
 	}
 
+	void MainPage::set_shaders_list_visibility()
+	{
+		if (m_graphics_resources.m_shaders.size() != 0)
+		{
+			shaders_list().Visibility(winrt::Windows::UI::Xaml::Visibility::Visible);
+		}
+		else
+		{
+			shaders_list().Visibility(winrt::Windows::UI::Xaml::Visibility::Collapsed);
+		}
+	}
+
 	Windows::Foundation::IAsyncAction MainPage::onclick_clear_vertex(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
 		m_vertex_generator.vertices().clear();
 		m_geometryViewModel.Geometry().Positions().Clear();
+		m_graphics_resources.update_vbv_content(m_vertex_generator.vertices());
 		set_vertices_list_visibility();
 		co_return;
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::texturePicker_Click(IInspectable const&, RoutedEventArgs const&)
+	Windows::Foundation::IAsyncAction MainPage::menuflyout_clear_shaders_click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
-		// Pick and read the file data
-		winrt::Windows::Storage::Pickers::FileOpenPicker filePicker;
-		filePicker.FileTypeFilter().Append(L".dds");
-		auto file = co_await filePicker.PickSingleFileAsync();
-		if (file == nullptr)
-		{
-			return;
-		}
-
-		auto fileBuffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
-		auto dataReader = winrt::Windows::Storage::Streams::DataReader::FromBuffer(fileBuffer);
-
-		std::vector<unsigned char> file_bytes;
-		int fileSize = fileBuffer.Length();
-		file_bytes.assign(fileSize, 0);
-		dataReader.ReadBytes(file_bytes);
-
-		auto woodcrate_texture = m_graphics_resources.create_texture(file_bytes, fileSize, "woodCrateTexture");
-		m_textures["woodCrateTexture"] = std::move(woodcrate_texture);
-		m_graphics_resources.create_shader_resources(m_textures["woodCrateTexture"]->Resource.get());
+		m_graphics_resources.m_shaders.clear();
+		set_shaders_list_visibility();
+		co_return;
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::pixelShaderPicker_Click(IInspectable const&, RoutedEventArgs const&)
+	Windows::Foundation::IAsyncAction MainPage::onclick_texture_picker(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
+	{
+		Utilities::pick_file_buffer(hstring(L"aaa"), pick_modes::single_file_async);
+		co_return;
+		// Pick and read the file data
+		//auto file_buffer = co_await Utilities::pick_file_buffer(L".dds", pick_modes::single_file_async);
+
+		//winrt::Windows::Storage::Pickers::FileOpenPicker filePicker;
+		//filePicker.FileTypeFilter().Append(L".dds");
+		//auto file = co_await filePicker.PickSingleFileAsync();
+		//if (file == nullptr)
+		//{
+		//	return;
+		//}
+		//auto fileBuffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
+
+		//// abstract into Utilities::read_texture_file(fileBuffer) same as read_shader_file? rename it?
+		//auto dataReader = winrt::Windows::Storage::Streams::DataReader::FromBuffer(fileBuffer);
+		//std::vector<unsigned char> file_bytes;
+		//int fileSize = fileBuffer.Length();
+		//file_bytes.assign(fileSize, 0);
+		//dataReader.ReadBytes(file_bytes);
+
+		//auto woodcrate_texture = m_graphics_resources.create_texture(file_bytes, fileSize, "woodCrateTexture");
+		//m_textures["woodCrateTexture"] = std::move(woodcrate_texture);
+		//m_graphics_resources.create_shader_resources(m_textures["woodCrateTexture"]->Resource.get());
+	}
+
+	Windows::Foundation::IAsyncAction MainPage::onclick_pixelshader_picker(IInspectable const&, RoutedEventArgs const&)
 	{
 		// Pick and read the shader data
+	/*
 		winrt::Windows::Storage::Pickers::FileOpenPicker filePicker;
 		filePicker.FileTypeFilter().Append(L".hlsl");
 		auto file = co_await filePicker.PickSingleFileAsync();
@@ -150,7 +180,67 @@ namespace winrt::wzrd_editor::implementation
 		}
 		auto fileBuffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
 		auto file_bytes = Utilities::read_shader_file(fileBuffer).get();
+*/
+
+// shader struct to contain the info, put it in shader.idl
+/*auto current_shader_model = winrt::make<wzrd_editor::implementation::Shader>(shader_name, shader_type);
+
+auto shader_infos = pick_shader_async();
+m_graphics_resources.m_shaders[shader_name] = Utilities::compile_shader("ps_5_0", shader_bytes, "PS");
+
+m_geometryViewModel.Shaders().Append(current_shader_model);
+set_shaders_list_visibility();*/
+		co_return;
+	}
+
+	Windows::Foundation::IAsyncAction MainPage::onclick_vertexshader_picker(IInspectable const&, RoutedEventArgs const&)
+	{
+		co_return;
+	}
+
+	Windows::Foundation::IAsyncAction MainPage::texturePicker_Click(IInspectable const&, RoutedEventArgs const&)
+	{
+
+		winrt::Windows::Storage::Pickers::FileOpenPicker filePicker;
+		filePicker.FileTypeFilter().Append(L".dds");
+		auto file = co_await filePicker.PickSingleFileAsync();
+		if (file == nullptr)
+		{
+			return;
+		}
+		auto fileBuffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
+
+		auto dataReader = winrt::Windows::Storage::Streams::DataReader::FromBuffer(fileBuffer);
+		std::vector<unsigned char> file_bytes;
+		int fileSize = fileBuffer.Length();
+		file_bytes.assign(fileSize, 0);
+		dataReader.ReadBytes(file_bytes);
+
+		auto woodcrate_texture = m_graphics_resources.create_texture(file_bytes, fileSize, "woodCrateTexture");
+		m_textures["woodCrateTexture"] = std::move(woodcrate_texture);
+		m_graphics_resources.create_shader_resources(m_textures["woodCrateTexture"]->Resource.get());
+		co_return;
+	}
+
+	Windows::Foundation::IAsyncAction MainPage::pixelShaderPicker_Click(IInspectable const&, RoutedEventArgs const&)
+	{
+		winrt::Windows::Storage::Pickers::FileOpenPicker filePicker;
+		filePicker.FileTypeFilter().Append(L".hlsl");
+		auto file = co_await filePicker.PickSingleFileAsync();
+		if (file == nullptr)
+		{
+			return;
+		}
+		auto fileBuffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
+		auto file_bytes = Utilities::read_shader_file(fileBuffer).get();
+
 		m_graphics_resources.m_shaders["woodCratePS"] = Utilities::compile_shader("ps_5_0", file_bytes, "PS");
+
+		auto shaders_collection = m_geometryViewModel.Shaders();
+		shaders_collection.Append(m_shaderViewModel);
+
+		set_shaders_list_visibility();
+		co_return;
 	}
 
 	Windows::Foundation::IAsyncAction MainPage::vertexShaderPicker_Click(IInspectable const&, RoutedEventArgs const&)
@@ -165,40 +255,60 @@ namespace winrt::wzrd_editor::implementation
 		}
 		auto fileBuffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
 		auto file_bytes = Utilities::read_shader_file(fileBuffer).get();
+
 		m_graphics_resources.m_shaders["woodCrateVS"] = Utilities::compile_shader("vs_5_0", file_bytes, "VS");
+
+		auto shaders_collection = m_geometryViewModel.Shaders();
+		shaders_collection.Append(m_shaderViewModel);
+
+		set_shaders_list_visibility();
+		co_return;
 	}
 
 	Windows::Foundation::IAsyncAction MainPage::onclick_build_pointlist(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
-		if (m_running) {
-			m_graphics_resources.set_points_wireframe();
-		}
-		else {
-			m_graphics_resources.create_basic_input_layout();
-			m_graphics_resources.set_points_wireframe();
-
-			m_graphics_resources.execute_cmd_list();
-			m_running = true;
-			ThreadPool::RunAsync(m_render_loop_work_item);
-		}
+		start_render_loop();
+		m_graphics_resources.m_current_rendering_mode = GraphicsResources::rendering_modes::points;
 		co_return;
 	}
 
 	Windows::Foundation::IAsyncAction MainPage::onclick_build_trianglelist(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
-		if (m_running)
-		{
-			m_graphics_resources.set_triangles_wireframe();
-		}
-		else {
-			m_graphics_resources.create_basic_input_layout();
-			m_graphics_resources.set_triangles_wireframe();
+		start_render_loop();
+		m_graphics_resources.m_current_rendering_mode = GraphicsResources::rendering_modes::triangles;
+		co_return;
+	}
 
-			m_graphics_resources.execute_cmd_list();
+	Windows::Foundation::IAsyncAction MainPage::onclick_build_lineslist(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
+	{
+		start_render_loop();
+		m_graphics_resources.m_current_rendering_mode = GraphicsResources::rendering_modes::lines;
+		co_return;
+	}
+
+
+	Windows::Foundation::IAsyncAction MainPage::onclick_build_linestrips(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
+	{
+		start_render_loop();
+		m_graphics_resources.m_current_rendering_mode = GraphicsResources::rendering_modes::linestrips;
+		co_return;
+	}
+
+	Windows::Foundation::IAsyncAction MainPage::onclick_build_trianglestrips(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
+	{
+		start_render_loop();
+		m_graphics_resources.m_current_rendering_mode = GraphicsResources::rendering_modes::trianglestrips;
+		co_return;
+	}
+
+	void MainPage::start_render_loop()
+	{
+		if (!m_running)
+		{
+			m_graphics_resources.init_psos();
 			m_running = true;
 			ThreadPool::RunAsync(m_render_loop_work_item);
 		}
-		co_return;
 	}
 
 	Windows::Foundation::IAsyncAction MainPage::ui_thread_work()
@@ -210,7 +320,6 @@ namespace winrt::wzrd_editor::implementation
 		m_current_slider_x = slider_x().Value();
 		m_current_slider_y = slider_y().Value();
 		m_current_slider_z = slider_z().Value();
-
 		// Leaving this function switches back to the rendering thread
 	}
 }

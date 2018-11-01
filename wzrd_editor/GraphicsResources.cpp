@@ -319,39 +319,6 @@ void GraphicsResources::create_shader_resources(ID3D12Resource* resource /* turn
 	m_device->CreateShaderResourceView(resource, &srv_desc, m_srv_heap->GetCPUDescriptorHandleForHeapStart());
 }
 
-void GraphicsResources::create_texture_pso(winrt::com_ptr<ID3D10Blob> vertex_shader, winrt::com_ptr<ID3D10Blob> pixel_shader)
-{
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC texture_pso_desc = {};
-
-	texture_pso_desc.InputLayout = { m_texture_input_layout.data(), static_cast<UINT>(m_texture_input_layout.size()) };
-	texture_pso_desc.pRootSignature = m_rootsig.get();
-	texture_pso_desc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
-	texture_pso_desc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-	texture_pso_desc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
-	texture_pso_desc.SampleMask = UINT_MAX;
-	texture_pso_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	texture_pso_desc.NumRenderTargets = 1;
-	texture_pso_desc.RTVFormats[0] = m_backbuffer_format;
-	texture_pso_desc.SampleDesc.Count = 1;
-	texture_pso_desc.SampleDesc.Quality = 0;
-	texture_pso_desc.DSVFormat = m_depthstencil_format;
-
-	// shaders
-	texture_pso_desc.VS =
-	{
-		reinterpret_cast<unsigned char*>(vertex_shader->GetBufferPointer()),
-		vertex_shader->GetBufferSize()
-	};
-
-	texture_pso_desc.PS =
-	{
-		reinterpret_cast<unsigned char*>(pixel_shader->GetBufferPointer()),
-		pixel_shader->GetBufferSize()
-	};
-
-	winrt::check_hresult(m_device->CreateGraphicsPipelineState(&texture_pso_desc, winrt::guid_of<ID3D12PipelineState>(), m_texture_pso.put_void()));
-}
-
 void GraphicsResources::create_points_pso(winrt::com_ptr<ID3D10Blob> vertex_shader, winrt::com_ptr<ID3D10Blob> pixel_shader)
 {
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC points_pso_desc = {};
@@ -382,10 +349,41 @@ void GraphicsResources::create_points_pso(winrt::com_ptr<ID3D10Blob> vertex_shad
 		pixel_shader->GetBufferSize()
 	};
 
-	m_current_topology = D3D_PRIMITIVE_TOPOLOGY_POINTLIST;
 	winrt::check_hresult(m_device->CreateGraphicsPipelineState(&points_pso_desc, winrt::guid_of<ID3D12PipelineState>(), m_points_pso.put_void()));
 }
 
+void GraphicsResources::create_lines_pso(winrt::com_ptr<ID3D10Blob> vertex_shader, winrt::com_ptr<ID3D10Blob> pixel_shader)
+{
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC lines_pso_desc = {};
+
+	lines_pso_desc.InputLayout = { m_basic_input_layout.data(), static_cast<UINT>(m_basic_input_layout.size()) };
+	lines_pso_desc.pRootSignature = m_rootsig.get();
+	lines_pso_desc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+	lines_pso_desc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+	lines_pso_desc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+	lines_pso_desc.SampleMask = UINT_MAX;
+	lines_pso_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE;
+	lines_pso_desc.NumRenderTargets = 1;
+	lines_pso_desc.RTVFormats[0] = m_backbuffer_format;
+	lines_pso_desc.SampleDesc.Count = 1;
+	lines_pso_desc.SampleDesc.Quality = 0;
+	lines_pso_desc.DSVFormat = m_depthstencil_format;
+
+	// shaders
+	lines_pso_desc.VS =
+	{
+		reinterpret_cast<unsigned char*>(vertex_shader->GetBufferPointer()),
+		vertex_shader->GetBufferSize()
+	};
+
+	lines_pso_desc.PS =
+	{
+		reinterpret_cast<unsigned char*>(pixel_shader->GetBufferPointer()),
+		pixel_shader->GetBufferSize()
+	};
+
+	winrt::check_hresult(m_device->CreateGraphicsPipelineState(&lines_pso_desc, winrt::guid_of<ID3D12PipelineState>(), m_lines_pso.put_void()));
+}
 void GraphicsResources::create_triangles_pso(winrt::com_ptr<ID3D10Blob> vertex_shader, winrt::com_ptr<ID3D10Blob> pixel_shader)
 {
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC triangles_pso_desc = {};
@@ -416,74 +414,7 @@ void GraphicsResources::create_triangles_pso(winrt::com_ptr<ID3D10Blob> vertex_s
 		pixel_shader->GetBufferSize()
 	};
 
-	m_current_topology = D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
 	winrt::check_hresult(m_device->CreateGraphicsPipelineState(&triangles_pso_desc, winrt::guid_of<ID3D12PipelineState>(), m_triangles_pso.put_void()));
-}
-
-void GraphicsResources::set_triangles_wireframe()
-{
-	if (m_triangles_pso.get() != nullptr)
-	{
-		m_graphics_cmdlist->SetPipelineState(m_triangles_pso.get());
-		//m_current_pso.attach(m_triangles_pso.get());
-	}
-	else {
-		create_triangles_pso(m_shaders["woodCrateVS"], m_shaders["woodCratePS"]);
-		winrt::check_hresult(m_graphics_cmdlist->Reset(m_cmd_allocator.get(), nullptr));
-		m_graphics_cmdlist->SetPipelineState(m_triangles_pso.get());
-		winrt::check_hresult(m_graphics_cmdlist->Close());
-		//execute_cmd_list();
-		//m_current_pso.attach(m_triangles_pso.get());
-	}
-}
-
-void GraphicsResources::set_points_wireframe()
-{
-	if (m_points_pso.get() != nullptr)
-	{
-		m_graphics_cmdlist->SetPipelineState(m_points_pso.get());
-		//m_current_pso.attach(m_points_pso.get());
-	}
-	else {
-		create_points_pso(m_shaders["woodCrateVS"], m_shaders["woodCratePS"]);
-		//winrt::check_hresult(m_graphics_cmdlist->Reset(m_cmd_allocator.get(), nullptr));
-		m_graphics_cmdlist->SetPipelineState(m_points_pso.get());
-		//execute_cmd_list();
-		//m_current_pso.attach(m_points_pso.get());
-	}
-}
-
-void GraphicsResources::create_opaque_pso(winrt::com_ptr<ID3D10Blob> vertex_shader, winrt::com_ptr<ID3D10Blob> pixel_shader)
-{
-	D3D12_GRAPHICS_PIPELINE_STATE_DESC opaque_pso_desc = {};
-
-	opaque_pso_desc.InputLayout = { m_basic_input_layout.data(), static_cast<UINT>(m_basic_input_layout.size()) };
-	opaque_pso_desc.pRootSignature = m_rootsig.get();
-	opaque_pso_desc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
-	opaque_pso_desc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
-	opaque_pso_desc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
-	opaque_pso_desc.SampleMask = UINT_MAX;
-	opaque_pso_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	opaque_pso_desc.NumRenderTargets = 1;
-	opaque_pso_desc.RTVFormats[0] = m_backbuffer_format;
-	opaque_pso_desc.SampleDesc.Count = 1;
-	opaque_pso_desc.SampleDesc.Quality = 0;
-	opaque_pso_desc.DSVFormat = m_depthstencil_format;
-
-	// shaders
-	opaque_pso_desc.VS =
-	{
-		reinterpret_cast<unsigned char*>(vertex_shader->GetBufferPointer()),
-		vertex_shader->GetBufferSize()
-	};
-
-	opaque_pso_desc.PS =
-	{
-		reinterpret_cast<unsigned char*>(pixel_shader->GetBufferPointer()),
-		pixel_shader->GetBufferSize()
-	};
-
-	winrt::check_hresult(m_device->CreateGraphicsPipelineState(&opaque_pso_desc, winrt::guid_of<ID3D12PipelineState>(), m_opaque_pso.put_void()));
 }
 
 void GraphicsResources::create_basic_input_layout()
@@ -697,15 +628,33 @@ D3D12_CPU_DESCRIPTOR_HANDLE GraphicsResources::current_backbuffer_view() const
 
 void GraphicsResources::update_vbv_content(std::vector<Vertex_tex>& vertices)
 {
-	for (size_t i = 0; i < vertices.size(); ++i)
+	auto current_size = vertices.size();
+
+	if (current_size == 0)
 	{
-		auto current_size = vertices.size();
+		m_box_geo->VertexBufferByteSize = 0;
+		m_box_geo->IndexBufferByteSize = 0;
+		m_box_geo->DrawArgs["box"].IndexCount = 0;
+		m_dynamic_vertex_buffer->clear_data();
+		m_dynamic_index_buffer->clear_data();
+	}
+	for (size_t i = 0; i < current_size; ++i)
+	{
 		m_box_geo->VertexBufferByteSize = current_size * sizeof(Vertex_tex);
 		m_box_geo->IndexBufferByteSize = current_size * sizeof(std::uint16_t);
 		m_box_geo->DrawArgs["box"].IndexCount = current_size;
 		m_dynamic_vertex_buffer->copy_data(i, vertices[i]);
 		m_dynamic_index_buffer->copy_data(i, i);
 	}
+}
+
+void GraphicsResources::init_psos()
+{
+	create_basic_input_layout();
+	create_points_pso(m_shaders["woodCrateVS"], m_shaders["woodCratePS"]);
+	create_triangles_pso(m_shaders["woodCrateVS"], m_shaders["woodCratePS"]);
+	create_lines_pso(m_shaders["woodCrateVS"], m_shaders["woodCratePS"]);
+	execute_cmd_list();
 }
 
 void GraphicsResources::update()
@@ -751,9 +700,8 @@ void GraphicsResources::update()
 
 void GraphicsResources::render()
 {
-	//flush_cmd_queue();
 	winrt::check_hresult(m_cmd_allocator->Reset());
-	winrt::check_hresult(m_graphics_cmdlist->Reset(m_cmd_allocator.get(), nullptr));
+	winrt::check_hresult(m_graphics_cmdlist->Reset(m_cmd_allocator.get(), m_points_pso.get()));
 
 	m_screen_viewport.TopLeftX = 0;
 	m_screen_viewport.TopLeftY = 0;
@@ -767,6 +715,33 @@ void GraphicsResources::render()
 		m_swapchain_buffer[m_current_backbuffer].get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 	m_graphics_cmdlist->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(
 		m_depthstencil_buffer.get(), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE));
+
+	switch (m_current_rendering_mode) {
+	case GraphicsResources::rendering_modes::points:
+		m_graphics_cmdlist->SetPipelineState(m_points_pso.get());
+		m_graphics_cmdlist->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
+		break;
+	case GraphicsResources::rendering_modes::triangles:
+		m_graphics_cmdlist->SetPipelineState(m_triangles_pso.get());
+		m_graphics_cmdlist->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		break;
+	case GraphicsResources::rendering_modes::lines:
+		m_graphics_cmdlist->SetPipelineState(m_lines_pso.get());
+		m_graphics_cmdlist->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
+		break;
+	case GraphicsResources::rendering_modes::linestrips:
+		m_graphics_cmdlist->SetPipelineState(m_lines_pso.get());
+		m_graphics_cmdlist->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINESTRIP);
+		break;
+	case GraphicsResources::rendering_modes::trianglestrips:
+		m_graphics_cmdlist->SetPipelineState(m_triangles_pso.get());
+		m_graphics_cmdlist->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+		break;
+	default:
+		m_graphics_cmdlist->SetPipelineState(m_triangles_pso.get());
+		m_graphics_cmdlist->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+		break;
+	}
 
 	m_graphics_cmdlist->RSSetViewports(1, &m_screen_viewport);
 	m_graphics_cmdlist->RSSetScissorRects(1, &m_scissor_rect);
@@ -782,7 +757,6 @@ void GraphicsResources::render()
 
 	m_graphics_cmdlist->IASetVertexBuffers(0, 1, &m_box_geo->VertexBufferView());
 	m_graphics_cmdlist->IASetIndexBuffer(&m_box_geo->IndexBufferView());
-	m_graphics_cmdlist->IASetPrimitiveTopology(m_current_topology);
 
 	m_graphics_cmdlist->DrawIndexedInstanced(m_box_geo->DrawArgs["box"].IndexCount, 1, 0, 0, 0);
 
@@ -791,10 +765,9 @@ void GraphicsResources::render()
 	m_graphics_cmdlist->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(
 		m_depthstencil_buffer.get(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_COMMON));
 
-	flush_cmd_queue();
 	execute_cmd_list();
+	flush_cmd_queue();
 
 	winrt::check_hresult(m_swapchain->Present(0, 0));
 	m_current_backbuffer = (m_current_backbuffer + 1) % m_swapchain_buffer_count;
-	winrt::check_hresult(m_cmd_queue->Signal(m_gpu_fence.get(), m_cpu_fence));
 }

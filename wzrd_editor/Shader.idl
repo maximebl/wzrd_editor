@@ -1,0 +1,8 @@
+namespace wzrd_editor
+{
+    runtimeclass Shader 
+    {
+		String Name;
+		String Type;
+    }
+}

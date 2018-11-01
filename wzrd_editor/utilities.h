@@ -50,7 +50,7 @@ public:
 			// https://docs.microsoft.com/en-ca/windows/desktop/direct3d12/upload-and-readback-of-texture-data
 			m_element_byte_size = Utilities::constant_buffer_byte_size(sizeof(T));
 		}
-		
+
 		winrt::check_hresult(
 			device->CreateCommittedResource(
 				&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
@@ -69,10 +69,7 @@ public:
 
 	~upload_buffer()
 	{
-		if (m_upload_buffer != nullptr)
-		{
-			m_upload_buffer->Unmap(0, nullptr);
-		}
+		clear_data();
 		m_mapped_data = nullptr;
 	}
 
@@ -82,6 +79,14 @@ public:
 	ID3D12Resource* get_resource() const
 	{
 		return m_upload_buffer.get();
+	}
+
+	void clear_data()
+	{
+		if (m_upload_buffer != nullptr)
+		{
+			m_upload_buffer->Unmap(0, nullptr);
+		}
 	}
 
 	void copy_data(int element_index, const T& data)
@@ -141,7 +146,10 @@ struct MeshGeometry
 	}
 };
 
-
+enum class pick_modes {
+	single_file_async = 0,
+	multiple_files_async = 1
+};
 
 class Utilities
 {
@@ -150,14 +158,16 @@ public:
 	static concurrency::task<std::vector<unsigned char>> read_shader_file(winrt::Windows::Storage::Streams::IBuffer fileBuffer);
 	static winrt::com_ptr<ID3DBlob> compile_shader(const std::string& shaderType, const std::vector<unsigned char>& file_bytes, const std::string& entryPoint);
 	static winrt::com_ptr<ID3D12Resource> create_default_buffer(
-		ID3D12Device* device, 
-		ID3D12GraphicsCommandList* cmdList, 
-		const void* initData, 
-		UINT64 byteSize, 
+		ID3D12Device* device,
+		ID3D12GraphicsCommandList* cmdList,
+		const void* initData,
+		UINT64 byteSize,
 		winrt::com_ptr<ID3D12Resource>& uploadBuffer);
 	static UINT constant_buffer_byte_size(UINT byte_size);
 	static std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> get_static_samplers();
 	static void print_coordinates(float x, float y);
+	//static winrt::Windows::Foundation::IAsyncOperation<winrt::Windows::Storage::Streams::IBuffer> pick_file_buffer(winrt::hstring file_extension, pick_modes pick_mode);
+	static winrt::Windows::Foundation::IAsyncAction pick_file_buffer(winrt::hstring file_extension, pick_modes pick_mode);
 };
 
 struct render_item
