@@ -37,8 +37,8 @@
 #include <d3dcompiler.h>
 
 #include <ppltasks.h>
-// allows us to use concurrency::task as a coroutine awaitable type
 #include <experimental/resumable>
+// pplawait.h allows the use of co_await on concurrency::task types
 #include <pplawait.h>
 
 #include "GeometryGenerator.h"

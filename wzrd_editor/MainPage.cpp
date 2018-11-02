@@ -77,19 +77,13 @@ namespace winrt::wzrd_editor::implementation
 		return m_geometryViewModel;
 	}
 
-	wzrd_editor::Shader MainPage::Shader()
-	{
-		return m_shaderViewModel;
-	}
-
 	Windows::Foundation::IAsyncAction MainPage::onclick_create_vertex(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
 		auto pos_x = m_geometryViewModel.Geometry().Position().x();
 		auto pos_y = m_geometryViewModel.Geometry().Position().y();
 		auto pos_z = m_geometryViewModel.Geometry().Position().z();
 
-		auto positions_collection = m_geometryViewModel.Geometry().Positions();
-		positions_collection.Append(m_geometryViewModel.Geometry().Position());
+		m_geometryViewModel.Geometry().Positions().Append(m_geometryViewModel.Geometry().Position());
 
 		m_vertex_generator.push_vertex(pos_x, pos_y, pos_z, 0.0f, 0.0f);
 
@@ -141,128 +135,43 @@ namespace winrt::wzrd_editor::implementation
 
 	Windows::Foundation::IAsyncAction MainPage::onclick_texture_picker(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
-		Utilities::pick_file_buffer(hstring(L"aaa"), pick_modes::single_file_async);
-		co_return;
-		// Pick and read the file data
-		//auto file_buffer = co_await Utilities::pick_file_buffer(L".dds", pick_modes::single_file_async);
-
-		//winrt::Windows::Storage::Pickers::FileOpenPicker filePicker;
-		//filePicker.FileTypeFilter().Append(L".dds");
-		//auto file = co_await filePicker.PickSingleFileAsync();
-		//if (file == nullptr)
-		//{
-		//	return;
-		//}
-		//auto fileBuffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
-
-		//// abstract into Utilities::read_texture_file(fileBuffer) same as read_shader_file? rename it?
-		//auto dataReader = winrt::Windows::Storage::Streams::DataReader::FromBuffer(fileBuffer);
-		//std::vector<unsigned char> file_bytes;
-		//int fileSize = fileBuffer.Length();
-		//file_bytes.assign(fileSize, 0);
-		//dataReader.ReadBytes(file_bytes);
-
-		//auto woodcrate_texture = m_graphics_resources.create_texture(file_bytes, fileSize, "woodCrateTexture");
-		//m_textures["woodCrateTexture"] = std::move(woodcrate_texture);
-		//m_graphics_resources.create_shader_resources(m_textures["woodCrateTexture"]->Resource.get());
-	}
-
-	Windows::Foundation::IAsyncAction MainPage::onclick_pixelshader_picker(IInspectable const&, RoutedEventArgs const&)
-	{
-		// Pick and read the shader data
-	/*
-		winrt::Windows::Storage::Pickers::FileOpenPicker filePicker;
-		filePicker.FileTypeFilter().Append(L".hlsl");
-		auto file = co_await filePicker.PickSingleFileAsync();
-		if (file == nullptr)
+		auto file_buffer = co_await Utilities::pick_file_buffer(hstring(L".dds"), pick_modes::single_file_async);
+		if (file_buffer == nullptr)
 		{
 			return;
 		}
-		auto fileBuffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
-		auto file_bytes = Utilities::read_shader_file(fileBuffer).get();
-*/
+		auto file_bytes = co_await Utilities::read_file_bytes(file_buffer);
 
-// shader struct to contain the info, put it in shader.idl
-/*auto current_shader_model = winrt::make<wzrd_editor::implementation::Shader>(shader_name, shader_type);
-
-auto shader_infos = pick_shader_async();
-m_graphics_resources.m_shaders[shader_name] = Utilities::compile_shader("ps_5_0", shader_bytes, "PS");
-
-m_geometryViewModel.Shaders().Append(current_shader_model);
-set_shaders_list_visibility();*/
-		co_return;
-	}
-
-	Windows::Foundation::IAsyncAction MainPage::onclick_vertexshader_picker(IInspectable const&, RoutedEventArgs const&)
-	{
-		co_return;
-	}
-
-	Windows::Foundation::IAsyncAction MainPage::texturePicker_Click(IInspectable const&, RoutedEventArgs const&)
-	{
-
-		winrt::Windows::Storage::Pickers::FileOpenPicker filePicker;
-		filePicker.FileTypeFilter().Append(L".dds");
-		auto file = co_await filePicker.PickSingleFileAsync();
-		if (file == nullptr)
-		{
-			return;
-		}
-		auto fileBuffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
-
-		auto dataReader = winrt::Windows::Storage::Streams::DataReader::FromBuffer(fileBuffer);
-		std::vector<unsigned char> file_bytes;
-		int fileSize = fileBuffer.Length();
-		file_bytes.assign(fileSize, 0);
-		dataReader.ReadBytes(file_bytes);
-
-		auto woodcrate_texture = m_graphics_resources.create_texture(file_bytes, fileSize, "woodCrateTexture");
+		auto woodcrate_texture = m_graphics_resources.create_texture(file_bytes, file_buffer.Length(), "woodCrateTexture");
 		m_textures["woodCrateTexture"] = std::move(woodcrate_texture);
 		m_graphics_resources.create_shader_resources(m_textures["woodCrateTexture"]->Resource.get());
 		co_return;
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::pixelShaderPicker_Click(IInspectable const&, RoutedEventArgs const&)
+	Windows::Foundation::IAsyncAction MainPage::onclick_pixelshader_picker(IInspectable const&, RoutedEventArgs const&)
 	{
-		winrt::Windows::Storage::Pickers::FileOpenPicker filePicker;
-		filePicker.FileTypeFilter().Append(L".hlsl");
-		auto file = co_await filePicker.PickSingleFileAsync();
-		if (file == nullptr)
-		{
-			return;
-		}
-		auto fileBuffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
-		auto file_bytes = Utilities::read_shader_file(fileBuffer).get();
+		auto shader_file_bytes = co_await Utilities::pick_shader_file();
 
-		m_graphics_resources.m_shaders["woodCratePS"] = Utilities::compile_shader("ps_5_0", file_bytes, "PS");
+		co_await winrt::resume_background();
+		m_graphics_resources.m_shaders["woodCratePS"] = Utilities::compile_shader("ps_5_0", shader_file_bytes, "PS");
 
-		auto shaders_collection = m_geometryViewModel.Shaders();
-		shaders_collection.Append(m_shaderViewModel);
-
+		co_await m_ui_thread;
+		wzrd_editor::Shader new_shader = winrt::make<wzrd_editor::implementation::Shader>(hstring(L"woodCratePS"));
+		m_geometryViewModel.Shaders().Append(new_shader);
 		set_shaders_list_visibility();
-		co_return;
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::vertexShaderPicker_Click(IInspectable const&, RoutedEventArgs const&)
+	Windows::Foundation::IAsyncAction MainPage::onclick_vertexshader_picker(IInspectable const&, RoutedEventArgs const&)
 	{
-		// Pick and read the shader data
-		winrt::Windows::Storage::Pickers::FileOpenPicker filePicker;
-		filePicker.FileTypeFilter().Append(L".hlsl");
-		auto file = co_await filePicker.PickSingleFileAsync();
-		if (file == nullptr)
-		{
-			return;
-		}
-		auto fileBuffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
-		auto file_bytes = Utilities::read_shader_file(fileBuffer).get();
+		auto shader_file_bytes = co_await Utilities::pick_shader_file();
 
-		m_graphics_resources.m_shaders["woodCrateVS"] = Utilities::compile_shader("vs_5_0", file_bytes, "VS");
+		co_await winrt::resume_background();
+		m_graphics_resources.m_shaders["woodCrateVS"] = Utilities::compile_shader("vs_5_0", shader_file_bytes, "VS");
 
-		auto shaders_collection = m_geometryViewModel.Shaders();
-		shaders_collection.Append(m_shaderViewModel);
-
+		co_await m_ui_thread;
+		wzrd_editor::Shader new_shader = winrt::make<wzrd_editor::implementation::Shader>(hstring(L"woodCrateVS"));
+		m_geometryViewModel.Shaders().Append(new_shader);
 		set_shaders_list_visibility();
-		co_return;
 	}
 
 	Windows::Foundation::IAsyncAction MainPage::onclick_build_pointlist(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)

@@ -10,7 +10,7 @@ UINT Utilities::constant_buffer_byte_size(UINT byte_size)
 	return (byte_size + 255) & ~255;
 }
 
-concurrency::task<std::vector<unsigned char>> Utilities::read_shader_file(winrt::Windows::Storage::Streams::IBuffer fileBuffer)
+concurrency::task<std::vector<unsigned char>> Utilities::read_file_bytes(winrt::Windows::Storage::Streams::IBuffer fileBuffer)
 {
 	auto dataReader = winrt::Windows::Storage::Streams::DataReader::FromBuffer(fileBuffer);
 
@@ -22,6 +22,29 @@ concurrency::task<std::vector<unsigned char>> Utilities::read_shader_file(winrt:
 		dataReader.ReadBytes(file_bytes);
 		return file_bytes;
 	});
+}
+
+winrt::Windows::Foundation::IAsyncOperation<winrt::Windows::Storage::Streams::IBuffer> Utilities::pick_file_buffer(winrt::hstring file_extension, pick_modes pick_mode)
+{
+	winrt::Windows::Storage::Pickers::FileOpenPicker filePicker;
+	filePicker.FileTypeFilter().Append(file_extension);
+
+	switch (pick_mode)
+	{
+	case pick_modes::single_file_async:
+		auto file = co_await filePicker.PickSingleFileAsync();
+		if (file != nullptr)
+		{
+			auto buffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
+			return buffer;
+		}
+	}
+}
+
+concurrency::task<std::vector<unsigned char>> Utilities::pick_shader_file()
+{
+	auto file_buffer = co_await pick_file_buffer(winrt::hstring(L".hlsl"), pick_modes::single_file_async);
+	return co_await read_file_bytes(file_buffer);
 }
 
 winrt::com_ptr<ID3DBlob> Utilities::compile_shader(const std::string& shaderType, const std::vector<unsigned char>& file_bytes, const std::string& entryPoint)
@@ -170,21 +193,3 @@ void Utilities::print_coordinates(float x, float y)
 	OutputDebugStringW(wstringstream.str().c_str());
 }
 
-winrt::Windows::Foundation::IAsyncAction Utilities::pick_file_buffer(winrt::hstring file_extension, pick_modes pick_mode)
-{
-	winrt::Windows::Storage::Pickers::FileOpenPicker filePicker;
-	filePicker.FileTypeFilter().Append(file_extension);
-	auto file = co_await filePicker.PickSingleFileAsync();
-	co_return;
-	//return winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
-	//switch (pick_mode)
-	//{
-	//case pick_modes::single_file_async:
-	//	auto file = co_await filePicker.PickSingleFileAsync();
-	//	//if (file == nullptr)
-	//	//{
-	//	//	return;
-	//	//}
-	//	return winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
-	//}
-}

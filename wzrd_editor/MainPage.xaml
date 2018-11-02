@@ -48,12 +48,12 @@
     <StackPanel x:Name="outer_stackpanel" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Height="821" Width="1438" Margin="0,0,0,0">
         <StackPanel Orientation="Vertical">
             <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right">
-                <AppBarButton x:Name="texturePicker" Click="texturePicker_Click" Icon="OpenFile" Label="Texture"/>
+                <AppBarButton x:Name="texturePicker" Click="onclick_texture_picker" Icon="OpenFile" Label="Texture"/>
 
                 <AppBarButton x:Name="shaderPicker" Icon="OpenFile" Label="Shaders" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <AppBarButton.Flyout>
                         <MenuFlyout>
-                            <MenuFlyoutItem x:Name="pixelShaderPicker" Click="pixelShaderPicker_Click">
+                            <MenuFlyoutItem x:Name="pixelShaderPicker" Click="onclick_pixelshader_picker">
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon Glyph="&#xE74C;"/>
                                 </MenuFlyoutItem.Icon>
@@ -62,7 +62,7 @@
                                     <KeyboardAccelerator Key="P" Modifiers="Shift"/>
                                 </MenuFlyoutItem.KeyboardAccelerators>
                             </MenuFlyoutItem>
-                            <MenuFlyoutItem x:Name="vertexShaderPicker" Click="vertexShaderPicker_Click">
+                            <MenuFlyoutItem x:Name="vertexShaderPicker" Click="onclick_vertexshader_picker">
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon Glyph="&#xE768;"/>
                                 </MenuFlyoutItem.Icon>
