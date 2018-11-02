@@ -58,7 +58,6 @@ namespace winrt::wzrd_editor::implementation
 		double m_current_slider_y = 0;
 		double m_current_slider_z = 0;
 		winrt::apartment_context m_ui_thread;
-		Windows::Foundation::IAsyncAction ui_thread_work();
 
 		std::vector<std::unique_ptr<render_item>> m_render_items;
 		std::vector<render_item*> m_opaque_render_items;

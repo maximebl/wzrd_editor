@@ -29,5 +29,5 @@ vertex_out VS(vertex_in vin)
 float4 PS(vertex_out pin) : SV_Target
 {
 	//float3 result = g_texture.Sample(g_sampler, pin.tex_coord);
-	return float4(pin.tex_coord, 0.0f, 0.0f);
+	return float4(0.0f, 0.0f, 0.0f, 0.0f);
 }

@@ -38,7 +38,7 @@
                 <FontIcon Glyph="&#xE768;"> </FontIcon>
                 <StackPanel Orientation="Vertical" VerticalAlignment="Top" Margin="8,8,0,0" RelativePanel.RightOf="image">
                     <TextBlock Text="{x:Bind Name}"></TextBlock>
-                    <TextBlock Text="bottom text for vertex shader "></TextBlock>
+                    <TextBlock Text="{x:Bind Type}"></TextBlock>
                 </StackPanel>
             </RelativePanel>
         </DataTemplate>

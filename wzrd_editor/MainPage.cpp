@@ -59,10 +59,9 @@ namespace winrt::wzrd_editor::implementation
 
 			while (m_running)
 			{
-				ui_thread_work();
 				m_timer.Tick();
 
-				if (m_windowVisible)
+				if (m_window.Visible())
 				{
 					m_graphics_resources.update();
 					m_graphics_resources.render();
@@ -177,21 +176,21 @@ namespace winrt::wzrd_editor::implementation
 	Windows::Foundation::IAsyncAction MainPage::onclick_build_pointlist(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
 		start_render_loop();
-		m_graphics_resources.m_current_rendering_mode = GraphicsResources::rendering_modes::points;
+		m_graphics_resources.m_current_rendering_mode = GraphicsResources::rendering_mode::points;
 		co_return;
 	}
 
 	Windows::Foundation::IAsyncAction MainPage::onclick_build_trianglelist(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
 		start_render_loop();
-		m_graphics_resources.m_current_rendering_mode = GraphicsResources::rendering_modes::triangles;
+		m_graphics_resources.m_current_rendering_mode = GraphicsResources::rendering_mode::triangles;
 		co_return;
 	}
 
 	Windows::Foundation::IAsyncAction MainPage::onclick_build_lineslist(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
 		start_render_loop();
-		m_graphics_resources.m_current_rendering_mode = GraphicsResources::rendering_modes::lines;
+		m_graphics_resources.m_current_rendering_mode = GraphicsResources::rendering_mode::lines;
 		co_return;
 	}
 
@@ -199,14 +198,14 @@ namespace winrt::wzrd_editor::implementation
 	Windows::Foundation::IAsyncAction MainPage::onclick_build_linestrips(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
 		start_render_loop();
-		m_graphics_resources.m_current_rendering_mode = GraphicsResources::rendering_modes::linestrips;
+		m_graphics_resources.m_current_rendering_mode = GraphicsResources::rendering_mode::linestrips;
 		co_return;
 	}
 
 	Windows::Foundation::IAsyncAction MainPage::onclick_build_trianglestrips(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
 		start_render_loop();
-		m_graphics_resources.m_current_rendering_mode = GraphicsResources::rendering_modes::trianglestrips;
+		m_graphics_resources.m_current_rendering_mode = GraphicsResources::rendering_mode::trianglestrips;
 		co_return;
 	}
 
@@ -218,17 +217,5 @@ namespace winrt::wzrd_editor::implementation
 			m_running = true;
 			ThreadPool::RunAsync(m_render_loop_work_item);
 		}
-	}
-
-	Windows::Foundation::IAsyncAction MainPage::ui_thread_work()
-	{
-		// Switch to the UI thread
-		co_await m_ui_thread;
-
-		m_windowVisible = m_window.Visible();
-		m_current_slider_x = slider_x().Value();
-		m_current_slider_y = slider_y().Value();
-		m_current_slider_z = slider_z().Value();
-		// Leaving this function switches back to the rendering thread
 	}
 }

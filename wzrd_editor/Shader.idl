@@ -1,8 +1,13 @@
 namespace wzrd_editor
 {
-    runtimeclass Shader 
-    {
+	runtimeclass Shader
+	{
 		String Name;
-		String Type;
-    }
+		//String Type;
+		enum Type
+		{
+			vertex = 0,
+			pixel = 1
+		};
+	}
 }

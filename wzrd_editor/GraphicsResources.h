@@ -15,7 +15,7 @@ private:
 	constexpr static int m_output_height = 700;
 	D3D12_VIEWPORT m_screen_viewport;
 	D3D12_RECT m_scissor_rect;
-	
+
 	// projection
 	DirectX::XMFLOAT4X4 m_proj = MathHelper::Identity4x4();
 	DirectX::XMFLOAT4X4 m_view = MathHelper::Identity4x4();
@@ -61,7 +61,7 @@ private:
 public:
 	GraphicsResources();
 	~GraphicsResources();
-	
+
 	winrt::Windows::Foundation::Point last_mouse_position = winrt::Windows::Foundation::Point(0.0f, 0.0f);
 	winrt::Windows::Foundation::Point current_mouse_position = winrt::Windows::Foundation::Point(0.0f, 0.0f);
 
@@ -101,7 +101,8 @@ public:
 	void update();
 	void render();
 
-	enum class rendering_modes {
+	enum class rendering_mode 
+	{
 		points = 0,
 		triangles = 1,
 		lines = 2,
@@ -109,7 +110,13 @@ public:
 		linestrips = 4
 	};
 
-	rendering_modes m_current_rendering_mode{ rendering_modes::points };
+	enum class shader_type
+	{
+		vertex = 0,
+		pixel = 1
+	};
+
+	rendering_mode m_current_rendering_mode{ rendering_mode::points };
 
 	concurrency::task<Texture*> create_texture_from_file_async(std::string texture_name, winrt::Windows::Storage::StorageFile texture_file);
 };

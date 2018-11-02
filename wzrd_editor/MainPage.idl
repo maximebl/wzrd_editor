@@ -1,4 +1,5 @@
 import "GeometryViewModel.idl";
+import "Shader.idl";
 
 namespace wzrd_editor
 {

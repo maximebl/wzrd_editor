@@ -717,23 +717,23 @@ void GraphicsResources::render()
 		m_depthstencil_buffer.get(), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE));
 
 	switch (m_current_rendering_mode) {
-	case GraphicsResources::rendering_modes::points:
+	case GraphicsResources::rendering_mode::points:
 		m_graphics_cmdlist->SetPipelineState(m_points_pso.get());
 		m_graphics_cmdlist->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
 		break;
-	case GraphicsResources::rendering_modes::triangles:
+	case GraphicsResources::rendering_mode::triangles:
 		m_graphics_cmdlist->SetPipelineState(m_triangles_pso.get());
 		m_graphics_cmdlist->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		break;
-	case GraphicsResources::rendering_modes::lines:
+	case GraphicsResources::rendering_mode::lines:
 		m_graphics_cmdlist->SetPipelineState(m_lines_pso.get());
 		m_graphics_cmdlist->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINELIST);
 		break;
-	case GraphicsResources::rendering_modes::linestrips:
+	case GraphicsResources::rendering_mode::linestrips:
 		m_graphics_cmdlist->SetPipelineState(m_lines_pso.get());
 		m_graphics_cmdlist->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_LINESTRIP);
 		break;
-	case GraphicsResources::rendering_modes::trianglestrips:
+	case GraphicsResources::rendering_mode::trianglestrips:
 		m_graphics_cmdlist->SetPipelineState(m_triangles_pso.get());
 		m_graphics_cmdlist->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
 		break;

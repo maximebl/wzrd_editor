@@ -3,6 +3,11 @@
 
 namespace winrt::wzrd_editor::implementation
 {
+	//Shader::Shader(hstring name, GraphicsResources::shader_type type) : m_name(name)
+	//{
+	//	Type(type);
+	//}
+	
 	Shader::Shader(hstring name) : m_name(name)
 	{
 	}
@@ -17,13 +22,22 @@ namespace winrt::wzrd_editor::implementation
 		m_name = value;
 	}
 
-	hstring Shader::Type()
+	GraphicsResources::shader_type Shader::Type()
 	{
 		return m_type;
 	}
 
-	void Shader::Type(hstring const& value)
+	void Shader::Type(GraphicsResources::shader_type const& value)
 	{
 		m_type = value;
 	}
+	//hstring Shader::Type()
+	//{
+	//	return m_type;
+	//}
+
+	//void Shader::Type(hstring const& value)
+	//{
+	//	m_type = value;
+	//}
 }
