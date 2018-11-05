@@ -41,6 +41,13 @@
             </StackPanel>
         </DataTemplate>
 
+        <DataTemplate x:Key="texture_list_template" x:DataType="local:Texture">
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="8,8,0,0">
+                <SymbolIcon x:Name="shader_type_icon" Symbol="Page2"></SymbolIcon>
+                <TextBlock Text="{x:Bind Name}"></TextBlock>
+                <ProgressRing Margin="1,0,0,0" IsActive="{x:Bind Loading, Mode=TwoWay}"/>
+            </StackPanel>
+        </DataTemplate>
     </Page.Resources>
 
     <StackPanel x:Name="outer_stackpanel" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Height="821" Width="1438" Margin="0,0,0,0">

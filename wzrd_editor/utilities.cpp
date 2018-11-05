@@ -50,9 +50,9 @@ winrt::Windows::Foundation::IAsyncOperation<winrt::Windows::Storage::Streams::IB
 	}
 }
 
-concurrency::task<std::vector<unsigned char>> Utilities::pick_shader_file()
+concurrency::task<std::vector<unsigned char>> Utilities::pick_file(winrt::hstring file_extension)
 {
-	auto file_buffer = co_await pick_file_buffer(winrt::hstring(L".hlsl"), pick_modes::single_file_async);
+	auto file_buffer = co_await pick_file_buffer(file_extension, pick_modes::single_file_async);
 	return co_await read_file_bytes(file_buffer);
 }
 

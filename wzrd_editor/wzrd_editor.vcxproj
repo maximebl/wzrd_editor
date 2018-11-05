@@ -110,6 +110,10 @@
       <DependentUpon>Shader.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
+    <ClInclude Include="Texture.h">
+      <DependentUpon>Texture.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="utilities.h" />
     <ClInclude Include="VertexBufferGenerator.h" />
     <ClInclude Include="wzrd_vec3.h" />
@@ -187,6 +191,10 @@
       <DependentUpon>Shader.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
+    <ClCompile Include="Texture.cpp">
+      <DependentUpon>Texture.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="utilities.cpp" />
     <ClCompile Include="VertexBufferGenerator.cpp" />
     <ClCompile Include="wzrd_vec3.cpp" />
@@ -201,6 +209,9 @@
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Midl>
     <Midl Include="Shader.idl">
+      <SubType>Designer</SubType>
+    </Midl>
+    <Midl Include="Texture.idl">
       <SubType>Designer</SubType>
     </Midl>
     <Midl Include="wzrd_vec3.idl" />

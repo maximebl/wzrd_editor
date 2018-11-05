@@ -35,6 +35,8 @@ namespace winrt::wzrd_editor::implementation
 
 		wzrd_editor::GeometryViewModel GeometryViewModel();
 
+		Windows::Foundation::IAsyncAction ui_thread_work();
+
 		Windows::Foundation::IAsyncAction onclick_texture_picker(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 		Windows::Foundation::IAsyncAction onclick_pixelshader_picker(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 		Windows::Foundation::IAsyncAction onclick_vertexshader_picker(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
@@ -62,7 +64,7 @@ namespace winrt::wzrd_editor::implementation
 		std::vector<render_item*> m_opaque_render_items;
 		frame_resource* m_current_frame_resource = nullptr;
 
-		std::unordered_map<std::string, std::unique_ptr<Texture>> m_textures;
+		std::unordered_map<std::string, std::unique_ptr<winrt::wzrd_editor::data::Texture>> m_textures;
 		std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> m_geometries;
 		std::unordered_map<std::string, std::unique_ptr<Material>> m_materials;
 

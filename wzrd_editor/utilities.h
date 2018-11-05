@@ -6,14 +6,16 @@
 #include "MathHelper.h"
 
 const int global_num_frame_resources = 3;
-
-struct Texture
+namespace winrt::wzrd_editor::data
 {
-	std::string Name;
-	std::wstring Filename;
-	winrt::com_ptr<ID3D12Resource> Resource = nullptr;
-	winrt::com_ptr<ID3D12Resource> UploadHeap = nullptr;
-};
+	struct Texture
+	{
+		std::string Name;
+		std::wstring Filename;
+		winrt::com_ptr<ID3D12Resource> Resource = nullptr;
+		winrt::com_ptr<ID3D12Resource> UploadHeap = nullptr;
+	};
+}
 
 struct Material
 {
@@ -34,6 +36,56 @@ struct SubmeshGeometry
 	UINT StartIndexLocation = 0;
 	INT BaseVertexLocation = 0;
 	DirectX::BoundingBox Bounds;
+};
+
+struct MeshGeometry
+{
+	std::string Name;
+
+	winrt::com_ptr<ID3DBlob> VertexBufferCPU = nullptr;
+	winrt::com_ptr<ID3DBlob> IndexBufferCPU = nullptr;
+
+	winrt::com_ptr<ID3D12Resource> VertexBufferGPU = nullptr;
+	winrt::com_ptr<ID3D12Resource> IndexBufferGPU = nullptr;
+
+	winrt::com_ptr<ID3D12Resource> VertexBufferUploader = nullptr;
+	winrt::com_ptr<ID3D12Resource> IndexBufferUploader = nullptr;
+
+	UINT VertexByteStride = 0;
+	UINT VertexBufferByteSize = 0;
+	UINT IndexBufferByteSize = 0;
+	DXGI_FORMAT IndexFormat = DXGI_FORMAT_R16_UINT;
+
+	std::unordered_map<std::string, SubmeshGeometry> DrawArgs;
+
+	D3D12_VERTEX_BUFFER_VIEW VertexBufferView() const
+	{
+		D3D12_VERTEX_BUFFER_VIEW vbv;
+		vbv.BufferLocation = VertexBufferGPU->GetGPUVirtualAddress();
+		vbv.StrideInBytes = VertexByteStride;
+		vbv.SizeInBytes = VertexBufferByteSize;
+		return vbv;
+	}
+
+	D3D12_INDEX_BUFFER_VIEW IndexBufferView() const
+	{
+		D3D12_INDEX_BUFFER_VIEW ibv;
+		ibv.BufferLocation = IndexBufferGPU->GetGPUVirtualAddress();
+		ibv.Format = IndexFormat;
+		ibv.SizeInBytes = IndexBufferByteSize;
+		return ibv;
+	}
+
+	void DisposeUploaders()
+	{
+		VertexBufferUploader = nullptr;
+		IndexBufferUploader = nullptr;
+	}
+};
+
+enum class pick_modes {
+	single_file_async = 0,
+	multiple_files_async = 1
 };
 
 template <typename T>
@@ -101,56 +153,6 @@ private:
 	bool m_is_constant_buffer = false;
 };
 
-struct MeshGeometry
-{
-	std::string Name;
-
-	winrt::com_ptr<ID3DBlob> VertexBufferCPU = nullptr;
-	winrt::com_ptr<ID3DBlob> IndexBufferCPU = nullptr;
-
-	winrt::com_ptr<ID3D12Resource> VertexBufferGPU = nullptr;
-	winrt::com_ptr<ID3D12Resource> IndexBufferGPU = nullptr;
-
-	winrt::com_ptr<ID3D12Resource> VertexBufferUploader = nullptr;
-	winrt::com_ptr<ID3D12Resource> IndexBufferUploader = nullptr;
-
-	UINT VertexByteStride = 0;
-	UINT VertexBufferByteSize = 0;
-	UINT IndexBufferByteSize = 0;
-	DXGI_FORMAT IndexFormat = DXGI_FORMAT_R16_UINT;
-
-	std::unordered_map<std::string, SubmeshGeometry> DrawArgs;
-
-	D3D12_VERTEX_BUFFER_VIEW VertexBufferView() const
-	{
-		D3D12_VERTEX_BUFFER_VIEW vbv;
-		vbv.BufferLocation = VertexBufferGPU->GetGPUVirtualAddress();
-		vbv.StrideInBytes = VertexByteStride;
-		vbv.SizeInBytes = VertexBufferByteSize;
-		return vbv;
-	}
-
-	D3D12_INDEX_BUFFER_VIEW IndexBufferView() const
-	{
-		D3D12_INDEX_BUFFER_VIEW ibv;
-		ibv.BufferLocation = IndexBufferGPU->GetGPUVirtualAddress();
-		ibv.Format = IndexFormat;
-		ibv.SizeInBytes = IndexBufferByteSize;
-		return ibv;
-	}
-
-	void DisposeUploaders()
-	{
-		VertexBufferUploader = nullptr;
-		IndexBufferUploader = nullptr;
-	}
-};
-
-enum class pick_modes {
-	single_file_async = 0,
-	multiple_files_async = 1
-};
-
 class Utilities
 {
 public:
@@ -161,7 +163,7 @@ public:
 		const std::vector<unsigned char>& file_bytes,
 		const std::string& entryPoint);
 	static winrt::Windows::Foundation::IAsyncOperation<winrt::Windows::Storage::Streams::IBuffer> pick_file_buffer(winrt::hstring file_extension, pick_modes pick_mode);
-	static concurrency::task<std::vector<unsigned char>> pick_shader_file();
+	static concurrency::task<std::vector<unsigned char>> pick_file(winrt::hstring file_extension);
 	static winrt::com_ptr<ID3D12Resource> create_default_buffer(
 		ID3D12Device* device,
 		ID3D12GraphicsCommandList* cmdList,

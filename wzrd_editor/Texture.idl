@@ -1,0 +1,8 @@
+namespace wzrd_editor
+{
+    runtimeclass Texture : Windows.UI.Xaml.Data.INotifyPropertyChanged
+    {
+		String Name;
+		Boolean Loading;
+    }
+}
