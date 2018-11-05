@@ -106,7 +106,7 @@ namespace winrt::wzrd_editor::implementation
 
 	void MainPage::set_shaders_list_visibility()
 	{
-		if (m_graphics_resources.m_shaders.size() != 0)
+		if (m_geometryViewModel.Shaders().Size() > 0)
 		{
 			shaders_list().Visibility(winrt::Windows::UI::Xaml::Visibility::Visible);
 		}
@@ -151,26 +151,40 @@ namespace winrt::wzrd_editor::implementation
 	{
 		auto shader_file_bytes = co_await Utilities::pick_shader_file();
 
+		wzrd_editor::Shader new_shader = winrt::make<wzrd_editor::implementation::Shader>(hstring(L"woodCratePS"), wzrd_editor::ShaderType::pixel);
+		m_geometryViewModel.Shaders().Append(new_shader);
+		new_shader.Loading(true);
+		set_shaders_list_visibility();
+
 		co_await winrt::resume_background();
 		m_graphics_resources.m_shaders["woodCratePS"] = Utilities::compile_shader("ps_5_0", shader_file_bytes, "PS");
 
 		co_await m_ui_thread;
-		wzrd_editor::Shader new_shader = winrt::make<wzrd_editor::implementation::Shader>(hstring(L"woodCratePS"));
-		m_geometryViewModel.Shaders().Append(new_shader);
-		set_shaders_list_visibility();
+		HANDLE event_handle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
+		WaitForSingleObject(event_handle, 5000);
+		CloseHandle(event_handle);
+
+		new_shader.Loading(false);
 	}
 
 	Windows::Foundation::IAsyncAction MainPage::onclick_vertexshader_picker(IInspectable const&, RoutedEventArgs const&)
 	{
 		auto shader_file_bytes = co_await Utilities::pick_shader_file();
 
+		wzrd_editor::Shader new_shader = winrt::make<wzrd_editor::implementation::Shader>(hstring(L"woodCrateVS"), wzrd_editor::ShaderType::vertex);
+		m_geometryViewModel.Shaders().Append(new_shader);
+		new_shader.Loading(true);
+		set_shaders_list_visibility();
+
 		co_await winrt::resume_background();
 		m_graphics_resources.m_shaders["woodCrateVS"] = Utilities::compile_shader("vs_5_0", shader_file_bytes, "VS");
 
 		co_await m_ui_thread;
-		wzrd_editor::Shader new_shader = winrt::make<wzrd_editor::implementation::Shader>(hstring(L"woodCrateVS"));
-		m_geometryViewModel.Shaders().Append(new_shader);
-		set_shaders_list_visibility();
+		HANDLE event_handle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
+		WaitForSingleObject(event_handle, 5000);
+		CloseHandle(event_handle);
+
+		new_shader.Loading(false);
 	}
 
 	Windows::Foundation::IAsyncAction MainPage::onclick_build_pointlist(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)

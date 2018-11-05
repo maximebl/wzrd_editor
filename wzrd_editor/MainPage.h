@@ -27,7 +27,6 @@ namespace winrt::wzrd_editor::implementation
 
 		wzrd_editor::GeometryViewModel m_geometryViewModel = winrt::make<wzrd_editor::implementation::GeometryViewModel>();
 
-		bool buffers_initialized = false;
 		void set_vertices_list_visibility();
 		void set_shaders_list_visibility();
 		void start_render_loop();

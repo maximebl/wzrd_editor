@@ -1,13 +1,16 @@
 namespace wzrd_editor
 {
-	runtimeclass Shader
+	enum ShaderType
+	{
+		vertex = 0,
+		pixel = 1
+	};
+
+	runtimeclass Shader : Windows.UI.Xaml.Data.INotifyPropertyChanged
 	{
 		String Name;
-		//String Type;
-		enum Type
-		{
-			vertex = 0,
-			pixel = 1
-		};
+		String TypeGlyph;
+		Boolean Loading;
+		ShaderType Type;
 	}
 }
