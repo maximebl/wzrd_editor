@@ -31,13 +31,22 @@ winrt::Windows::Foundation::IAsyncOperation<winrt::Windows::Storage::Streams::IB
 
 	switch (pick_mode)
 	{
-	case pick_modes::single_file_async:
-		auto file = co_await filePicker.PickSingleFileAsync();
-		if (file != nullptr)
+		case pick_modes::single_file_async:
 		{
-			auto buffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
-			return buffer;
+			auto file = co_await filePicker.PickSingleFileAsync();
+			if (file != nullptr)
+			{
+				return co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
+			}
 		}
+		break;
+
+		case pick_modes::multiple_files_async:
+		{
+			//TODO: add support for selecting multiple files
+			throw winrt::hresult_not_implemented();
+		}
+		break;
 	}
 }
 
@@ -191,5 +200,12 @@ void Utilities::print_coordinates(float x, float y)
 	std::wstringstream wstringstream;
 	wstringstream << L"\n" << L"(" << x << L", " << y << L")" << L"\n" << std::endl;
 	OutputDebugStringW(wstringstream.str().c_str());
+}
+
+void Utilities::wait(DWORD duration)
+{
+	HANDLE event_handle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
+	WaitForSingleObject(event_handle, duration);
+	CloseHandle(event_handle);
 }
 

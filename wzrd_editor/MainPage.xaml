@@ -5,7 +5,8 @@
     xmlns:local="using:wzrd_editor"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    >
 
     <Page.Resources>
         <DataTemplate x:Key="vertices_list_header">
@@ -36,7 +37,7 @@
             <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="8,8,0,0">
                 <SymbolIcon x:Name="shader_type_icon" Symbol="{x:Bind TypeGlyph}"></SymbolIcon>
                 <TextBlock Text="{x:Bind Name}"></TextBlock>
-                <ProgressRing IsActive="{x:Bind Loading, Mode=TwoWay}"/>
+                <ProgressRing Margin="1,0,0,0" IsActive="{x:Bind Loading, Mode=TwoWay}"/>
             </StackPanel>
         </DataTemplate>
 
@@ -53,7 +54,6 @@
                             <MenuFlyoutItem x:Name="pixelShaderPicker" Click="onclick_pixelshader_picker">
                                 <MenuFlyoutItem.Icon>
                                     <SymbolIcon Symbol="SelectAll"></SymbolIcon>
-                                    <!--<FontIcon Glyph="&#xE74C;"/>-->
                                 </MenuFlyoutItem.Icon>
                                 <MenuFlyoutItem.Text>Pixel</MenuFlyoutItem.Text>
                                 <MenuFlyoutItem.KeyboardAccelerators>
@@ -63,7 +63,6 @@
                             <MenuFlyoutItem x:Name="vertexShaderPicker" Click="onclick_vertexshader_picker">
                                 <MenuFlyoutItem.Icon>
                                     <SymbolIcon Symbol="Play"></SymbolIcon>
-                                    <!--<FontIcon Glyph="&#xE768;"/>-->
                                 </MenuFlyoutItem.Icon>
                                 <MenuFlyoutItem.Text>Vertex</MenuFlyoutItem.Text>
                                 <MenuFlyoutItem.KeyboardAccelerators>

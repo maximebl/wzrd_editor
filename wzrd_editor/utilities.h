@@ -157,8 +157,8 @@ public:
 	Utilities();
 	static concurrency::task<std::vector<unsigned char>> read_file_bytes(winrt::Windows::Storage::Streams::IBuffer fileBuffer);
 	static winrt::com_ptr<ID3DBlob> compile_shader(
-		const std::string& shaderType, 
-		const std::vector<unsigned char>& file_bytes, 
+		const std::string& shaderType,
+		const std::vector<unsigned char>& file_bytes,
 		const std::string& entryPoint);
 	static winrt::Windows::Foundation::IAsyncOperation<winrt::Windows::Storage::Streams::IBuffer> pick_file_buffer(winrt::hstring file_extension, pick_modes pick_mode);
 	static concurrency::task<std::vector<unsigned char>> pick_shader_file();
@@ -171,6 +171,7 @@ public:
 	static UINT constant_buffer_byte_size(UINT byte_size);
 	static std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> get_static_samplers();
 	static void print_coordinates(float x, float y);
+	static void wait(DWORD duration);
 };
 
 struct render_item

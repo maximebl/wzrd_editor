@@ -128,6 +128,7 @@ namespace winrt::wzrd_editor::implementation
 	Windows::Foundation::IAsyncAction MainPage::menuflyout_clear_shaders_click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
 		m_graphics_resources.m_shaders.clear();
+		m_geometryViewModel.Shaders().Clear();
 		set_shaders_list_visibility();
 		co_return;
 	}
@@ -154,16 +155,13 @@ namespace winrt::wzrd_editor::implementation
 		wzrd_editor::Shader new_shader = winrt::make<wzrd_editor::implementation::Shader>(hstring(L"woodCratePS"), wzrd_editor::ShaderType::pixel);
 		m_geometryViewModel.Shaders().Append(new_shader);
 		new_shader.Loading(true);
+
 		set_shaders_list_visibility();
 
 		co_await winrt::resume_background();
 		m_graphics_resources.m_shaders["woodCratePS"] = Utilities::compile_shader("ps_5_0", shader_file_bytes, "PS");
 
 		co_await m_ui_thread;
-		HANDLE event_handle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
-		WaitForSingleObject(event_handle, 5000);
-		CloseHandle(event_handle);
-
 		new_shader.Loading(false);
 	}
 
@@ -174,16 +172,13 @@ namespace winrt::wzrd_editor::implementation
 		wzrd_editor::Shader new_shader = winrt::make<wzrd_editor::implementation::Shader>(hstring(L"woodCrateVS"), wzrd_editor::ShaderType::vertex);
 		m_geometryViewModel.Shaders().Append(new_shader);
 		new_shader.Loading(true);
+
 		set_shaders_list_visibility();
 
 		co_await winrt::resume_background();
 		m_graphics_resources.m_shaders["woodCrateVS"] = Utilities::compile_shader("vs_5_0", shader_file_bytes, "VS");
 
 		co_await m_ui_thread;
-		HANDLE event_handle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
-		WaitForSingleObject(event_handle, 5000);
-		CloseHandle(event_handle);
-
 		new_shader.Loading(false);
 	}
 
