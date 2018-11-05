@@ -18,6 +18,9 @@
     <Midl Include="wzrd_vec3.idl">
       <Filter>Models</Filter>
     </Midl>
+    <Midl Include="Shader.idl">
+      <Filter>Models</Filter>
+    </Midl>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -43,6 +46,7 @@
     </ClCompile>
     <ClCompile Include="VertexBufferGenerator.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Shader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -65,6 +69,7 @@
       <Filter>Models</Filter>
     </ClInclude>
     <ClInclude Include="VertexBufferGenerator.h" />
+    <ClInclude Include="Shader.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Wide310x150Logo.scale-200.png">
