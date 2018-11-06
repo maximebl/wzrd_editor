@@ -18,4 +18,9 @@ namespace winrt::wzrd_editor::implementation
 	{
 		return m_shaders;
 	}
+
+	Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> GeometryViewModel::Textures()
+	{
+		return m_textures;
+	}
 }

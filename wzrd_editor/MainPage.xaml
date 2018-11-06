@@ -5,10 +5,27 @@
     xmlns:local="using:wzrd_editor"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d"
-    >
+    mc:Ignorable="d">
 
     <Page.Resources>
+        <DataTemplate x:Key="textures_list_header">
+            <Grid HorizontalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Textures" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+            </Grid>
+        </DataTemplate>
+
+        <DataTemplate x:Key="shaders_list_header">
+            <Grid HorizontalAlignment="Stretch">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Shaders" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+            </Grid>
+        </DataTemplate>
+
         <DataTemplate x:Key="vertices_list_header">
             <Grid HorizontalAlignment="Stretch">
                 <Grid.ColumnDefinitions>
@@ -19,9 +36,13 @@
         </DataTemplate>
 
         <DataTemplate x:Key="vertices_list_template" x:DataType="local:wzrd_vec3">
-            <ListViewItem HorizontalContentAlignment="Stretch" >
+            <ListViewItem HorizontalContentAlignment="Stretch">
                 <Grid HorizontalAlignment="Stretch">
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
                         <ColumnDefinition Width="*"></ColumnDefinition>
                         <ColumnDefinition Width="*"></ColumnDefinition>
                         <ColumnDefinition Width="*"></ColumnDefinition>
@@ -29,6 +50,10 @@
                     <TextBox Grid.Column="0" Text="{x:Bind x}" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
                     <TextBox Grid.Column="1" Text="{x:Bind y}" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
                     <TextBox Grid.Column="2" Text="{x:Bind z}" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="3" Text="R" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="4" Text="G" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="5" Text="B" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="6" Text="A" HorizontalAlignment="Stretch" VerticalAlignment="Center"/>
                 </Grid>
             </ListViewItem>
         </DataTemplate>
@@ -43,7 +68,7 @@
 
         <DataTemplate x:Key="texture_list_template" x:DataType="local:Texture">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="8,8,0,0">
-                <SymbolIcon x:Name="shader_type_icon" Symbol="Page2"></SymbolIcon>
+                <SymbolIcon x:Name="texture_type_icon" Symbol="Page2"></SymbolIcon>
                 <TextBlock Text="{x:Bind Name}"></TextBlock>
                 <ProgressRing Margin="1,0,0,0" IsActive="{x:Bind Loading, Mode=TwoWay}"/>
             </StackPanel>
@@ -51,9 +76,33 @@
     </Page.Resources>
 
     <StackPanel x:Name="outer_stackpanel" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Height="821" Width="1438" Margin="0,0,0,0">
-        <StackPanel Orientation="Vertical">
+        <StackPanel HorizontalAlignment="Left" Orientation="Vertical">
             <CommandBar Background="Transparent" IsOpen="False" DefaultLabelPosition="Right">
-                <AppBarButton x:Name="texturePicker" Click="onclick_texture_picker" Icon="OpenFile" Label="Texture"/>
+                <AppBarButton Icon="OpenFile" Label="Texture">
+                    <AppBarButton.Flyout>
+                        <MenuFlyout>
+                            <MenuFlyoutItem x:Name="texturePicker" Click="onclick_texture_picker">
+                                <MenuFlyoutItem.Icon>
+                                    <SymbolIcon Symbol="Page2"></SymbolIcon>
+                                </MenuFlyoutItem.Icon>
+                                <MenuFlyoutItem.Text>Texture</MenuFlyoutItem.Text>
+                                <MenuFlyoutItem.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="T" Modifiers="Shift"/>
+                                </MenuFlyoutItem.KeyboardAccelerators>
+                            </MenuFlyoutItem>
+
+                            <MenuFlyoutSeparator/>
+
+                            <MenuFlyoutItem x:Name="menuflyout_clear_textures" Click="menuflyout_clear_textures_click" IsEnabled="True">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xE75C;"/>
+                                </MenuFlyoutItem.Icon>
+                                <MenuFlyoutItem.Text>Clear textures</MenuFlyoutItem.Text>
+                            </MenuFlyoutItem>
+                        </MenuFlyout>
+                    </AppBarButton.Flyout>
+
+                </AppBarButton>
 
                 <AppBarButton x:Name="shaderPicker" Icon="OpenFile" Label="Shaders" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <AppBarButton.Flyout>
@@ -104,12 +153,21 @@
                 </CommandBar.SecondaryCommands>
             </CommandBar>
 
-            <ListView x:Name="shaders_list" HorizontalAlignment="Stretch" Width="268" Height="153" VerticalAlignment="Center"
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
+                <ListView x:Name="shaders_list" HorizontalAlignment="Stretch" Width="auto" Height="auto" VerticalAlignment="Top"
+                      HeaderTemplate="{StaticResource shaders_list_header}" 
                       Visibility="Collapsed"
                       ItemsSource="{x:Bind GeometryViewModel.Shaders}" 
-                      ItemTemplate="{StaticResource shaders_list_template}"
-                      >
-            </ListView>
+                      ItemTemplate="{StaticResource shaders_list_template}">
+                </ListView>
+
+                <ListView x:Name="textures_list" HorizontalAlignment="Stretch" Width="auto" Height="auto" VerticalAlignment="Top"
+                      HeaderTemplate="{StaticResource textures_list_header}" 
+                      Visibility="Collapsed"
+                      ItemsSource="{x:Bind GeometryViewModel.Textures}" 
+                      ItemTemplate="{StaticResource texture_list_template}">
+                </ListView>
+            </StackPanel>
 
             <ColorPicker x:Name="colorPicker"
                      HorizontalAlignment="Center" 
@@ -214,7 +272,6 @@
                       HeaderTemplate="{StaticResource vertices_list_header}" 
                       ItemTemplate="{StaticResource vertices_list_template}">
             </ListView>
-
         </StackPanel>
 
         <SwapChainPanel x:Name="swapChainPanel" HorizontalAlignment="Left" Width="700" Margin="100,0,0,0" Height="700" VerticalAlignment="Center" />

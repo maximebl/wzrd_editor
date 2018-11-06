@@ -59,6 +59,7 @@ namespace winrt::wzrd_editor::implementation
 		{
 			m_timer.Reset();
 			ui_thread_work();
+
 			while (m_windowVisible)
 			{
 				m_timer.Tick();
@@ -90,7 +91,7 @@ namespace winrt::wzrd_editor::implementation
 
 		m_geometryViewModel.Geometry().Positions().Append(m_geometryViewModel.Geometry().Position());
 
-		m_vertex_generator.push_vertex(pos_x, pos_y, pos_z, 0.0f, 0.0f);
+		m_vertex_generator.push_vertex(pos_x, pos_y, pos_z, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
 
 		set_vertices_list_visibility();
 
@@ -122,6 +123,18 @@ namespace winrt::wzrd_editor::implementation
 		}
 	}
 
+	void MainPage::set_textures_visibility()
+	{
+		if (m_geometryViewModel.Textures().Size() > 0)
+		{
+			textures_list().Visibility(winrt::Windows::UI::Xaml::Visibility::Visible);
+		}
+		else
+		{
+			textures_list().Visibility(winrt::Windows::UI::Xaml::Visibility::Collapsed);
+		}
+	}
+
 	Windows::Foundation::IAsyncAction MainPage::onclick_clear_vertex(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
 		m_vertex_generator.vertices().clear();
@@ -139,16 +152,31 @@ namespace winrt::wzrd_editor::implementation
 		co_return;
 	}
 
+	Windows::Foundation::IAsyncAction MainPage::menuflyout_clear_textures_click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
+	{
+		m_graphics_resources.m_textures.clear();
+		m_geometryViewModel.Textures().Clear();
+		set_textures_visibility();
+		co_return;
+	}
+
 	Windows::Foundation::IAsyncAction MainPage::onclick_texture_picker(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
 		auto texture_file_bytes = co_await Utilities::pick_file(winrt::hstring(L".dds"));
 
-		//wzrd_editor::Texture new_texture = winrt::make<wzrd_editor::implementation::Texture>
+		wzrd_editor::Texture new_texture = winrt::make<wzrd_editor::implementation::Texture>(winrt::hstring(L"woodCrateTexture"));
+		m_geometryViewModel.Textures().Append(new_texture);
+		new_texture.Loading(true);
 
+		set_textures_visibility();
+
+		co_await winrt::resume_background();
 		auto woodcrate_texture = m_graphics_resources.create_texture(texture_file_bytes, texture_file_bytes.size(), "woodCrateTexture");
-		m_textures["woodCrateTexture"] = std::move(woodcrate_texture);
-		m_graphics_resources.create_shader_resources(m_textures["woodCrateTexture"]->Resource.get());
-		co_return;
+		m_graphics_resources.m_textures["woodCrateTexture"] = std::move(woodcrate_texture);
+		m_graphics_resources.create_shader_resources(m_graphics_resources.m_textures["woodCrateTexture"]->Resource.get());
+
+		co_await m_ui_thread;
+		new_texture.Loading(false);
 	}
 
 	Windows::Foundation::IAsyncAction MainPage::onclick_pixelshader_picker(IInspectable const&, RoutedEventArgs const&)

@@ -245,39 +245,9 @@ void GraphicsResources::create_rootsignature()
 	);
 }
 
-concurrency::task<Texture*> GraphicsResources::create_texture_from_file_async(std::string texture_name, winrt::Windows::Storage::StorageFile texture_file)
+std::unique_ptr<winrt::wzrd_editor::data::Texture> GraphicsResources::create_texture(std::vector<unsigned char> bytes, int file_size, std::string texture_name)
 {
-	return concurrency::create_task([&, texture_name, texture_file]
-	{
-		auto filename = texture_file.Path();
-
-		Texture* woodcrate_texture = new Texture();
-		woodcrate_texture->Name = texture_name;
-
-		Microsoft::WRL::ComPtr<ID3D12Resource> tmpResource = nullptr;
-		Microsoft::WRL::ComPtr<ID3D12Resource> tmpUploadHeap = nullptr;
-
-		winrt::check_hresult(m_graphics_cmdlist->Reset(m_cmd_allocator.get(), nullptr));
-		winrt::check_hresult(
-			DirectX::CreateDDSTextureFromFile12(
-				m_device.get(),
-				m_graphics_cmdlist.get(),
-				filename.c_str(),
-				tmpResource,
-				tmpUploadHeap
-			)
-		);
-		winrt::check_hresult(m_graphics_cmdlist->Close());
-
-		woodcrate_texture->Resource.copy_from(tmpResource.Get());
-		woodcrate_texture->UploadHeap.copy_from(tmpUploadHeap.Get());
-		return woodcrate_texture;
-	});
-}
-
-std::unique_ptr<Texture> GraphicsResources::create_texture(std::vector<unsigned char> bytes, int file_size, std::string texture_name)
-{
-	auto woodcrate_texture = std::make_unique<Texture>();
+	auto woodcrate_texture = std::make_unique<winrt::wzrd_editor::data::Texture>();
 	woodcrate_texture->Name = texture_name;
 
 	Microsoft::WRL::ComPtr<ID3D12Resource> tmpResource = nullptr;

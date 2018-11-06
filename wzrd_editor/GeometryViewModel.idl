@@ -7,5 +7,6 @@ namespace wzrd_editor
 	{
 		Geometry Geometry{get; };
 		Windows.Foundation.Collections.IObservableVector<IInspectable> Shaders{ get; };
+		Windows.Foundation.Collections.IObservableVector<IInspectable> Textures{ get; };
 	}
 }

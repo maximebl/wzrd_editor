@@ -3,6 +3,10 @@
 
 namespace winrt::wzrd_editor::implementation
 {
+	Texture::Texture(winrt::hstring name) : m_name(name)
+	{
+	}
+
     hstring Texture::Name()
     {
 		return m_name;

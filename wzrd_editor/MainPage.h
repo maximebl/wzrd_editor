@@ -12,6 +12,7 @@
 #include "GeometryViewModel.h"
 #include "Geometry.h"
 #include "Shader.h"
+#include "Texture.h"
 #include "wzrd_vec3.h"
 #include "VertexBufferGenerator.h"
 
@@ -29,6 +30,7 @@ namespace winrt::wzrd_editor::implementation
 
 		void set_vertices_list_visibility();
 		void set_shaders_list_visibility();
+		void set_textures_visibility();
 		void start_render_loop();
 
 	public:
@@ -43,6 +45,7 @@ namespace winrt::wzrd_editor::implementation
 		Windows::Foundation::IAsyncAction onclick_create_vertex(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 		Windows::Foundation::IAsyncAction onclick_clear_vertex(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 		Windows::Foundation::IAsyncAction menuflyout_clear_shaders_click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
+		Windows::Foundation::IAsyncAction menuflyout_clear_textures_click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
  
 		Windows::Foundation::IAsyncAction onclick_build_pointlist(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 		Windows::Foundation::IAsyncAction onclick_build_trianglelist(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
@@ -64,7 +67,6 @@ namespace winrt::wzrd_editor::implementation
 		std::vector<render_item*> m_opaque_render_items;
 		frame_resource* m_current_frame_resource = nullptr;
 
-		std::unordered_map<std::string, std::unique_ptr<winrt::wzrd_editor::data::Texture>> m_textures;
 		std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> m_geometries;
 		std::unordered_map<std::string, std::unique_ptr<Material>> m_materials;
 

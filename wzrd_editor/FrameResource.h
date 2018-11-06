@@ -18,6 +18,7 @@ struct Vertex
 struct Vertex_tex
 {
 	DirectX::XMFLOAT3 Pos;
+	DirectX::XMFLOAT4 Color;
 	DirectX::XMFLOAT2 TexC;
 };
 

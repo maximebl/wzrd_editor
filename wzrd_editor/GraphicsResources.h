@@ -77,7 +77,7 @@ public:
 	void create_depthstencil_buffer();
 	void create_constant_buffers();
 	void create_rootsignature();
-	std::unique_ptr<Texture> create_texture(std::vector<unsigned char> bytes, int file_size, std::string texture_name);
+	std::unique_ptr<winrt::wzrd_editor::data::Texture> create_texture(std::vector<unsigned char> bytes, int file_size, std::string texture_name);
 	void create_shader_resources(ID3D12Resource* resource);
 	void create_points_pso(winrt::com_ptr<ID3D10Blob> vertex_shader, winrt::com_ptr<ID3D10Blob> pixel_shader);
 	void create_triangles_pso(winrt::com_ptr<ID3D10Blob> vertex_shader, winrt::com_ptr<ID3D10Blob> pixel_shader);
@@ -92,6 +92,7 @@ public:
 
 	D3D12_CPU_DESCRIPTOR_HANDLE current_backbuffer_view() const;
 	std::unordered_map<std::string, winrt::com_ptr<ID3DBlob>> m_shaders;
+	std::unordered_map<std::string, std::unique_ptr<winrt::wzrd_editor::data::Texture>> m_textures;
 
 	void create_texture_geometry(std::vector<Vertex_tex>& vertices);
 	void create_vertex_colored_box_geometry();
@@ -117,7 +118,5 @@ public:
 	};
 
 	rendering_mode m_current_rendering_mode{ rendering_mode::points };
-
-	concurrency::task<Texture*> create_texture_from_file_async(std::string texture_name, winrt::Windows::Storage::StorageFile texture_file);
 };
 

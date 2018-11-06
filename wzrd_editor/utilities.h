@@ -6,6 +6,7 @@
 #include "MathHelper.h"
 
 const int global_num_frame_resources = 3;
+
 namespace winrt::wzrd_editor::data
 {
 	struct Texture

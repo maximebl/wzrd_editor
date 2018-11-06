@@ -27,7 +27,7 @@ namespace winrt::wzrd_editor::implementation
 	private:
 		hstring m_name;
 		hstring m_type_glyph;
-		bool m_loading;
+		bool m_loading = false;
 
 		wzrd_editor::ShaderType m_type;
 		winrt::event<Windows::UI::Xaml::Data::PropertyChangedEventHandler> m_propertyChanged;

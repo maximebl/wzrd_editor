@@ -4,7 +4,7 @@
 class VertexBufferGenerator {
 public:
 	VertexBufferGenerator();
-	void push_vertex(float x, float y, float z, float u, float v);
+	void push_vertex(float x, float y, float z, float r, float g, float b, float a, float u, float v);
 	std::vector<Vertex_tex>& vertices();
 
 private:
