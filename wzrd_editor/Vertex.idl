@@ -1,0 +1,17 @@
+namespace wzrd_editor
+{
+	runtimeclass Vertex : Windows.UI.Xaml.Data.INotifyPropertyChanged
+	{
+		Single x;
+		Single y;
+		Single z;
+
+		Single r;
+		Single g;
+		Single b;
+		Single a;
+
+		Single u;
+		Single v;
+	}
+}

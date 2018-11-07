@@ -115,6 +115,10 @@
       <SubType>Code</SubType>
     </ClInclude>
     <ClInclude Include="utilities.h" />
+    <ClInclude Include="Vertex.h">
+      <DependentUpon>Vertex.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="VertexBufferGenerator.h" />
     <ClInclude Include="wzrd_vec3.h" />
   </ItemGroup>
@@ -196,6 +200,10 @@
       <SubType>Code</SubType>
     </ClCompile>
     <ClCompile Include="utilities.cpp" />
+    <ClCompile Include="Vertex.cpp">
+      <DependentUpon>Vertex.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="VertexBufferGenerator.cpp" />
     <ClCompile Include="wzrd_vec3.cpp" />
   </ItemGroup>
@@ -212,6 +220,9 @@
       <SubType>Designer</SubType>
     </Midl>
     <Midl Include="Texture.idl">
+      <SubType>Designer</SubType>
+    </Midl>
+    <Midl Include="Vertex.idl">
       <SubType>Designer</SubType>
     </Midl>
     <Midl Include="wzrd_vec3.idl" />

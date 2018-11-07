@@ -13,6 +13,7 @@
 #include "Geometry.h"
 #include "Shader.h"
 #include "Texture.h"
+#include "Vertex.h"
 #include "wzrd_vec3.h"
 #include "VertexBufferGenerator.h"
 
@@ -52,6 +53,9 @@ namespace winrt::wzrd_editor::implementation
 		Windows::Foundation::IAsyncAction onclick_build_lineslist(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 		Windows::Foundation::IAsyncAction onclick_build_linestrips(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 		Windows::Foundation::IAsyncAction onclick_build_trianglestrips(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
+
+		//Windows::Foundation::IAsyncAction onchange_vertex_entry(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::Controls::TextChangedEventArgs const& args);
+		//Windows::Foundation::IAsyncAction onchanging_vertex_entry(Windows::Foundation::IInspectable const& sender, winrt::Windows::UI::Xaml::Controls::TextBoxTextChangingEventArgs const& args);
 
 		GameTimer m_timer;
 		Windows::UI::Core::CoreWindow m_window = nullptr;

@@ -20,6 +20,11 @@ namespace winrt::wzrd_editor::implementation
 		return m_positions;
 	}
 
+	Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> Geometry::Vertices()
+	{
+		return m_vertices;
+	}
+
     winrt::event_token Geometry::PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& handler)
     {
 		return m_propertyChanged.add(handler);

@@ -89,9 +89,26 @@ namespace winrt::wzrd_editor::implementation
 		auto pos_y = m_geometryViewModel.Geometry().Position().y();
 		auto pos_z = m_geometryViewModel.Geometry().Position().z();
 
-		m_geometryViewModel.Geometry().Positions().Append(m_geometryViewModel.Geometry().Position());
+		auto selected_color = color_picker().Color();
 
-		m_vertex_generator.push_vertex(pos_x, pos_y, pos_z, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+		auto color_r = static_cast<float>(selected_color.R) / 255;
+		auto color_g = static_cast<float>(selected_color.G) / 255;
+		auto color_b = static_cast<float>(selected_color.B) / 255;
+		auto color_a = static_cast<float>(selected_color.A) / 255;
+
+		auto tex_u = 0.0f;
+		auto tex_v = 0.0f;
+		// just add the new_vertex to m_vertices and pass m_vertices to Vertices()
+		auto new_vertex = winrt::make<winrt::wzrd_editor::implementation::Vertex>(
+			pos_x, pos_y, pos_z,
+			color_r, color_g, color_b, color_a,
+			tex_u, tex_v
+			);
+		m_geometryViewModel.Geometry().Vertices().Append(new_vertex);
+		m_vertex_generator.push_vertex(pos_x, pos_y, pos_z, color_r, color_g, color_b, color_a, tex_u, tex_v);
+
+		//auto stv = winrt::single_threaded_observable_vector<Windows::Foundation::IInspectable>(std::move(m_vertex_generator.vertices()));
+		//auto lUlZ = m_vertex_generator.vertices());
 
 		set_vertices_list_visibility();
 
@@ -138,7 +155,7 @@ namespace winrt::wzrd_editor::implementation
 	Windows::Foundation::IAsyncAction MainPage::onclick_clear_vertex(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
 		m_vertex_generator.vertices().clear();
-		m_geometryViewModel.Geometry().Positions().Clear();
+		m_geometryViewModel.Geometry().Vertices().Clear();
 		m_graphics_resources.update_vbv_content(m_vertex_generator.vertices());
 		set_vertices_list_visibility();
 		co_return;
