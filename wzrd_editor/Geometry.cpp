@@ -7,17 +7,11 @@ namespace winrt::wzrd_editor::implementation
 	Geometry::Geometry(wzrd_editor::wzrd_vec3 const& position) : 
 		m_position{position}
 	{
-		m_positions = winrt::single_threaded_observable_vector<Windows::Foundation::IInspectable>();
 	}
 
 	wzrd_editor::wzrd_vec3 Geometry::Position()
 	{
 		return m_position;
-	}
-	
-	Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> Geometry::Positions()
-	{
-		return m_positions;
 	}
 
 	Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> Geometry::Vertices()

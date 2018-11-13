@@ -7,7 +7,6 @@ namespace wzrd_editor
 	{
 		wzrd_vec3 Position{ get; };
 
-		Windows.Foundation.Collections.IObservableVector<IInspectable> Positions{ get; };
 		Windows.Foundation.Collections.IObservableVector<IInspectable> Vertices{ get; };
 	}
 }

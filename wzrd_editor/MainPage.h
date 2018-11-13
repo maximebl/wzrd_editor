@@ -35,7 +35,6 @@ namespace winrt::wzrd_editor::implementation
 		void start_render_loop();
 
 	public:
-
 		wzrd_editor::GeometryViewModel GeometryViewModel();
 
 		Windows::Foundation::IAsyncAction ui_thread_work();
@@ -53,9 +52,11 @@ namespace winrt::wzrd_editor::implementation
 		Windows::Foundation::IAsyncAction onclick_build_lineslist(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 		Windows::Foundation::IAsyncAction onclick_build_linestrips(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 		Windows::Foundation::IAsyncAction onclick_build_trianglestrips(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
+		
+		Windows::Foundation::IAsyncAction onclick_render_as_static(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
+		Windows::Foundation::IAsyncAction onclick_render_as_dynamic(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 
-		//Windows::Foundation::IAsyncAction onchange_vertex_entry(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::Controls::TextChangedEventArgs const& args);
-		//Windows::Foundation::IAsyncAction onchanging_vertex_entry(Windows::Foundation::IInspectable const& sender, winrt::Windows::UI::Xaml::Controls::TextBoxTextChangingEventArgs const& args);
+		Windows::Foundation::IAsyncAction onchanged_vertex_input(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::Controls::TextChangedEventArgs const& args);
 
 		GameTimer m_timer;
 		Windows::UI::Core::CoreWindow m_window = nullptr;
@@ -74,6 +75,7 @@ namespace winrt::wzrd_editor::implementation
 		std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> m_geometries;
 		std::unordered_map<std::string, std::unique_ptr<Material>> m_materials;
 
+		bool m_is_buffer_dynamic = false;
 		bool m_running = false;
 		int output_width = 700;
 		int output_height = 700;

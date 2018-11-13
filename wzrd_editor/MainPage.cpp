@@ -10,7 +10,6 @@ namespace winrt::wzrd_editor::implementation
 	MainPage::MainPage()
 	{
 		InitializeComponent();
-
 		m_ui_thread = winrt::apartment_context();
 
 		swapChainPanel().PointerMoved([this](IInspectable sender, winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs args) {
@@ -51,7 +50,6 @@ namespace winrt::wzrd_editor::implementation
 		m_graphics_resources.create_render_targets();
 		m_graphics_resources.create_constant_buffers();
 		m_graphics_resources.create_rootsignature();
-		m_graphics_resources.init_dynamic_buffer();
 
 		m_window = Window::Current().CoreWindow().GetForCurrentThread();
 
@@ -98,27 +96,28 @@ namespace winrt::wzrd_editor::implementation
 
 		auto tex_u = 0.0f;
 		auto tex_v = 0.0f;
-		// just add the new_vertex to m_vertices and pass m_vertices to Vertices()
+
 		auto new_vertex = winrt::make<winrt::wzrd_editor::implementation::Vertex>(
 			pos_x, pos_y, pos_z,
 			color_r, color_g, color_b, color_a,
 			tex_u, tex_v
 			);
 		m_geometryViewModel.Geometry().Vertices().Append(new_vertex);
-		m_vertex_generator.push_vertex(pos_x, pos_y, pos_z, color_r, color_g, color_b, color_a, tex_u, tex_v);
 
-		//auto stv = winrt::single_threaded_observable_vector<Windows::Foundation::IInspectable>(std::move(m_vertex_generator.vertices()));
-		//auto lUlZ = m_vertex_generator.vertices());
+		if (m_running && m_is_buffer_dynamic)
+		{
+			m_vertex_generator.push_vertex(pos_x, pos_y, pos_z, color_r, color_g, color_b, color_a, tex_u, tex_v);
+			m_graphics_resources.update_vbv_content(m_vertex_generator.vertices());
+		}
 
 		set_vertices_list_visibility();
 
-		m_graphics_resources.update_vbv_content(m_vertex_generator.vertices());
 		co_return;
 	}
 
 	void MainPage::set_vertices_list_visibility()
 	{
-		if (m_vertex_generator.vertices().size() != 0)
+		if (m_geometryViewModel.Geometry().Vertices().Size() > 0)
 		{
 			vertices_list().Visibility(winrt::Windows::UI::Xaml::Visibility::Visible);
 		}
@@ -232,21 +231,18 @@ namespace winrt::wzrd_editor::implementation
 
 	Windows::Foundation::IAsyncAction MainPage::onclick_build_pointlist(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
-		start_render_loop();
 		m_graphics_resources.m_current_rendering_mode = GraphicsResources::rendering_mode::points;
 		co_return;
 	}
 
 	Windows::Foundation::IAsyncAction MainPage::onclick_build_trianglelist(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
-		start_render_loop();
 		m_graphics_resources.m_current_rendering_mode = GraphicsResources::rendering_mode::triangles;
 		co_return;
 	}
 
 	Windows::Foundation::IAsyncAction MainPage::onclick_build_lineslist(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
-		start_render_loop();
 		m_graphics_resources.m_current_rendering_mode = GraphicsResources::rendering_mode::lines;
 		co_return;
 	}
@@ -254,15 +250,58 @@ namespace winrt::wzrd_editor::implementation
 
 	Windows::Foundation::IAsyncAction MainPage::onclick_build_linestrips(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
-		start_render_loop();
 		m_graphics_resources.m_current_rendering_mode = GraphicsResources::rendering_mode::linestrips;
 		co_return;
 	}
 
 	Windows::Foundation::IAsyncAction MainPage::onclick_build_trianglestrips(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
-		start_render_loop();
 		m_graphics_resources.m_current_rendering_mode = GraphicsResources::rendering_mode::trianglestrips;
+		co_return;
+	}
+
+	Windows::Foundation::IAsyncAction MainPage::onclick_render_as_static(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		VisualStateManager().GoToState(*this, L"inputs_disabled", false);
+		m_is_buffer_dynamic = false;
+		m_vertex_generator.regenerate_vertices_from_model(m_geometryViewModel.Geometry().Vertices());
+		m_graphics_resources.init_static_buffer(m_vertex_generator.vertices());
+		start_render_loop();
+		co_return;
+	}
+
+	Windows::Foundation::IAsyncAction MainPage::onclick_render_as_dynamic(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		m_is_buffer_dynamic = true;
+		m_graphics_resources.init_dynamic_buffer();
+		m_vertex_generator.regenerate_vertices_from_model(m_geometryViewModel.Geometry().Vertices());
+		m_graphics_resources.update_vbv_content(m_vertex_generator.vertices());
+
+		start_render_loop();
+		co_return;
+	}
+
+	Windows::Foundation::IAsyncAction MainPage::onchanged_vertex_input(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::Controls::TextChangedEventArgs const& args)
+	{
+		auto current_textbox = sender.try_as<Windows::UI::Xaml::Controls::TextBox>();
+		current_textbox.GetBindingExpression(current_textbox.TextProperty()).UpdateSource();
+
+		for (size_t i = 0; i < m_geometryViewModel.Geometry().Vertices().Size(); i++)
+		{
+			m_vertex_generator.vertices()[i].Pos.x = m_geometryViewModel.Geometry().Vertices().GetAt(i).try_as<wzrd_editor::implementation::Vertex>()->x();
+			m_vertex_generator.vertices()[i].Pos.y = m_geometryViewModel.Geometry().Vertices().GetAt(i).try_as<wzrd_editor::implementation::Vertex>()->y();
+			m_vertex_generator.vertices()[i].Pos.z = m_geometryViewModel.Geometry().Vertices().GetAt(i).try_as<wzrd_editor::implementation::Vertex>()->z();
+
+			m_vertex_generator.vertices()[i].Color.x = m_geometryViewModel.Geometry().Vertices().GetAt(i).try_as<wzrd_editor::implementation::Vertex>()->r();
+			m_vertex_generator.vertices()[i].Color.y = m_geometryViewModel.Geometry().Vertices().GetAt(i).try_as<wzrd_editor::implementation::Vertex>()->g();
+			m_vertex_generator.vertices()[i].Color.z = m_geometryViewModel.Geometry().Vertices().GetAt(i).try_as<wzrd_editor::implementation::Vertex>()->b();
+			m_vertex_generator.vertices()[i].Color.w = m_geometryViewModel.Geometry().Vertices().GetAt(i).try_as<wzrd_editor::implementation::Vertex>()->a();
+
+			m_vertex_generator.vertices()[i].TexC.x = m_geometryViewModel.Geometry().Vertices().GetAt(i).try_as<wzrd_editor::implementation::Vertex>()->u();
+			m_vertex_generator.vertices()[i].TexC.y = m_geometryViewModel.Geometry().Vertices().GetAt(i).try_as<wzrd_editor::implementation::Vertex>()->v();
+		}
+
+		m_graphics_resources.update_vbv_content(m_vertex_generator.vertices());
 		co_return;
 	}
 

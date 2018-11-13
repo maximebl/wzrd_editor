@@ -2,6 +2,7 @@
 #include "utilities.h"
 #include "DDSTextureLoader.h"
 #include "FrameResource.h"
+#include "Vertex.h"
 
 class GraphicsResources
 {
@@ -86,6 +87,7 @@ public:
 	void create_basic_input_layout();
 	void create_texture_input_layout();
 	void init_dynamic_buffer();
+	void init_static_buffer(std::vector<Vertex_tex>& vertices);
 
 	void flush_cmd_queue();
 	void execute_cmd_list();
@@ -119,4 +121,3 @@ public:
 
 	rendering_mode m_current_rendering_mode{ rendering_mode::points };
 };
-

@@ -215,7 +215,7 @@ void GraphicsResources::create_depthstencil_buffer()
 void GraphicsResources::create_constant_buffers()
 {
 	m_object_cb = std::make_unique<upload_buffer<object_constants>>(m_device.get(), 1, true);
-
+	m_box_geo = std::make_unique<MeshGeometry>();
 	m_dynamic_vertex_buffer = std::make_unique<upload_buffer<Vertex_tex>>(m_device.get(), 6, false);
 	m_dynamic_index_buffer = std::make_unique<upload_buffer<std::uint16_t>>(m_device.get(), 6, false);
 }
@@ -225,12 +225,15 @@ void GraphicsResources::create_rootsignature()
 	CD3DX12_DESCRIPTOR_RANGE srv_table;
 	srv_table.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
 
-	CD3DX12_ROOT_PARAMETER root_parameters[2];
-	root_parameters[0].InitAsDescriptorTable(1, &srv_table, D3D12_SHADER_VISIBILITY_PIXEL);
-	root_parameters[1].InitAsConstantBufferView(0);
+	//CD3DX12_ROOT_PARAMETER root_parameters[2];
+	//root_parameters[0].InitAsDescriptorTable(1, &srv_table, D3D12_SHADER_VISIBILITY_PIXEL);
+	//root_parameters[1].InitAsConstantBufferView(0);
+
+	CD3DX12_ROOT_PARAMETER root_parameters[1];
+	root_parameters[0].InitAsConstantBufferView(0);
 
 	auto samplers = Utilities::get_static_samplers();
-	CD3DX12_ROOT_SIGNATURE_DESC rootsig_desc(2, root_parameters, (UINT)samplers.size(), samplers.data(), D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+	CD3DX12_ROOT_SIGNATURE_DESC rootsig_desc(1, root_parameters, (UINT)samplers.size(), samplers.data(), D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
 	winrt::com_ptr<ID3DBlob> serialized_rootsig = nullptr;
 	winrt::com_ptr<ID3DBlob> error_blob = nullptr;
@@ -560,6 +563,50 @@ void GraphicsResources::create_texture_geometry(std::vector<Vertex_tex>& vertice
 	m_box_geo->DrawArgs["box"] = submesh;
 }
 
+void GraphicsResources::init_static_buffer(std::vector<Vertex_tex>& vertices)
+{
+	using namespace DirectX;
+
+	std::vector<std::uint16_t> indices = { 0,1,2,3,4,5 };
+
+	const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
+	const UINT ibByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
+
+	m_box_geo->Name = "boxGeo";
+
+	winrt::check_hresult(D3DCreateBlob(vbByteSize, m_box_geo->VertexBufferCPU.put()));
+	CopyMemory(m_box_geo->VertexBufferCPU->GetBufferPointer(), vertices.data(), vbByteSize);
+	m_box_geo->VertexBufferGPU = Utilities::create_default_buffer(
+		m_device.get(),
+		m_graphics_cmdlist.get(),
+		vertices.data(),
+		vbByteSize,
+		m_box_geo->VertexBufferUploader
+	);
+
+	winrt::check_hresult(D3DCreateBlob(ibByteSize, m_box_geo->IndexBufferCPU.put()));
+	CopyMemory(m_box_geo->IndexBufferCPU->GetBufferPointer(), vertices.data(), ibByteSize);
+	m_box_geo->IndexBufferGPU = Utilities::create_default_buffer(
+		m_device.get(),
+		m_graphics_cmdlist.get(),
+		indices.data(),
+		ibByteSize,
+		m_box_geo->IndexBufferUploader
+	);
+
+	m_box_geo->VertexByteStride = sizeof(Vertex_tex);
+	m_box_geo->VertexBufferByteSize = vbByteSize;
+	m_box_geo->IndexFormat = DXGI_FORMAT_R16_UINT;
+	m_box_geo->IndexBufferByteSize = ibByteSize;
+
+	SubmeshGeometry submesh;
+	submesh.IndexCount = indices.size();
+	submesh.StartIndexLocation = 0;
+	submesh.BaseVertexLocation = 0;
+
+	m_box_geo->DrawArgs["box"] = submesh;
+}
+
 void GraphicsResources::init_dynamic_buffer()
 {
 	using namespace DirectX;
@@ -569,7 +616,6 @@ void GraphicsResources::init_dynamic_buffer()
 	const UINT vbByteSize = tmp_element_count * sizeof(Vertex_tex);
 	const UINT ibByteSize = tmp_element_count * sizeof(std::uint16_t);
 
-	m_box_geo = std::make_unique<MeshGeometry>();
 	m_box_geo->VertexBufferGPU.attach(m_dynamic_vertex_buffer->get_resource());
 	m_box_geo->IndexBufferGPU.attach(m_dynamic_index_buffer->get_resource());
 	m_box_geo->Name = "boxGeo";
@@ -720,10 +766,11 @@ void GraphicsResources::render()
 	m_graphics_cmdlist->OMSetRenderTargets(1, &current_backbuffer_view(), true, &m_dsv_heap->GetCPUDescriptorHandleForHeapStart());
 
 	m_graphics_cmdlist->SetGraphicsRootSignature(m_rootsig.get());
-	std::array<ID3D12DescriptorHeap*, 1> descriptor_heaps = { m_srv_heap.get() };
-	m_graphics_cmdlist->SetDescriptorHeaps(descriptor_heaps.size(), &descriptor_heaps[0]);
-	m_graphics_cmdlist->SetGraphicsRootDescriptorTable(0, m_srv_heap->GetGPUDescriptorHandleForHeapStart());
-	m_graphics_cmdlist->SetGraphicsRootConstantBufferView(1, m_object_cb->get_resource()->GetGPUVirtualAddress());
+	// only necessary when we will use texture resources
+	//std::array<ID3D12DescriptorHeap*, 1> descriptor_heaps = { m_srv_heap.get() };
+	//m_graphics_cmdlist->SetDescriptorHeaps(descriptor_heaps.size(), &descriptor_heaps[0]);
+	//m_graphics_cmdlist->SetGraphicsRootDescriptorTable(0, m_srv_heap->GetGPUDescriptorHandleForHeapStart());
+	m_graphics_cmdlist->SetGraphicsRootConstantBufferView(0, m_object_cb->get_resource()->GetGPUVirtualAddress());
 
 	m_graphics_cmdlist->IASetVertexBuffers(0, 1, &m_box_geo->VertexBufferView());
 	m_graphics_cmdlist->IASetIndexBuffer(&m_box_geo->IndexBufferView());
