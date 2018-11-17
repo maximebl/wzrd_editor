@@ -81,6 +81,19 @@ namespace winrt::wzrd_editor::implementation
 		return m_geometryViewModel;
 	}
 
+	Windows::Foundation::IAsyncAction MainPage::onclick_new_index(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		auto new_index = m_geometryViewModel.Geometry().Index();
+		m_geometryViewModel.Geometry().Indices().Append(winrt::box_value(new_index));
+		co_return;
+	}
+
+	Windows::Foundation::IAsyncAction MainPage::onclick_clear_indices(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		m_geometryViewModel.Geometry().Indices().Clear();
+		co_return;
+	}
+
 	Windows::Foundation::IAsyncAction MainPage::onclick_create_vertex(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
 		auto pos_x = m_geometryViewModel.Geometry().Position().x();
@@ -262,11 +275,16 @@ namespace winrt::wzrd_editor::implementation
 
 	Windows::Foundation::IAsyncAction MainPage::onclick_render_as_static(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		VisualStateManager().GoToState(*this, L"inputs_disabled", false);
-		m_is_buffer_dynamic = false;
-		m_vertex_generator.regenerate_vertices_from_model(m_geometryViewModel.Geometry().Vertices());
-		m_graphics_resources.init_static_buffer(m_vertex_generator.vertices());
-		start_render_loop();
+		OutputDebugStringW(L"markz");
+		auto res = m_geometryViewModel.Geometry().Indices().GetAt(0);
+		auto aaa = winrt::unbox_value<int32_t>(res);
+		OutputDebugStringW(std::to_wstring(aaa).c_str());
+
+		//VisualStateManager().GoToState(*this, L"inputs_disabled", false);
+		//m_is_buffer_dynamic = false;
+		//m_vertex_generator.regenerate_vertices_from_model(m_geometryViewModel.Geometry().Vertices());
+		//m_graphics_resources.init_static_buffer(m_vertex_generator.vertices());
+		//start_render_loop();
 		co_return;
 	}
 

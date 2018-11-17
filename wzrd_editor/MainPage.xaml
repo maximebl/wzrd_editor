@@ -78,6 +78,12 @@
             </ListViewItem>
         </DataTemplate>
 
+        <DataTemplate x:Key="indices_list_template" x:DataType="x:Int32">
+            <ListViewItem HorizontalContentAlignment="Stretch">
+                <TextBox Text="{x:Bind}" />
+            </ListViewItem>
+        </DataTemplate>
+
         <DataTemplate x:Key="shaders_list_template" x:DataType="local:Shader">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="8,8,0,0">
                 <SymbolIcon x:Name="shader_type_icon" Symbol="{x:Bind TypeGlyph}"></SymbolIcon>
@@ -303,18 +309,6 @@
                         RelativePanel.AlignRightWithPanel="True"/>
             </RelativePanel>
 
-            <RelativePanel>
-                <TextBlock x:Name="index_count_label" 
-                          Text="Index count" 
-                           HorizontalAlignment="Left"/>
-                <TextBox x:Name="index_count"
-                         Text="0"
-                         HorizontalAlignment="Right"
-                         Width="68"
-                         RelativePanel.RightOf="index_count_label"
-                         RelativePanel.AlignRightWithPanel="True"/>
-            </RelativePanel>
-
             <StackPanel>
                 <StackPanel.Resources>
                     <Style TargetType="Button">
@@ -326,6 +320,9 @@
                 </StackPanel.Resources>
                 <Grid HorizontalAlignment="Stretch" ColumnSpacing="1" RowSpacing="1">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -350,11 +347,38 @@
                             Grid.ColumnSpan="4"
                             HorizontalAlignment="Stretch" 
                             VerticalAlignment="Stretch"/>
+
+                    <RelativePanel Grid.Row="2" Grid.ColumnSpan="4">
+                        <TextBlock x:Name="index_count_label" 
+                           Text="Index count" 
+                           HorizontalAlignment="Left"/>
+                        <TextBox x:Name="index_count"
+                         Text="{x:Bind Mode=TwoWay, Path=GeometryViewModel.Geometry.Index}"
+                         HorizontalAlignment="Right"
+                         Width="68"
+                         RelativePanel.RightOf="index_count_label"
+                         RelativePanel.AlignRightWithPanel="True"/>
+                    </RelativePanel>
+
+                    <Button 
+                        Grid.Row="3"
+                        Grid.ColumnSpan="4"
+                        HorizontalAlignment="Stretch"
+                        Click="onclick_new_index"
+                        Content="New index"/>
+
+                    <Button 
+                        Grid.Row="4"
+                        Grid.ColumnSpan="4"
+                        HorizontalAlignment="Stretch"
+                        Click="onclick_clear_indices"
+                        Content="Clear indices"/>
+
                     <ToggleButton x:Name="render_as_static" 
                           Content="Static buffer" 
                           Grid.Column="0" 
                           Click="onclick_render_as_static" 
-                          Grid.Row="2"
+                          Grid.Row="5"
                           Grid.ColumnSpan="2"
                           HorizontalAlignment="Stretch" 
                           VerticalAlignment="Stretch"/>
@@ -362,7 +386,7 @@
                     <ToggleButton x:Name="render_as_dynamic" 
                           Content="Dynamic buffer" 
                           Grid.Column="2" Click="onclick_render_as_dynamic" 
-                          Grid.Row="2"
+                          Grid.Row="5"
                           Grid.ColumnSpan="2"
                           HorizontalAlignment="Stretch" 
                           VerticalAlignment="Stretch"/>
@@ -376,6 +400,11 @@
                       HeaderTemplate="{StaticResource vertices_list_header}" 
                       ItemTemplate="{StaticResource vertices_list_template}"/>
 
+            <ListView x:Name="indices_list" HorizontalAlignment="Stretch" Width="auto" Height="auto" Margin="-2,3" VerticalAlignment="Center"
+                      Visibility="Visible"
+                      Background="WhiteSmoke"
+                      ItemsSource="{x:Bind Path=GeometryViewModel.Geometry.Indices}" 
+                      ItemTemplate="{StaticResource indices_list_template}"/>
         </StackPanel>
         <SwapChainPanel x:Name="swapChainPanel" HorizontalAlignment="Left" Width="700" Height="700" VerticalAlignment="Center" Margin="0,0,0,0" />
     </StackPanel>

@@ -3,7 +3,6 @@
 
 VertexBufferGenerator::VertexBufferGenerator()
 {
-
 }
 
 void VertexBufferGenerator::regenerate_vertices_from_model(winrt::Windows::Foundation::Collections::IObservableVector<winrt::Windows::Foundation::IInspectable> model_vertices)

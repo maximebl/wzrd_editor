@@ -9,6 +9,44 @@ const int global_num_frame_resources = 3;
 
 namespace winrt::wzrd_editor::data
 {
+	struct observable_indices_vector :
+		implements<observable_indices_vector,
+		winrt::Windows::Foundation::Collections::IObservableVector<float>,
+		winrt::Windows::Foundation::Collections::IVector<float>,
+		winrt::Windows::Foundation::Collections::IVectorView<float>,
+		winrt::Windows::Foundation::Collections::IIterable<float>>,
+		winrt::observable_vector_base<observable_indices_vector, float>
+	{
+
+		auto& get_container() const noexcept
+		{
+			return m_values;
+		}
+
+		auto& get_container() noexcept
+		{
+			return m_values;
+		}
+
+		observable_indices_vector(const winrt::wzrd_editor::data::observable_indices_vector & vec)
+		{
+			m_values = vec.get_container();
+		}
+
+		observable_indices_vector(std::vector<float> & vec)
+		{
+			m_values = vec;
+		}
+
+		observable_indices_vector()
+		{
+			m_values = std::vector<float>();
+		}
+
+	private:
+		std::vector<float> m_values{ 0.1f, 0.2f, 0.3f };
+	};
+
 	struct Texture
 	{
 		std::string Name;

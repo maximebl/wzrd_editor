@@ -4,8 +4,8 @@
 
 namespace winrt::wzrd_editor::implementation
 {
-	Geometry::Geometry(wzrd_editor::wzrd_vec3 const& position) : 
-		m_position{position}
+	Geometry::Geometry(wzrd_editor::wzrd_vec3 const& position) :
+		m_position{ position }
 	{
 	}
 
@@ -14,18 +14,33 @@ namespace winrt::wzrd_editor::implementation
 		return m_position;
 	}
 
+	int32_t Geometry::Index()
+	{
+		return m_index;
+	}
+
+	void Geometry::Index(int32_t value)
+	{
+		m_index = value;
+	}
+
 	Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> Geometry::Vertices()
 	{
 		return m_vertices;
 	}
 
-    winrt::event_token Geometry::PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& handler)
-    {
-		return m_propertyChanged.add(handler);
-    }
+	Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> Geometry::Indices()
+	{
+		return m_indices;
+	}
 
-    void Geometry::PropertyChanged(winrt::event_token const& token) noexcept
-    {
+	winrt::event_token Geometry::PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& handler)
+	{
+		return m_propertyChanged.add(handler);
+	}
+
+	void Geometry::PropertyChanged(winrt::event_token const& token) noexcept
+	{
 		m_propertyChanged.remove(token);
-    }
+	}
 }

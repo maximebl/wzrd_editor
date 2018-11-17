@@ -55,6 +55,8 @@ namespace winrt::wzrd_editor::implementation
 		
 		Windows::Foundation::IAsyncAction onclick_render_as_static(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 		Windows::Foundation::IAsyncAction onclick_render_as_dynamic(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
+		Windows::Foundation::IAsyncAction onclick_new_index(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
+		Windows::Foundation::IAsyncAction onclick_clear_indices(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 
 		Windows::Foundation::IAsyncAction onchanged_vertex_input(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::Controls::TextChangedEventArgs const& args);
 

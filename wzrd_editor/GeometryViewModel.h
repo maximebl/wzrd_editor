@@ -1,9 +1,10 @@
 ﻿#pragma once
 
 #include "GeometryViewModel.g.h"
+#include "utilities.h"
 
 namespace winrt::wzrd_editor::implementation
-{
+{	
     struct GeometryViewModel : GeometryViewModelT<GeometryViewModel>
     {
         GeometryViewModel();
@@ -16,5 +17,6 @@ namespace winrt::wzrd_editor::implementation
 		wzrd_editor::Geometry m_geometry;
 		Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> m_shaders = winrt::single_threaded_observable_vector<Windows::Foundation::IInspectable>();
 		Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> m_textures = winrt::single_threaded_observable_vector<Windows::Foundation::IInspectable>();
+
     };
 }

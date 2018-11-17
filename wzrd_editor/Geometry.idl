@@ -6,7 +6,9 @@ namespace wzrd_editor
 	runtimeclass Geometry : Windows.UI.Xaml.Data.INotifyPropertyChanged
 	{
 		wzrd_vec3 Position{ get; };
+		Int32 Index{ get; set; };
 
 		Windows.Foundation.Collections.IObservableVector<IInspectable> Vertices{ get; };
+		Windows.Foundation.Collections.IObservableVector<IInspectable> Indices{ get; };
 	}
 }
