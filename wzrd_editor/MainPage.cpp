@@ -1,5 +1,7 @@
 ﻿#include "pch.h"
 #include "MainPage.h"
+#include "buffer_size_select_dialog.h"
+#include "BlankUserControl.h"
 
 using namespace winrt;
 using namespace winrt::Windows::UI::Xaml;
@@ -113,18 +115,35 @@ namespace winrt::wzrd_editor::implementation
 		auto new_vertex = winrt::make<winrt::wzrd_editor::implementation::Vertex>(
 			pos_x, pos_y, pos_z,
 			color_r, color_g, color_b, color_a,
-			tex_u, tex_v
-			);
+			tex_u, tex_v);
 		m_geometryViewModel.Geometry().Vertices().Append(new_vertex);
 
-		if (m_running && m_is_buffer_dynamic)
+		if (m_running)
 		{
-			m_vertex_generator.push_vertex(pos_x, pos_y, pos_z, color_r, color_g, color_b, color_a, tex_u, tex_v);
-			m_graphics_resources.update_vbv_content(m_vertex_generator.vertices());
+			if (m_geometryViewModel.Geometry().Vertices().Size() <= m_graphics_resources.m_dynamic_vertex_buffer->m_element_count)
+			{
+				m_vertex_generator.push_vertex(pos_x, pos_y, pos_z, color_r, color_g, color_b, color_a, tex_u, tex_v);
+				m_graphics_resources.update_vbv_content(m_vertex_generator.vertices());
+
+				if (m_geometryViewModel.Geometry().Vertices().Size() == m_graphics_resources.m_dynamic_vertex_buffer->m_element_count)
+				{
+					VisualStateManager().GoToState(*this, L"buffer_full", false);
+				}
+			}
+			else {
+				if (m_graphics_resources.m_dynamic_vertex_buffer->m_is_auto_resize)
+				{
+					// recreate the upload_heap committed resource
+					int x = 1;
+				}
+				else {
+					VisualStateManager().GoToState(*this, L"buffer_full", false);
+				}
+			}
+
 		}
 
 		set_vertices_list_visibility();
-
 		co_return;
 	}
 
@@ -189,7 +208,7 @@ namespace winrt::wzrd_editor::implementation
 		co_return;
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::onclick_texture_picker(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
+	Windows::Foundation::IAsyncAction MainPage::onclick_texture_picker(Windows::Foundation::IInspectable const&, Windows::UI::Xaml::RoutedEventArgs const& )
 	{
 		auto texture_file_bytes = co_await Utilities::pick_file(winrt::hstring(L".dds"));
 
@@ -275,28 +294,36 @@ namespace winrt::wzrd_editor::implementation
 
 	Windows::Foundation::IAsyncAction MainPage::onclick_render_as_static(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		OutputDebugStringW(L"markz");
-		auto res = m_geometryViewModel.Geometry().Indices().GetAt(0);
-		auto aaa = winrt::unbox_value<int32_t>(res);
-		OutputDebugStringW(std::to_wstring(aaa).c_str());
-
-		//VisualStateManager().GoToState(*this, L"inputs_disabled", false);
-		//m_is_buffer_dynamic = false;
-		//m_vertex_generator.regenerate_vertices_from_model(m_geometryViewModel.Geometry().Vertices());
-		//m_graphics_resources.init_static_buffer(m_vertex_generator.vertices());
-		//start_render_loop();
+		VisualStateManager().GoToState(*this, L"static_buffer_selected", false);
+		m_is_buffer_dynamic = false;
+		m_vertex_generator.regenerate_vertices_from_model(m_geometryViewModel.Geometry().Vertices());
+		m_graphics_resources.init_static_buffer(m_vertex_generator.vertices());
+		start_render_loop();
 		co_return;
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::onclick_render_as_dynamic(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	Windows::Foundation::IAsyncAction MainPage::onclick_render_as_dynamic(Windows::Foundation::IInspectable const &, Windows::UI::Xaml::RoutedEventArgs const &)
 	{
-		m_is_buffer_dynamic = true;
-		m_graphics_resources.init_dynamic_buffer();
-		m_vertex_generator.regenerate_vertices_from_model(m_geometryViewModel.Geometry().Vertices());
-		m_graphics_resources.update_vbv_content(m_vertex_generator.vertices());
+		auto dialog = winrt::make<wzrd_editor::implementation::buffer_size_select_dialog>();
+		auto dialog_result = co_await dialog.ShowAsync();
 
-		start_render_loop();
-		co_return;
+		switch (dialog_result)
+		{
+		case winrt::Windows::UI::Xaml::Controls::ContentDialogResult::None:
+			co_return;
+
+		case winrt::Windows::UI::Xaml::Controls::ContentDialogResult::Primary:
+			VisualStateManager().GoToState(*this, L"dynamic_buffer_selected", false);
+			m_is_buffer_dynamic = true;
+			m_graphics_resources.init_dynamic_buffer(dialog.buffer_size(), dialog.is_auto_resizeable());
+			m_vertex_generator.regenerate_vertices_from_model(m_geometryViewModel.Geometry().Vertices());
+			m_graphics_resources.update_vbv_content(m_vertex_generator.vertices());
+
+			start_render_loop();
+			co_return;
+		default:
+			break;
+		}
 	}
 
 	Windows::Foundation::IAsyncAction MainPage::onchanged_vertex_input(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::Controls::TextChangedEventArgs const& args)

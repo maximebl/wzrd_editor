@@ -49,10 +49,6 @@ private:
 
 	std::vector<D3D12_INPUT_ELEMENT_DESC> m_basic_input_layout;
 	std::vector<D3D12_INPUT_ELEMENT_DESC> m_texture_input_layout;
-	std::unique_ptr<MeshGeometry> m_box_geo = nullptr;
-	std::unique_ptr<upload_buffer<object_constants>> m_object_cb;
-	std::unique_ptr<upload_buffer<Vertex_tex>> m_dynamic_vertex_buffer;
-	std::unique_ptr<upload_buffer<std::uint16_t>> m_dynamic_index_buffer;
 
 	// synchronization
 	int m_vertex_count = 0;
@@ -86,7 +82,7 @@ public:
 
 	void create_basic_input_layout();
 	void create_texture_input_layout();
-	void init_dynamic_buffer();
+	void init_dynamic_buffer(int32_t vertex_count, bool is_auto_resize);
 	void init_static_buffer(std::vector<Vertex_tex>& vertices);
 
 	void flush_cmd_queue();
@@ -95,6 +91,11 @@ public:
 	D3D12_CPU_DESCRIPTOR_HANDLE current_backbuffer_view() const;
 	std::unordered_map<std::string, winrt::com_ptr<ID3DBlob>> m_shaders;
 	std::unordered_map<std::string, std::unique_ptr<winrt::wzrd_editor::data::Texture>> m_textures;
+
+	std::unique_ptr<MeshGeometry> m_box_geo = nullptr;
+	std::unique_ptr<upload_buffer<object_constants>> m_object_cb;
+	std::unique_ptr<upload_buffer<Vertex_tex>> m_dynamic_vertex_buffer;
+	std::unique_ptr<upload_buffer<std::uint16_t>> m_dynamic_index_buffer;
 
 	void create_texture_geometry(std::vector<Vertex_tex>& vertices);
 	void create_vertex_colored_box_geometry();

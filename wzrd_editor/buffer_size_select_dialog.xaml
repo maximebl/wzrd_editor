@@ -1,0 +1,37 @@
+﻿<ContentDialog
+
+    x:Class="wzrd_editor.buffer_size_select_dialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:wzrd_editor"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+
+    Title="Buffer size?"
+    PrimaryButtonText="Allocate"
+    PrimaryButtonClick="onclick_allocate"
+    CloseButtonText="Cancel"
+    DefaultButton="Primary"
+    >
+
+    <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+        <!-- Content body -->
+        <TextBlock Text="Choose how many vertices you would like to allocate memory for." TextWrapping="Wrap" />
+        <Slider
+            Value="{x:Bind buffer_size, Mode=TwoWay}"
+            Minimum="1" 
+            Maximum="100"
+            SnapsTo="Ticks"
+            TickFrequency="1"
+            TickPlacement="Inline"
+            />
+        <CheckBox IsChecked="{x:Bind is_auto_resizeable, Mode=TwoWay}">
+            <StackPanel Orientation="Horizontal">
+                <ContentControl>Auto resize the buffer when out of memory.</ContentControl>
+                <SymbolIcon Symbol="Important" ToolTipService.ToolTip="This is an expensive operation. It will cause the underlying default heap to be replaced by a new larger one." />
+            </StackPanel>
+        </CheckBox>
+    </StackPanel>
+
+</ContentDialog>

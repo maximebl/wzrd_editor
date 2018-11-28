@@ -5,6 +5,12 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="MainPage.xaml" />
+    <Page Include="buffer_size_select_dialog.xaml">
+      <Filter>views</Filter>
+    </Page>
+    <Page Include="BlankUserControl.xaml">
+      <Filter>views</Filter>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="App.idl" />
@@ -27,6 +33,8 @@
     <Midl Include="Vertex.idl">
       <Filter>Models</Filter>
     </Midl>
+    <Midl Include="BlankUserControl.idl" />
+    <Midl Include="buffer_size_select_dialog.idl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -55,6 +63,8 @@
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Vertex.cpp" />
+    <ClCompile Include="BlankUserControl.cpp" />
+    <ClCompile Include="buffer_size_select_dialog.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -81,6 +91,8 @@
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="BlankUserControl.h" />
+    <ClInclude Include="buffer_size_select_dialog.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Wide310x150Logo.scale-200.png">
@@ -121,6 +133,9 @@
     </Filter>
     <Filter Include="ViewModels">
       <UniqueIdentifier>{66a95b7e-03a9-4066-aef3-6f40cdfdf90d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="views">
+      <UniqueIdentifier>{4070b2eb-2179-4235-87ba-2b5a78f74d25}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>

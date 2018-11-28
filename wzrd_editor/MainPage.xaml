@@ -6,7 +6,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d" HorizontalAlignment="Stretch" Margin="0,0,0,0" VerticalAlignment="Stretch">
-
+    
     <Page.Resources>
         <DataTemplate x:Key="textures_list_header">
             <Grid HorizontalAlignment="Stretch">
@@ -106,8 +106,25 @@
 
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup>
-                <VisualState x:Name="inputs_disabled">
+
+                <VisualState x:Name="buffer_full">
                     <VisualState.Setters>
+                        <Setter Target="new_vertex_button.IsEnabled" Value="False"/>
+                        <Setter Target="render_as_dynamic.IsEnabled" Value="False"/>
+                        <Setter Target="render_as_static.IsEnabled" Value="False"/>
+                    </VisualState.Setters> 
+                </VisualState>
+
+                <VisualState x:Name="dynamic_buffer_selected">
+                    <VisualState.Setters>
+                        <Setter Target="render_as_dynamic.IsEnabled" Value="False"/>
+                        <Setter Target="render_as_static.IsEnabled" Value="False"/>
+                    </VisualState.Setters> 
+                </VisualState>
+
+                <VisualState x:Name="static_buffer_selected">
+                    <VisualState.Setters>
+                        <Setter Target="render_as_dynamic.IsEnabled" Value="False"/>
                         <Setter Target="render_as_static.IsEnabled" Value="False"/>
                         <Setter Target="slider_x.IsEnabled" Value="False"/>
                         <Setter Target="position_x_value.IsEnabled" Value="False"/>
@@ -117,7 +134,6 @@
                         <Setter Target="position_z_value.IsEnabled" Value="False"/>
                         <Setter Target="color_picker.IsEnabled" Value="False"/>
                         <Setter Target="main_cmd_bar.IsEnabled" Value="False"/>
-                        <Setter Target="render_as_dynamic.IsEnabled" Value="False"/>
                         <Setter Target="index_count.IsEnabled" Value="False"/>
                         <Setter Target="vertices_list.IsEnabled" Value="False"/>
                         <Setter Target="new_vertex_button.IsEnabled" Value="False"/>
@@ -128,7 +144,7 @@
         </VisualStateManager.VisualStateGroups>
 
         <StackPanel HorizontalAlignment="Left" Orientation="Vertical">
-            
+
             <CommandBar x:Name="main_cmd_bar" Background="Transparent" IsOpen="False" DefaultLabelPosition="Right">
                 <!--<AppBarButton Icon="OpenFile" Label="Texture">
                     <AppBarButton.Flyout>
@@ -231,6 +247,17 @@
         </StackPanel>
 
         <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Top" Height="650" Width="400">
+            <Grid xmlns:src="using:wzrd_editor" 
+         Margin="0,50,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <src:BlankUserControl Grid.Row="0"/>
+                <src:BlankUserControl Grid.Row="1" Margin="0,15,0,0"/>
+            </Grid>
+
             <RelativePanel>
                 <TextBlock x:Name="position_x_label"
                            Text="X"
@@ -312,14 +339,12 @@
             <StackPanel>
                 <StackPanel.Resources>
                     <Style TargetType="Button">
-                        <Setter Property="Margin" Value="0,0,0,0" />
-                    </Style>
-                    <Style TargetType="ToggleButton">
                         <Setter Property="Margin" Value="0,0,0,0"/>
                     </Style>
                 </StackPanel.Resources>
                 <Grid HorizontalAlignment="Stretch" ColumnSpacing="1" RowSpacing="1">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
@@ -374,7 +399,7 @@
                         Click="onclick_clear_indices"
                         Content="Clear indices"/>
 
-                    <ToggleButton x:Name="render_as_static" 
+                    <Button x:Name="render_as_static" 
                           Content="Static buffer" 
                           Grid.Column="0" 
                           Click="onclick_render_as_static" 
@@ -383,26 +408,42 @@
                           HorizontalAlignment="Stretch" 
                           VerticalAlignment="Stretch"/>
 
-                    <ToggleButton x:Name="render_as_dynamic" 
+                    <Button x:Name="render_as_dynamic" 
                           Content="Dynamic buffer" 
                           Grid.Column="2" Click="onclick_render_as_dynamic" 
                           Grid.Row="5"
                           Grid.ColumnSpan="2"
                           HorizontalAlignment="Stretch" 
                           VerticalAlignment="Stretch"/>
+
+                    <RelativePanel Grid.Row="6" Grid.ColumnSpan="4">
+                        <TextBlock
+                            x:Name="buffer_capacity_label"
+                            HorizontalAlignment="Left"
+                            Text="Buffer capacity"                            
+                            />
+                        <ProgressBar
+                            x:Name="heap_progressbar"
+                            Value="50"
+                            RelativePanel.Below="buffer_capacity_label"
+                            HorizontalAlignment="Stretch"
+                            RelativePanel.AlignLeftWith="buffer_capacity_label"
+                            RelativePanel.AlignRightWithPanel="True"
+                            />
+                    </RelativePanel>
                 </Grid>
             </StackPanel>
 
             <ListView x:Name="vertices_list" HorizontalAlignment="Stretch" Width="auto" Height="auto" Margin="-2,3" VerticalAlignment="Center"
                       Visibility="Collapsed"
-                      Background="WhiteSmoke"
+                      Background="{StaticResource ContentDialogDimmingThemeBrush}"
                       ItemsSource="{x:Bind Path=GeometryViewModel.Geometry.Vertices}" 
                       HeaderTemplate="{StaticResource vertices_list_header}" 
                       ItemTemplate="{StaticResource vertices_list_template}"/>
 
             <ListView x:Name="indices_list" HorizontalAlignment="Stretch" Width="auto" Height="auto" Margin="-2,3" VerticalAlignment="Center"
                       Visibility="Visible"
-                      Background="WhiteSmoke"
+                      Background="{StaticResource ContentDialogDimmingThemeBrush}"
                       ItemsSource="{x:Bind Path=GeometryViewModel.Geometry.Indices}" 
                       ItemTemplate="{StaticResource indices_list_template}"/>
         </StackPanel>

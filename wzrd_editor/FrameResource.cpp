@@ -10,7 +10,7 @@ frame_resource::frame_resource(ID3D12Device* device, UINT pass_count, UINT objec
 			cmd_list_allocator.put_void()
 		));
 
-	pass_cb = std::make_unique<upload_buffer<pass_constants>>(device, pass_count, true);
-	material_cb = std::make_unique<upload_buffer<material_constants>>(device, material_count, true);
-	object_cb = std::make_unique<upload_buffer<object_constants>>(device, object_count, true);
+	pass_cb = std::make_unique<upload_buffer<pass_constants>>(device, pass_count, true, false);
+	material_cb = std::make_unique<upload_buffer<material_constants>>(device, material_count, true, false);
+	object_cb = std::make_unique<upload_buffer<object_constants>>(device, object_count, true, false);
 }

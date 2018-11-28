@@ -79,6 +79,7 @@ namespace winrt::wzrd_editor::implementation
 
 		bool m_is_buffer_dynamic = false;
 		bool m_running = false;
+		int32_t m_size_limit = 0;
 		int output_width = 700;
 		int output_height = 700;
 	};

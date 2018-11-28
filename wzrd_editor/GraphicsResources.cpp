@@ -214,10 +214,8 @@ void GraphicsResources::create_depthstencil_buffer()
 
 void GraphicsResources::create_constant_buffers()
 {
-	m_object_cb = std::make_unique<upload_buffer<object_constants>>(m_device.get(), 1, true);
+	m_object_cb = std::make_unique<upload_buffer<object_constants>>(m_device.get(), 1, true, false);
 	m_box_geo = std::make_unique<MeshGeometry>();
-	m_dynamic_vertex_buffer = std::make_unique<upload_buffer<Vertex_tex>>(m_device.get(), 6, false);
-	m_dynamic_index_buffer = std::make_unique<upload_buffer<std::uint16_t>>(m_device.get(), 6, false);
 }
 
 void GraphicsResources::create_rootsignature()
@@ -607,14 +605,15 @@ void GraphicsResources::init_static_buffer(std::vector<Vertex_tex>& vertices)
 	m_box_geo->DrawArgs["box"] = submesh;
 }
 
-void GraphicsResources::init_dynamic_buffer()
+void GraphicsResources::init_dynamic_buffer(int32_t vertex_count, bool is_auto_resize)
 {
 	using namespace DirectX;
 
-	int tmp_element_count = 0;
+	const UINT vbByteSize = vertex_count * sizeof(Vertex_tex);
+	const UINT ibByteSize = vertex_count * sizeof(std::uint16_t);
 
-	const UINT vbByteSize = tmp_element_count * sizeof(Vertex_tex);
-	const UINT ibByteSize = tmp_element_count * sizeof(std::uint16_t);
+	m_dynamic_index_buffer = std::make_unique<upload_buffer<std::uint16_t>>(m_device.get(), vertex_count, false, is_auto_resize);
+	m_dynamic_vertex_buffer = std::make_unique<upload_buffer<Vertex_tex>>(m_device.get(), vertex_count, false, is_auto_resize);
 
 	m_box_geo->VertexBufferGPU.attach(m_dynamic_vertex_buffer->get_resource());
 	m_box_geo->IndexBufferGPU.attach(m_dynamic_index_buffer->get_resource());
@@ -626,7 +625,7 @@ void GraphicsResources::init_dynamic_buffer()
 	m_box_geo->IndexBufferByteSize = ibByteSize;
 
 	SubmeshGeometry submesh;
-	submesh.IndexCount = tmp_element_count;
+	submesh.IndexCount = vertex_count;
 	submesh.StartIndexLocation = 0;
 	submesh.BaseVertexLocation = 0;
 
@@ -645,8 +644,9 @@ D3D12_CPU_DESCRIPTOR_HANDLE GraphicsResources::current_backbuffer_view() const
 void GraphicsResources::update_vbv_content(std::vector<Vertex_tex>& vertices)
 {
 	auto current_size = vertices.size();
+	bool is_safe_to_clear = (m_box_geo && m_dynamic_vertex_buffer && m_dynamic_index_buffer);
 
-	if (current_size == 0)
+	if (current_size == 0 && is_safe_to_clear)
 	{
 		m_box_geo->VertexBufferByteSize = 0;
 		m_box_geo->IndexBufferByteSize = 0;
@@ -654,13 +654,16 @@ void GraphicsResources::update_vbv_content(std::vector<Vertex_tex>& vertices)
 		m_dynamic_vertex_buffer->clear_data();
 		m_dynamic_index_buffer->clear_data();
 	}
-	for (size_t i = 0; i < current_size; ++i)
+	else
 	{
-		m_box_geo->VertexBufferByteSize = current_size * sizeof(Vertex_tex);
-		m_box_geo->IndexBufferByteSize = current_size * sizeof(std::uint16_t);
-		m_box_geo->DrawArgs["box"].IndexCount = current_size;
-		m_dynamic_vertex_buffer->copy_data(i, vertices[i]);
-		m_dynamic_index_buffer->copy_data(i, i);
+		for (size_t i = 0; i < current_size; ++i)
+		{
+			m_box_geo->VertexBufferByteSize = current_size * sizeof(Vertex_tex);
+			m_box_geo->IndexBufferByteSize = current_size * sizeof(std::uint16_t);
+			m_box_geo->DrawArgs["box"].IndexCount = current_size;
+			m_dynamic_vertex_buffer->copy_data(i, vertices[i]);
+			m_dynamic_index_buffer->copy_data(i, i);
+		}
 	}
 }
 

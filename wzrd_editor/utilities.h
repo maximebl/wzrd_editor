@@ -131,7 +131,10 @@ template <typename T>
 class upload_buffer
 {
 public:
-	upload_buffer(ID3D12Device* device, UINT element_count, bool is_constant_buffer) : m_is_constant_buffer(is_constant_buffer)
+	upload_buffer(ID3D12Device* device, UINT element_count, bool is_constant_buffer, bool is_auto_resize) : 
+		m_is_constant_buffer(is_constant_buffer), 
+		m_element_count(element_count), 
+		m_is_auto_resize(is_auto_resize)
 	{
 		m_element_byte_size = sizeof(T);
 
@@ -166,6 +169,9 @@ public:
 
 	upload_buffer(const upload_buffer& rhs) = delete;
 	upload_buffer& operator=(const upload_buffer* rhs) = delete;
+
+	uint32_t m_element_count = 0;
+	bool m_is_auto_resize = false;
 
 	ID3D12Resource* get_resource() const
 	{
