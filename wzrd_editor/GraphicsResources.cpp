@@ -514,6 +514,26 @@ void GraphicsResources::create_vertex_colored_box_geometry()
 	m_box_geo->DrawArgs["box"] = submesh;
 }
 
+void GraphicsResources::swap_upload_buffer(int32_t new_element_count, std::vector<Vertex_tex> vertices)
+{
+	auto current_size = vertices.size();
+	swap_vertex_buffer = std::make_unique<upload_buffer<Vertex_tex>>(m_device.get(), new_element_count, false, true);
+	swap_index_buffer = std::make_unique<upload_buffer<std::uint16_t>>(m_device.get(), new_element_count, false, true);
+
+	m_box_geo->VertexBufferByteSize = new_element_count * sizeof(Vertex_tex);
+	m_box_geo->IndexBufferByteSize = new_element_count * sizeof(std::uint16_t);
+	m_box_geo->DrawArgs["box"].IndexCount = new_element_count;
+
+	for (size_t i = 0; i < current_size; ++i)
+	{
+		swap_vertex_buffer->copy_data(i, vertices[i]);
+		swap_index_buffer->copy_data(i, i);
+	}
+
+	m_box_geo->VertexBufferGPU.copy_from(swap_vertex_buffer->get_resource());
+	m_box_geo->IndexBufferGPU.copy_from(swap_index_buffer->get_resource());
+}
+
 void GraphicsResources::create_texture_geometry(std::vector<Vertex_tex>& vertices)
 {
 	using namespace DirectX;
@@ -612,13 +632,13 @@ void GraphicsResources::init_dynamic_buffer(int32_t vertex_count, bool is_auto_r
 	const UINT vbByteSize = vertex_count * sizeof(Vertex_tex);
 	const UINT ibByteSize = vertex_count * sizeof(std::uint16_t);
 
-	m_dynamic_index_buffer = std::make_unique<upload_buffer<std::uint16_t>>(m_device.get(), vertex_count, false, is_auto_resize);
 	m_dynamic_vertex_buffer = std::make_unique<upload_buffer<Vertex_tex>>(m_device.get(), vertex_count, false, is_auto_resize);
+	m_dynamic_index_buffer = std::make_unique<upload_buffer<std::uint16_t>>(m_device.get(), vertex_count, false, is_auto_resize);
 
 	m_box_geo->VertexBufferGPU.attach(m_dynamic_vertex_buffer->get_resource());
 	m_box_geo->IndexBufferGPU.attach(m_dynamic_index_buffer->get_resource());
-	m_box_geo->Name = "boxGeo";
 
+	m_box_geo->Name = "boxGeo";
 	m_box_geo->VertexByteStride = sizeof(Vertex_tex);
 	m_box_geo->VertexBufferByteSize = vbByteSize;
 	m_box_geo->IndexFormat = DXGI_FORMAT_R16_UINT;

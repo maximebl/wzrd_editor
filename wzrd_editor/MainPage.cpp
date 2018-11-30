@@ -54,22 +54,6 @@ namespace winrt::wzrd_editor::implementation
 		m_graphics_resources.create_rootsignature();
 
 		m_window = Window::Current().CoreWindow().GetForCurrentThread();
-
-		m_render_loop_work_item = WorkItemHandler([this](Windows::Foundation::IAsyncAction action)
-		{
-			m_timer.Reset();
-			ui_thread_work();
-
-			while (m_windowVisible)
-			{
-				m_timer.Tick();
-				if (m_windowVisible)
-				{
-					m_graphics_resources.update();
-					m_graphics_resources.render();
-				}
-			}
-		});
 	}
 
 	Windows::Foundation::IAsyncAction MainPage::ui_thread_work()
@@ -125,7 +109,7 @@ namespace winrt::wzrd_editor::implementation
 				m_vertex_generator.push_vertex(pos_x, pos_y, pos_z, color_r, color_g, color_b, color_a, tex_u, tex_v);
 				m_graphics_resources.update_vbv_content(m_vertex_generator.vertices());
 
-				if (m_geometryViewModel.Geometry().Vertices().Size() == m_graphics_resources.m_dynamic_vertex_buffer->m_element_count)
+				if (!m_graphics_resources.m_dynamic_vertex_buffer->m_is_auto_resize && m_geometryViewModel.Geometry().Vertices().Size() == m_graphics_resources.m_dynamic_vertex_buffer->m_element_count)
 				{
 					VisualStateManager().GoToState(*this, L"buffer_full", false);
 				}
@@ -134,7 +118,8 @@ namespace winrt::wzrd_editor::implementation
 				if (m_graphics_resources.m_dynamic_vertex_buffer->m_is_auto_resize)
 				{
 					// recreate the upload_heap committed resource
-					int x = 1;
+					m_graphics_resources.swap_upload_buffer(10, m_vertex_generator.vertices());
+					
 				}
 				else {
 					VisualStateManager().GoToState(*this, L"buffer_full", false);
@@ -350,13 +335,27 @@ namespace winrt::wzrd_editor::implementation
 		co_return;
 	}
 
-	void MainPage::start_render_loop()
+	winrt::Windows::Foundation::IAsyncAction MainPage::start_render_loop()
 	{
 		if (!m_running)
 		{
 			m_graphics_resources.init_psos();
 			m_running = true;
-			ThreadPool::RunAsync(m_render_loop_work_item);
+
+			co_await winrt::resume_background();
+			m_timer.Reset();
+			ui_thread_work();
+
+			while (m_windowVisible)
+			{
+				m_timer.Tick();
+				if (m_windowVisible)
+				{
+					m_graphics_resources.update();
+					m_graphics_resources.render();
+				}
+			}
+
 		}
 	}
 }

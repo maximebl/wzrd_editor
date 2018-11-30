@@ -96,7 +96,10 @@ public:
 	std::unique_ptr<upload_buffer<object_constants>> m_object_cb;
 	std::unique_ptr<upload_buffer<Vertex_tex>> m_dynamic_vertex_buffer;
 	std::unique_ptr<upload_buffer<std::uint16_t>> m_dynamic_index_buffer;
+	std::unique_ptr<upload_buffer<Vertex_tex>> swap_vertex_buffer;
+	std::unique_ptr<upload_buffer<std::uint16_t>> swap_index_buffer;
 
+	void swap_upload_buffer(int32_t new_element_count, std::vector<Vertex_tex> vertices);
 	void create_texture_geometry(std::vector<Vertex_tex>& vertices);
 	void create_vertex_colored_box_geometry();
 	void update_vbv_content(std::vector<Vertex_tex>& vertices);

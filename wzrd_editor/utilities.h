@@ -191,9 +191,9 @@ public:
 		std::memcpy(&m_mapped_data[element_index * m_element_byte_size], &data, sizeof(T));
 	}
 
+	unsigned char* m_mapped_data = nullptr;
 private:
 	winrt::com_ptr<ID3D12Resource> m_upload_buffer;
-	unsigned char* m_mapped_data = nullptr;
 	UINT m_element_byte_size = 0;
 	bool m_is_constant_buffer = false;
 };

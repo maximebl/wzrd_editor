@@ -32,7 +32,7 @@ namespace winrt::wzrd_editor::implementation
 		void set_vertices_list_visibility();
 		void set_shaders_list_visibility();
 		void set_textures_visibility();
-		void start_render_loop();
+		winrt::Windows::Foundation::IAsyncAction start_render_loop();
 
 	public:
 		wzrd_editor::GeometryViewModel GeometryViewModel();
@@ -63,7 +63,6 @@ namespace winrt::wzrd_editor::implementation
 		GameTimer m_timer;
 		Windows::UI::Core::CoreWindow m_window = nullptr;
 
-		Windows::System::Threading::WorkItemHandler m_render_loop_work_item = nullptr;
 		bool m_windowVisible = false;
 		double m_current_slider_x = 0;
 		double m_current_slider_y = 0;
