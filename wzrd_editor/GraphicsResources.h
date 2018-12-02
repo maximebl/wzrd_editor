@@ -122,6 +122,6 @@ public:
 		vertex = 0,
 		pixel = 1
 	};
-
+	bool is_using_swap_buffer = false;
 	rendering_mode m_current_rendering_mode{ rendering_mode::points };
 };

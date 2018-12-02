@@ -85,14 +85,22 @@ struct MeshGeometry
 	winrt::com_ptr<ID3DBlob> IndexBufferCPU = nullptr;
 
 	winrt::com_ptr<ID3D12Resource> VertexBufferGPU = nullptr;
+	winrt::com_ptr<ID3D12Resource> SwapVertexBufferGPU = nullptr;
 	winrt::com_ptr<ID3D12Resource> IndexBufferGPU = nullptr;
+	winrt::com_ptr<ID3D12Resource> SwapIndexBufferGPU = nullptr;
 
 	winrt::com_ptr<ID3D12Resource> VertexBufferUploader = nullptr;
 	winrt::com_ptr<ID3D12Resource> IndexBufferUploader = nullptr;
 
 	UINT VertexByteStride = 0;
+	UINT SwapVertexByteStride = 0;
+
 	UINT VertexBufferByteSize = 0;
+	UINT SwapVertexBufferByteSize = 0;
+
 	UINT IndexBufferByteSize = 0;
+	UINT SwapIndexBufferByteSize = 0;
+
 	DXGI_FORMAT IndexFormat = DXGI_FORMAT_R16_UINT;
 
 	std::unordered_map<std::string, SubmeshGeometry> DrawArgs;
@@ -106,12 +114,30 @@ struct MeshGeometry
 		return vbv;
 	}
 
+	D3D12_VERTEX_BUFFER_VIEW SwapBufferView() const
+	{
+		D3D12_VERTEX_BUFFER_VIEW vbv;
+		vbv.BufferLocation = SwapVertexBufferGPU->GetGPUVirtualAddress();
+		vbv.StrideInBytes = SwapVertexByteStride;
+		vbv.SizeInBytes = SwapVertexBufferByteSize;
+		return vbv;
+	}
+
 	D3D12_INDEX_BUFFER_VIEW IndexBufferView() const
 	{
 		D3D12_INDEX_BUFFER_VIEW ibv;
 		ibv.BufferLocation = IndexBufferGPU->GetGPUVirtualAddress();
 		ibv.Format = IndexFormat;
 		ibv.SizeInBytes = IndexBufferByteSize;
+		return ibv;
+	}
+
+	D3D12_INDEX_BUFFER_VIEW SwapIndexBufferView() const
+	{
+		D3D12_INDEX_BUFFER_VIEW ibv;
+		ibv.BufferLocation = SwapIndexBufferGPU->GetGPUVirtualAddress();
+		ibv.Format = IndexFormat;
+		ibv.SizeInBytes = SwapIndexBufferByteSize;
 		return ibv;
 	}
 

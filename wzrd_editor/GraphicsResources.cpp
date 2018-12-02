@@ -529,9 +529,12 @@ void GraphicsResources::swap_upload_buffer(int32_t new_element_count, std::vecto
 		swap_vertex_buffer->copy_data(i, vertices[i]);
 		swap_index_buffer->copy_data(i, i);
 	}
-
-	m_box_geo->VertexBufferGPU.copy_from(swap_vertex_buffer->get_resource());
-	m_box_geo->IndexBufferGPU.copy_from(swap_index_buffer->get_resource());
+	m_box_geo->SwapVertexBufferByteSize = new_element_count * sizeof(Vertex_tex);
+	m_box_geo->SwapVertexByteStride = sizeof(Vertex_tex);
+	m_box_geo->SwapVertexBufferGPU.attach(swap_vertex_buffer->get_resource());
+	is_using_swap_buffer = true;
+	//m_box_geo->VertexBufferGPU.copy_from(swap_vertex_buffer->get_resource());
+	//m_box_geo->IndexBufferGPU.copy_from(swap_index_buffer->get_resource());
 }
 
 void GraphicsResources::create_texture_geometry(std::vector<Vertex_tex>& vertices)
@@ -795,7 +798,14 @@ void GraphicsResources::render()
 	//m_graphics_cmdlist->SetGraphicsRootDescriptorTable(0, m_srv_heap->GetGPUDescriptorHandleForHeapStart());
 	m_graphics_cmdlist->SetGraphicsRootConstantBufferView(0, m_object_cb->get_resource()->GetGPUVirtualAddress());
 
-	m_graphics_cmdlist->IASetVertexBuffers(0, 1, &m_box_geo->VertexBufferView());
+	if (is_using_swap_buffer)
+	{
+		m_graphics_cmdlist->IASetVertexBuffers(0, 1, &m_box_geo->SwapBufferView());
+	}
+	else
+	{
+		m_graphics_cmdlist->IASetVertexBuffers(0, 1, &m_box_geo->VertexBufferView());
+	}
 	m_graphics_cmdlist->IASetIndexBuffer(&m_box_geo->IndexBufferView());
 
 	m_graphics_cmdlist->DrawIndexedInstanced(m_box_geo->DrawArgs["box"].IndexCount, 1, 0, 0, 0);
