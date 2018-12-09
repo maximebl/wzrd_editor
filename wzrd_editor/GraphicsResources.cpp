@@ -432,156 +432,66 @@ void GraphicsResources::execute_cmd_list()
 	m_cmd_queue->ExecuteCommandLists(cmd_lists.size(), &cmd_lists[0]);
 }
 
-void GraphicsResources::create_vertex_colored_box_geometry()
-{
-	using namespace DirectX;
-
-	std::array<Vertex, 8> vertices =
-	{
-		Vertex({ XMFLOAT3(-1.0f, -1.0f, -1.0f), XMFLOAT4(Colors::White) }),
-		Vertex({ XMFLOAT3(-1.0f, +1.0f, -1.0f), XMFLOAT4(Colors::Black) }),
-		Vertex({ XMFLOAT3(+1.0f, +1.0f, -1.0f), XMFLOAT4(Colors::Red) }),
-		Vertex({ XMFLOAT3(+1.0f, -1.0f, -1.0f), XMFLOAT4(Colors::Green) }),
-		Vertex({ XMFLOAT3(-1.0f, -1.0f, +1.0f), XMFLOAT4(Colors::Blue) }),
-		Vertex({ XMFLOAT3(-1.0f, +1.0f, +1.0f), XMFLOAT4(Colors::Yellow) }),
-		Vertex({ XMFLOAT3(+1.0f, +1.0f, +1.0f), XMFLOAT4(Colors::Cyan) }),
-		Vertex({ XMFLOAT3(+1.0f, -1.0f, +1.0f), XMFLOAT4(Colors::Magenta) })
-	};
-
-	std::array<std::uint16_t, 36> indices =
-	{
-		// front face
-		0, 1, 2,
-		0, 2, 3,
-
-		// back face
-		4, 6, 5,
-		4, 7, 6,
-
-		// left face
-		4, 5, 1,
-		4, 1, 0,
-
-		// right face
-		3, 2, 6,
-		3, 6, 7,
-
-		// top face
-		1, 5, 6,
-		1, 6, 2,
-
-		// bottom face
-		4, 0, 3,
-		4, 3, 7
-	};
-
-	const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
-	const UINT ibByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
-
-	m_box_geo = std::make_unique<MeshGeometry>();
-	m_box_geo->Name = "boxGeo";
-
-	winrt::check_hresult(D3DCreateBlob(vbByteSize, m_box_geo->VertexBufferCPU.put()));
-	CopyMemory(m_box_geo->VertexBufferCPU->GetBufferPointer(), vertices.data(), vbByteSize);
-	m_box_geo->VertexBufferGPU = Utilities::create_default_buffer(
-		m_device.get(),
-		m_graphics_cmdlist.get(),
-		vertices.data(),
-		vbByteSize,
-		m_box_geo->VertexBufferUploader
-	);
-
-	winrt::check_hresult(D3DCreateBlob(ibByteSize, m_box_geo->IndexBufferCPU.put()));
-	CopyMemory(m_box_geo->IndexBufferCPU->GetBufferPointer(), indices.data(), ibByteSize);
-	m_box_geo->IndexBufferGPU = Utilities::create_default_buffer(
-		m_device.get(),
-		m_graphics_cmdlist.get(),
-		indices.data(),
-		ibByteSize,
-		m_box_geo->IndexBufferUploader
-	);
-
-	m_box_geo->VertexByteStride = sizeof(Vertex);
-	m_box_geo->VertexBufferByteSize = vbByteSize;
-	m_box_geo->IndexFormat = DXGI_FORMAT_R16_UINT;
-	m_box_geo->IndexBufferByteSize = ibByteSize;
-
-	SubmeshGeometry submesh;
-	submesh.IndexCount = (UINT)indices.size();
-	submesh.StartIndexLocation = 0;
-	submesh.BaseVertexLocation = 0;
-
-	m_box_geo->DrawArgs["box"] = submesh;
-}
-
 void GraphicsResources::swap_upload_buffer(int32_t new_element_count, std::vector<Vertex_tex> vertices)
 {
 	auto current_size = vertices.size();
-	swap_vertex_buffer = std::make_unique<upload_buffer<Vertex_tex>>(m_device.get(), new_element_count, false, true);
-	swap_index_buffer = std::make_unique<upload_buffer<std::uint16_t>>(m_device.get(), new_element_count, false, true);
-
-	m_box_geo->VertexBufferByteSize = new_element_count * sizeof(Vertex_tex);
-	m_box_geo->IndexBufferByteSize = new_element_count * sizeof(std::uint16_t);
-	m_box_geo->DrawArgs["box"].IndexCount = new_element_count;
-
-	for (size_t i = 0; i < current_size; ++i)
+	
+	if (!is_using_swap_buffer)
 	{
-		swap_vertex_buffer->copy_data(i, vertices[i]);
-		swap_index_buffer->copy_data(i, i);
+		// discard m_swap_buffer if already exist
+		swap_vertex_buffer.reset();
+		swap_index_buffer.reset();
+		swap_vertex_buffer = std::make_unique<upload_buffer<Vertex_tex>>(m_device.get(), new_element_count, false, true);
+		swap_index_buffer = std::make_unique<upload_buffer<std::uint16_t>>(m_device.get(), new_element_count, false, true);
+
+		m_box_geo->SwapVertexBufferByteSize = new_element_count * sizeof(Vertex_tex);
+		m_box_geo->SwapIndexBufferByteSize = new_element_count * sizeof(std::uint16_t);
+		m_box_geo->DrawArgs["box"].IndexCount = new_element_count;
+		//m_box_geo->SwapVertexByteStride = sizeof(Vertex_tex);
+
+		for (size_t i = 0; i < current_size; ++i)
+		{
+			swap_vertex_buffer->copy_data(i, vertices[i]);
+			swap_index_buffer->copy_data(i, i);
+		}
+		m_box_geo->SwapVertexBufferGPU.detach();
+		m_box_geo->SwapIndexBufferGPU.detach();
+		m_box_geo->SwapVertexBufferGPU.attach(swap_vertex_buffer->get_resource());
+		m_box_geo->SwapIndexBufferGPU.attach(swap_index_buffer->get_resource());
+
+		m_box_geo->SwapVertexBufferGPU->SetName(std::wstring(L"swap_vertex_buffer_GPU").c_str());
+		m_box_geo->SwapIndexBufferGPU->SetName(std::wstring(L"swap_index_buffer_GPU").c_str());
+
+		is_using_swap_buffer = true;
 	}
-	m_box_geo->SwapVertexBufferByteSize = new_element_count * sizeof(Vertex_tex);
-	m_box_geo->SwapVertexByteStride = sizeof(Vertex_tex);
-	m_box_geo->SwapVertexBufferGPU.attach(swap_vertex_buffer->get_resource());
-	is_using_swap_buffer = true;
-	//m_box_geo->VertexBufferGPU.copy_from(swap_vertex_buffer->get_resource());
-	//m_box_geo->IndexBufferGPU.copy_from(swap_index_buffer->get_resource());
-}
+	else {
+		// discard m_dynamic_buffer
+		// create new upload_buffer
+		m_dynamic_vertex_buffer.reset();
+		m_dynamic_index_buffer.reset();
+		m_dynamic_vertex_buffer = std::make_unique<upload_buffer<Vertex_tex>>(m_device.get(), new_element_count, false, true);
+		m_dynamic_index_buffer = std::make_unique<upload_buffer<std::uint16_t>>(m_device.get(), new_element_count, false, true);
 
-void GraphicsResources::create_texture_geometry(std::vector<Vertex_tex>& vertices)
-{
-	using namespace DirectX;
+		m_box_geo->VertexBufferByteSize = new_element_count * sizeof(Vertex_tex);
+		m_box_geo->IndexBufferByteSize = new_element_count * sizeof(std::uint16_t);
+		m_box_geo->DrawArgs["box"].IndexCount = new_element_count;
+		// assign new data to it
+		for (size_t i = 0; i < current_size; ++i)
+		{
+			m_dynamic_vertex_buffer->copy_data(i, vertices[i]);
+			m_dynamic_index_buffer->copy_data(i, i);
+		}
+		// assign its resource pointer to the VertexBufferGPU
+		m_box_geo->VertexBufferGPU.detach();
+		m_box_geo->IndexBufferGPU.detach();
+		m_box_geo->VertexBufferGPU.attach(m_dynamic_vertex_buffer->get_resource());
+		m_box_geo->IndexBufferGPU.attach(m_dynamic_index_buffer->get_resource());
 
-	std::vector<std::uint16_t> indices = { 0,1,2,3,4,5 };
+		m_box_geo->VertexBufferGPU->SetName(std::wstring(L"vertex_buffer_GPU").c_str());
+		m_box_geo->IndexBufferGPU->SetName(std::wstring(L"index_buffer_GPU").c_str());
 
-	const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex_tex);
-	const UINT ibByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
-
-	m_box_geo = std::make_unique<MeshGeometry>();
-	m_box_geo->Name = "boxGeo";
-
-	winrt::check_hresult(D3DCreateBlob(vbByteSize, m_box_geo->VertexBufferCPU.put()));
-	CopyMemory(m_box_geo->VertexBufferCPU->GetBufferPointer(), vertices.data(), vbByteSize);
-
-	m_box_geo->VertexBufferGPU = Utilities::create_default_buffer(
-		m_device.get(),
-		m_graphics_cmdlist.get(),
-		vertices.data(),
-		vbByteSize,
-		m_box_geo->VertexBufferUploader
-	);
-
-	winrt::check_hresult(D3DCreateBlob(ibByteSize, m_box_geo->IndexBufferCPU.put()));
-	CopyMemory(m_box_geo->IndexBufferCPU->GetBufferPointer(), indices.data(), ibByteSize);
-	m_box_geo->IndexBufferGPU = Utilities::create_default_buffer(
-		m_device.get(),
-		m_graphics_cmdlist.get(),
-		indices.data(),
-		ibByteSize,
-		m_box_geo->IndexBufferUploader
-	);
-
-	m_box_geo->VertexByteStride = sizeof(Vertex_tex);
-	m_box_geo->VertexBufferByteSize = vbByteSize;
-	m_box_geo->VertexBufferByteSize = sizeof(Vertex_tex) * vertices.size();
-	m_box_geo->IndexFormat = DXGI_FORMAT_R16_UINT;
-	m_box_geo->IndexBufferByteSize = ibByteSize;
-
-	SubmeshGeometry submesh;
-	submesh.IndexCount = (UINT)indices.size();
-	submesh.StartIndexLocation = 0;
-	submesh.BaseVertexLocation = 0;
-
-	m_box_geo->DrawArgs["box"] = submesh;
+		is_using_swap_buffer = false;
+	}
 }
 
 void GraphicsResources::init_static_buffer(std::vector<Vertex_tex>& vertices)
@@ -595,8 +505,8 @@ void GraphicsResources::init_static_buffer(std::vector<Vertex_tex>& vertices)
 
 	m_box_geo->Name = "boxGeo";
 
-	winrt::check_hresult(D3DCreateBlob(vbByteSize, m_box_geo->VertexBufferCPU.put()));
-	CopyMemory(m_box_geo->VertexBufferCPU->GetBufferPointer(), vertices.data(), vbByteSize);
+	//winrt::check_hresult(D3DCreateBlob(vbByteSize, m_box_geo->VertexBufferCPU.put()));
+	//CopyMemory(m_box_geo->VertexBufferCPU->GetBufferPointer(), vertices.data(), vbByteSize);
 	m_box_geo->VertexBufferGPU = Utilities::create_default_buffer(
 		m_device.get(),
 		m_graphics_cmdlist.get(),
@@ -605,8 +515,8 @@ void GraphicsResources::init_static_buffer(std::vector<Vertex_tex>& vertices)
 		m_box_geo->VertexBufferUploader
 	);
 
-	winrt::check_hresult(D3DCreateBlob(ibByteSize, m_box_geo->IndexBufferCPU.put()));
-	CopyMemory(m_box_geo->IndexBufferCPU->GetBufferPointer(), vertices.data(), ibByteSize);
+	//winrt::check_hresult(D3DCreateBlob(ibByteSize, m_box_geo->IndexBufferCPU.put()));
+	//CopyMemory(m_box_geo->IndexBufferCPU->GetBufferPointer(), vertices.data(), ibByteSize);
 	m_box_geo->IndexBufferGPU = Utilities::create_default_buffer(
 		m_device.get(),
 		m_graphics_cmdlist.get(),
@@ -801,12 +711,13 @@ void GraphicsResources::render()
 	if (is_using_swap_buffer)
 	{
 		m_graphics_cmdlist->IASetVertexBuffers(0, 1, &m_box_geo->SwapBufferView());
+		m_graphics_cmdlist->IASetIndexBuffer(&m_box_geo->SwapIndexBufferView());
 	}
 	else
 	{
 		m_graphics_cmdlist->IASetVertexBuffers(0, 1, &m_box_geo->VertexBufferView());
+		m_graphics_cmdlist->IASetIndexBuffer(&m_box_geo->IndexBufferView());
 	}
-	m_graphics_cmdlist->IASetIndexBuffer(&m_box_geo->IndexBufferView());
 
 	m_graphics_cmdlist->DrawIndexedInstanced(m_box_geo->DrawArgs["box"].IndexCount, 1, 0, 0, 0);
 

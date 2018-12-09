@@ -183,13 +183,15 @@ public:
 			));
 
 		winrt::check_hresult(
+			// Map: Gets a CPU pointer to the specified subresource (0) in the m_upload_buffer Resource (m_upload_buffer).
+			// Also invalidate the CPU cache (if needed) so that CPU reads to this address reflect modifications made by the GPU.
+			// m_mapped_data is the pointer to the pointer to the resource data.
 			m_upload_buffer->Map(0, nullptr, reinterpret_cast<void**>(&m_mapped_data))
 		);
 	}
 
 	~upload_buffer()
 	{
-		clear_data();
 		m_mapped_data = nullptr;
 	}
 
