@@ -100,7 +100,10 @@ public:
 	std::unique_ptr<upload_buffer<std::uint16_t>> swap_index_buffer;
 
 	void swap_upload_buffer(int32_t new_element_count, std::vector<Vertex_tex> vertices);
-	void update_vbv_content(std::vector<Vertex_tex>& vertices);
+	void update_vbv_content(std::vector<Vertex_tex>& vertices, std::unique_ptr<upload_buffer<Vertex_tex>>& target_vertex_buffer, std::unique_ptr<upload_buffer<std::uint16_t>>& target_index_buffer);
+	void update_swap_buffer(std::vector<Vertex_tex>& vertices);
+	void update_dynamic_buffer(std::vector<Vertex_tex>& vertices);
+	void update_current_buffer(std::vector<Vertex_tex>& vertices);
 	void init_psos();
 
 	void update();

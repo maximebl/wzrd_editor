@@ -107,7 +107,8 @@ namespace winrt::wzrd_editor::implementation
 			if (m_geometryViewModel.Geometry().Vertices().Size() <= current_buffer_limit)
 			{
 				m_vertex_generator.push_vertex(pos_x, pos_y, pos_z, color_r, color_g, color_b, color_a, tex_u, tex_v);
-				m_graphics_resources.update_vbv_content(m_vertex_generator.vertices());
+				m_graphics_resources.update_dynamic_buffer(m_vertex_generator.vertices());
+				//m_graphics_resources.update_vbv_content(m_vertex_generator.vertices());
 
 				if (!m_graphics_resources.m_dynamic_vertex_buffer->m_is_auto_resize && m_geometryViewModel.Geometry().Vertices().Size() == current_buffer_limit)
 				{
@@ -120,7 +121,10 @@ namespace winrt::wzrd_editor::implementation
 					// recreate the upload_heap committed resource
 					current_buffer_limit = 10;
 					m_graphics_resources.swap_upload_buffer(10, m_vertex_generator.vertices());
-					
+					// update the swapped buffer with the newly added vertex
+					m_vertex_generator.push_vertex(pos_x, pos_y, pos_z, color_r, color_g, color_b, color_a, tex_u, tex_v);
+					m_graphics_resources.update_swap_buffer(m_vertex_generator.vertices());
+
 				}
 				else {
 					VisualStateManager().GoToState(*this, L"buffer_full", false);
@@ -173,7 +177,8 @@ namespace winrt::wzrd_editor::implementation
 	{
 		m_vertex_generator.vertices().clear();
 		m_geometryViewModel.Geometry().Vertices().Clear();
-		m_graphics_resources.update_vbv_content(m_vertex_generator.vertices());
+		m_graphics_resources.update_current_buffer(m_vertex_generator.vertices());
+		//m_graphics_resources.update_vbv_content(m_vertex_generator.vertices());
 		set_vertices_list_visibility();
 		co_return;
 	}
@@ -194,7 +199,7 @@ namespace winrt::wzrd_editor::implementation
 		co_return;
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::onclick_texture_picker(Windows::Foundation::IInspectable const&, Windows::UI::Xaml::RoutedEventArgs const& )
+	Windows::Foundation::IAsyncAction MainPage::onclick_texture_picker(Windows::Foundation::IInspectable const&, Windows::UI::Xaml::RoutedEventArgs const&)
 	{
 		auto texture_file_bytes = co_await Utilities::pick_file(winrt::hstring(L".dds"));
 
@@ -304,7 +309,8 @@ namespace winrt::wzrd_editor::implementation
 			current_buffer_limit = dialog.buffer_size();
 			m_graphics_resources.init_dynamic_buffer(dialog.buffer_size(), dialog.is_auto_resizeable());
 			m_vertex_generator.regenerate_vertices_from_model(m_geometryViewModel.Geometry().Vertices());
-			m_graphics_resources.update_vbv_content(m_vertex_generator.vertices());
+			m_graphics_resources.update_current_buffer(m_vertex_generator.vertices());
+			//m_graphics_resources.update_vbv_content(m_vertex_generator.vertices());
 
 			start_render_loop();
 			co_return;
@@ -333,7 +339,8 @@ namespace winrt::wzrd_editor::implementation
 			m_vertex_generator.vertices()[i].TexC.y = m_geometryViewModel.Geometry().Vertices().GetAt(i).try_as<wzrd_editor::implementation::Vertex>()->v();
 		}
 
-		m_graphics_resources.update_vbv_content(m_vertex_generator.vertices());
+		//m_graphics_resources.update_vbv_content(m_vertex_generator.vertices());
+		m_graphics_resources.update_current_buffer(m_vertex_generator.vertices());
 		co_return;
 	}
 
