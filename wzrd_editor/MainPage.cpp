@@ -119,18 +119,16 @@ namespace winrt::wzrd_editor::implementation
 				if (m_graphics_resources.m_dynamic_vertex_buffer->m_is_auto_resize)
 				{
 					// recreate the upload_heap committed resource
-					current_buffer_limit = 10;
-					m_graphics_resources.swap_upload_buffer(10, m_vertex_generator.vertices());
+					current_buffer_limit += m_buffer_resize_increment;
+					m_graphics_resources.swap_upload_buffer(current_buffer_limit, m_vertex_generator.vertices());
 					// update the swapped buffer with the newly added vertex
 					m_vertex_generator.push_vertex(pos_x, pos_y, pos_z, color_r, color_g, color_b, color_a, tex_u, tex_v);
 					m_graphics_resources.update_swap_buffer(m_vertex_generator.vertices());
-
 				}
 				else {
 					VisualStateManager().GoToState(*this, L"buffer_full", false);
 				}
 			}
-
 		}
 
 		set_vertices_list_visibility();
@@ -178,7 +176,6 @@ namespace winrt::wzrd_editor::implementation
 		m_vertex_generator.vertices().clear();
 		m_geometryViewModel.Geometry().Vertices().Clear();
 		m_graphics_resources.update_current_buffer(m_vertex_generator.vertices());
-		//m_graphics_resources.update_vbv_content(m_vertex_generator.vertices());
 		set_vertices_list_visibility();
 		co_return;
 	}
@@ -297,7 +294,7 @@ namespace winrt::wzrd_editor::implementation
 	{
 		auto dialog = winrt::make<wzrd_editor::implementation::buffer_size_select_dialog>();
 		auto dialog_result = co_await dialog.ShowAsync();
-
+		
 		switch (dialog_result)
 		{
 		case winrt::Windows::UI::Xaml::Controls::ContentDialogResult::None:
@@ -307,10 +304,10 @@ namespace winrt::wzrd_editor::implementation
 			VisualStateManager().GoToState(*this, L"dynamic_buffer_selected", false);
 			m_is_buffer_dynamic = true;
 			current_buffer_limit = dialog.buffer_size();
+			m_buffer_resize_increment = dialog.buffer_increment_size();
 			m_graphics_resources.init_dynamic_buffer(dialog.buffer_size(), dialog.is_auto_resizeable());
 			m_vertex_generator.regenerate_vertices_from_model(m_geometryViewModel.Geometry().Vertices());
 			m_graphics_resources.update_current_buffer(m_vertex_generator.vertices());
-			//m_graphics_resources.update_vbv_content(m_vertex_generator.vertices());
 
 			start_render_loop();
 			co_return;

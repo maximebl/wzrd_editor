@@ -8,6 +8,7 @@
     mc:Ignorable="d" HorizontalAlignment="Stretch" Margin="0,0,0,0" VerticalAlignment="Stretch">
     
     <Page.Resources>
+    
         <DataTemplate x:Key="textures_list_header">
             <Grid HorizontalAlignment="Stretch">
                 <Grid.ColumnDefinitions>

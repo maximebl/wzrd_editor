@@ -14,7 +14,6 @@
     CloseButtonText="Cancel"
     DefaultButton="Primary"
     >
-
     <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
         <!-- Content body -->
         <TextBlock Text="Choose how many vertices you would like to allocate memory for." TextWrapping="Wrap" />
@@ -32,6 +31,19 @@
                 <SymbolIcon Symbol="Important" ToolTipService.ToolTip="This is an expensive operation. It will cause the underlying default heap to be replaced by a new larger one." />
             </StackPanel>
         </CheckBox>
+        <StackPanel x:Name="resize_options" Visibility="{x:Bind is_auto_resizeable, Mode=OneWay}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">
+            <TextBlock Text="Increment step size"></TextBlock>
+            <Slider
+                Value="{x:Bind buffer_increment_size, Mode=TwoWay}"
+                Minimum="1"
+                Maximum="100"
+                SnapsTo="Ticks"
+                TickFrequency="1"
+                TickPlacement="Inline"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch" 
+                HorizontalContentAlignment="Stretch"
+                />
+        </StackPanel>
     </StackPanel>
-
 </ContentDialog>

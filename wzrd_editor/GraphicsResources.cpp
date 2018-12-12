@@ -12,13 +12,14 @@ GraphicsResources::~GraphicsResources()
 
 void GraphicsResources::enable_debug_layer()
 {
-	winrt::com_ptr<ID3D12Debug> debugController;
+	winrt::com_ptr<ID3D12Debug1> debugController;
 	winrt::check_hresult(
 		D3D12GetDebugInterface(
-			winrt::guid_of<ID3D12Debug>(), debugController.put_void()
+			winrt::guid_of<ID3D12Debug1>(), debugController.put_void()
 		)
 	);
 	debugController->EnableDebugLayer();
+	debugController->SetEnableGPUBasedValidation(true);
 }
 
 void GraphicsResources::create_factory()

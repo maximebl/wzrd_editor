@@ -15,6 +15,9 @@ namespace winrt::wzrd_editor::implementation
         int32_t buffer_size();
         void buffer_size(int32_t value);
 
+        int32_t buffer_increment_size();
+        void buffer_increment_size(int32_t value);
+
 		void PropertyChanged(winrt::event_token const& token) noexcept;
 		winrt::event_token PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& handler);
 
@@ -22,6 +25,7 @@ namespace winrt::wzrd_editor::implementation
 		winrt::event<Windows::UI::Xaml::Data::PropertyChangedEventHandler> m_propertyChanged;
 		bool m_is_auto_resizeable = true;
 		int32_t m_buffer_size = 0;
+		int32_t m_buffer_increment_size = 0;
 	};
 }
 

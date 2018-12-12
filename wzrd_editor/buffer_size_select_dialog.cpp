@@ -24,7 +24,6 @@ namespace winrt::wzrd_editor::implementation
 		m_propertyChanged(*this, winrt::Windows::UI::Xaml::Data::PropertyChangedEventArgs{ L"is_auto_resizeable" });
 	}
 
-
     int32_t buffer_size_select_dialog::buffer_size()
     {
 		return m_buffer_size;
@@ -36,6 +35,16 @@ namespace winrt::wzrd_editor::implementation
 		m_propertyChanged(*this, winrt::Windows::UI::Xaml::Data::PropertyChangedEventArgs{ L"buffer_size" });
     }
 
+    int32_t buffer_size_select_dialog::buffer_increment_size()
+    {
+		return m_buffer_increment_size;
+    }
+
+    void buffer_size_select_dialog::buffer_increment_size(int32_t value)
+    {
+		m_buffer_increment_size = value;
+		m_propertyChanged(*this, winrt::Windows::UI::Xaml::Data::PropertyChangedEventArgs{ L"buffer_increment_size" });
+    }
 
     winrt::event_token buffer_size_select_dialog::PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& handler)
     {

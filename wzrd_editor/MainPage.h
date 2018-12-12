@@ -77,6 +77,7 @@ namespace winrt::wzrd_editor::implementation
 		std::unordered_map<std::string, std::unique_ptr<Material>> m_materials;
 
 		int32_t current_buffer_limit = 0;
+		int32_t m_buffer_resize_increment = 0;
 		bool m_is_buffer_dynamic = false;
 		bool m_running = false;
 		int32_t m_size_limit = 0;

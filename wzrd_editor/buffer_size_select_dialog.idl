@@ -5,6 +5,7 @@ namespace wzrd_editor
 	{
 		buffer_size_select_dialog();
 		Int32 buffer_size{ get; set; };
+		Int32 buffer_increment_size{ get; set; };
 		Boolean is_auto_resizeable{ get; set; };
 	}
 }
