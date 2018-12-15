@@ -4,11 +4,10 @@
     <ApplicationDefinition Include="App.xaml" />
   </ItemGroup>
   <ItemGroup>
-    <Page Include="MainPage.xaml" />
     <Page Include="buffer_size_select_dialog.xaml">
       <Filter>views</Filter>
     </Page>
-    <Page Include="BlankUserControl.xaml">
+    <Page Include="MainPage.xaml">
       <Filter>views</Filter>
     </Page>
   </ItemGroup>
@@ -40,12 +39,9 @@
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="App.cpp" />
     <ClCompile Include="MainPage.cpp" />
-    <ClCompile Include="Generated Files\module.g.cpp" />
     <ClCompile Include="DDSTextureLoader.h" />
     <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="utilities.cpp" />
-    <ClCompile Include="GeometryGenerator.cpp" />
-    <ClCompile Include="FrameResource.cpp" />
     <ClCompile Include="MathHelper.cpp" />
     <ClCompile Include="GameTimer.cpp" />
     <ClCompile Include="GraphicsResources.cpp" />
@@ -72,7 +68,6 @@
     <ClInclude Include="MainPage.h" />
     <ClInclude Include="d3dx12.h" />
     <ClInclude Include="utilities.h" />
-    <ClInclude Include="GeometryGenerator.h" />
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="MathHelper.h" />
     <ClInclude Include="GameTimer.h" />
@@ -90,7 +85,6 @@
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Vertex.h" />
-    <ClInclude Include="resource.h" />
     <ClInclude Include="BlankUserControl.h" />
     <ClInclude Include="buffer_size_select_dialog.h" />
   </ItemGroup>
@@ -137,9 +131,6 @@
     <Filter Include="views">
       <UniqueIdentifier>{4070b2eb-2179-4235-87ba-2b5a78f74d25}</UniqueIdentifier>
     </Filter>
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="readme.txt" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="wzrd_editor.rc" />

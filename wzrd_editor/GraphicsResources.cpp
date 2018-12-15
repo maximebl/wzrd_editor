@@ -221,13 +221,6 @@ void GraphicsResources::create_constant_buffers()
 
 void GraphicsResources::create_rootsignature()
 {
-	CD3DX12_DESCRIPTOR_RANGE srv_table;
-	srv_table.Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
-
-	//CD3DX12_ROOT_PARAMETER root_parameters[2];
-	//root_parameters[0].InitAsDescriptorTable(1, &srv_table, D3D12_SHADER_VISIBILITY_PIXEL);
-	//root_parameters[1].InitAsConstantBufferView(0);
-
 	CD3DX12_ROOT_PARAMETER root_parameters[1];
 	root_parameters[0].InitAsConstantBufferView(0);
 
@@ -430,7 +423,7 @@ void GraphicsResources::execute_cmd_list()
 {
 	winrt::check_hresult(m_graphics_cmdlist->Close());
 	std::array<ID3D12CommandList*, 1> cmd_lists = { m_graphics_cmdlist.get() };
-	m_cmd_queue->ExecuteCommandLists(cmd_lists.size(), &cmd_lists[0]);
+	m_cmd_queue->ExecuteCommandLists((UINT)cmd_lists.size(), &cmd_lists[0]);
 }
 
 void GraphicsResources::swap_upload_buffer(int32_t new_element_count, std::vector<Vertex_tex> vertices)
@@ -502,13 +495,11 @@ void GraphicsResources::init_static_buffer(std::vector<Vertex_tex>& vertices)
 
 	std::vector<std::uint16_t> indices = { 0,1,2,3,4,5 };
 
-	const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex);
+	const UINT vbByteSize = (UINT)vertices.size() * sizeof(Vertex_tex);
 	const UINT ibByteSize = (UINT)indices.size() * sizeof(std::uint16_t);
 
 	m_box_geo->Name = "boxGeo";
 
-	//winrt::check_hresult(D3DCreateBlob(vbByteSize, m_box_geo->VertexBufferCPU.put()));
-	//CopyMemory(m_box_geo->VertexBufferCPU->GetBufferPointer(), vertices.data(), vbByteSize);
 	m_box_geo->VertexBufferGPU = Utilities::create_default_buffer(
 		m_device.get(),
 		m_graphics_cmdlist.get(),
@@ -517,8 +508,6 @@ void GraphicsResources::init_static_buffer(std::vector<Vertex_tex>& vertices)
 		m_box_geo->VertexBufferUploader
 	);
 
-	//winrt::check_hresult(D3DCreateBlob(ibByteSize, m_box_geo->IndexBufferCPU.put()));
-	//CopyMemory(m_box_geo->IndexBufferCPU->GetBufferPointer(), vertices.data(), ibByteSize);
 	m_box_geo->IndexBufferGPU = Utilities::create_default_buffer(
 		m_device.get(),
 		m_graphics_cmdlist.get(),
@@ -607,7 +596,7 @@ void GraphicsResources::update_vbv_content(
 	std::unique_ptr<upload_buffer<std::uint16_t>>& target_index_buffer)
 {
 	auto current_size = vertices.size();
-	bool is_safe_to_clear = (m_box_geo && m_dynamic_vertex_buffer && m_dynamic_index_buffer);
+	bool is_safe_to_clear = (m_box_geo && target_vertex_buffer && target_index_buffer);
 
 	if (current_size == 0 && is_safe_to_clear)
 	{

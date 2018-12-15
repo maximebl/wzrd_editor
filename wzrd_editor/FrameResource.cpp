@@ -1,16 +1,1 @@
 #include "pch.h"
-#include "FrameResource.h"
-
-frame_resource::frame_resource(ID3D12Device* device, UINT pass_count, UINT object_count, UINT material_count)
-{
-	winrt::check_hresult(
-		device->CreateCommandAllocator(
-			D3D12_COMMAND_LIST_TYPE_DIRECT,
-			winrt::guid_of<ID3D12CommandAllocator>(),
-			cmd_list_allocator.put_void()
-		));
-
-	pass_cb = std::make_unique<upload_buffer<pass_constants>>(device, pass_count, true, false);
-	material_cb = std::make_unique<upload_buffer<material_constants>>(device, material_count, true, false);
-	object_cb = std::make_unique<upload_buffer<object_constants>>(device, object_count, true, false);
-}

@@ -120,6 +120,7 @@
                     <VisualState.Setters>
                         <Setter Target="render_as_dynamic.IsEnabled" Value="False"/>
                         <Setter Target="render_as_static.IsEnabled" Value="False"/>
+                        <Setter Target="buffer_capacity.Visibility" Value="Visible"/>
                     </VisualState.Setters> 
                 </VisualState>
 
@@ -145,7 +146,6 @@
         </VisualStateManager.VisualStateGroups>
 
         <StackPanel HorizontalAlignment="Left" Orientation="Vertical">
-
             <CommandBar x:Name="main_cmd_bar" Background="Transparent" IsOpen="False" DefaultLabelPosition="Right">
                 <!--<AppBarButton Icon="OpenFile" Label="Texture">
                     <AppBarButton.Flyout>
@@ -254,9 +254,6 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="Auto"/>
                 </Grid.RowDefinitions>
-
-                <src:BlankUserControl Grid.Row="0"/>
-                <src:BlankUserControl Grid.Row="1" Margin="0,15,0,0"/>
             </Grid>
 
             <RelativePanel>
@@ -417,15 +414,15 @@
                           HorizontalAlignment="Stretch" 
                           VerticalAlignment="Stretch"/>
 
-                    <RelativePanel Grid.Row="6" Grid.ColumnSpan="4">
+                    <RelativePanel x:Name="buffer_capacity" Visibility="Collapsed" Grid.Row="6" Grid.ColumnSpan="4">
                         <TextBlock
                             x:Name="buffer_capacity_label"
                             HorizontalAlignment="Left"
                             Text="Buffer capacity"                            
                             />
                         <ProgressBar
-                            x:Name="heap_progressbar"
-                            Value="50"
+                            x:Name="buffer_capacity_progressbar"
+                            Value="{x:Bind Path=GeometryViewModel.Geometry.BufferCapacity, Mode=TwoWay}"
                             RelativePanel.Below="buffer_capacity_label"
                             HorizontalAlignment="Stretch"
                             RelativePanel.AlignLeftWith="buffer_capacity_label"

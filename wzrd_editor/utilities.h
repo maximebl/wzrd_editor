@@ -2,7 +2,6 @@
 #include <string>
 #include <d3d12.h>
 #include "winrt/Windows.Foundation.h"
-#include <DirectXCollision.h>
 #include "MathHelper.h"
 
 const int global_num_frame_resources = 3;
@@ -56,25 +55,11 @@ namespace winrt::wzrd_editor::data
 	};
 }
 
-struct Material
-{
-	std::string name;
-	int mat_cb_index = -1;
-	int diffuse_srv_heap_index = -1;
-	int normal_srv_heap_index = -1;
-	int num_frames_dirty = global_num_frame_resources;
-	DirectX::XMFLOAT4 diffuse_albedo = { 1.0f, 1.0f, 1.0f, 1.0f };
-	DirectX::XMFLOAT3 fresnel_r0 = { 0.01f, 0.01f, 0.01f };
-	float roughness = 0.25f;
-	DirectX::XMFLOAT4X4 mat_transform = MathHelper::Identity4x4();
-};
-
 struct SubmeshGeometry
 {
 	UINT IndexCount = 0;
 	UINT StartIndexLocation = 0;
 	INT BaseVertexLocation = 0;
-	DirectX::BoundingBox Bounds;
 };
 
 struct MeshGeometry
@@ -247,20 +232,5 @@ public:
 	static std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> get_static_samplers();
 	static void print_coordinates(float x, float y);
 	static void wait(DWORD duration);
-};
-
-struct render_item
-{
-	render_item() = default;
-	DirectX::XMFLOAT4X4 world = MathHelper::Identity4x4();
-	DirectX::XMFLOAT4X4 tex_transform = MathHelper::Identity4x4();
-	int num_frames_dirty = global_num_frame_resources;
-	UINT obj_cb_index = -1;
-	Material* material = nullptr;
-	MeshGeometry* mesh_geometry = nullptr;
-	D3D12_PRIMITIVE_TOPOLOGY primitive_topology = D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST;
-	UINT index_count = 0;
-	UINT start_index_location = 0;
-	int base_vertex_location = 0;
 };
 

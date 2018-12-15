@@ -3,9 +3,10 @@ namespace wzrd_editor
 	[default_interface]
 	runtimeclass buffer_size_select_dialog : Windows.UI.Xaml.Controls.ContentDialog, Windows.UI.Xaml.Data.INotifyPropertyChanged
 	{
-		buffer_size_select_dialog();
+		buffer_size_select_dialog(Int32 current_buffer_size);
 		Int32 buffer_size{ get; set; };
 		Int32 buffer_increment_size{ get; set; };
+		Int32 minimum_buffer_size { get; };
 		Boolean is_auto_resizeable{ get; set; };
 	}
 }

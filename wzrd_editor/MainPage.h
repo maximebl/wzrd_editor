@@ -69,14 +69,9 @@ namespace winrt::wzrd_editor::implementation
 		double m_current_slider_z = 0;
 		winrt::apartment_context m_ui_thread;
 
-		std::vector<std::unique_ptr<render_item>> m_render_items;
-		std::vector<render_item*> m_opaque_render_items;
-		frame_resource* m_current_frame_resource = nullptr;
-
 		std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> m_geometries;
-		std::unordered_map<std::string, std::unique_ptr<Material>> m_materials;
 
-		int32_t current_buffer_limit = 0;
+		uint32_t current_buffer_capacity = 0;
 		int32_t m_buffer_resize_increment = 0;
 		bool m_is_buffer_dynamic = false;
 		bool m_running = false;

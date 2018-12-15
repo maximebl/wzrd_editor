@@ -24,6 +24,17 @@ namespace winrt::wzrd_editor::implementation
 		m_index = value;
 	}
 
+	int32_t Geometry::BufferCapacity()
+	{
+		return m_buffer_capacity;
+	}
+
+	void Geometry::BufferCapacity(int32_t value)
+	{
+		m_buffer_capacity = value;
+		m_propertyChanged(*this, winrt::Windows::UI::Xaml::Data::PropertyChangedEventArgs{ L"BufferCapacity" });
+	}
+
 	Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> Geometry::Vertices()
 	{
 		return m_vertices;

@@ -37,11 +37,9 @@
 #include <d3dcompiler.h>
 
 #include <ppltasks.h>
-//#include <experimental/resumable>
 // pplawait.h allows the use of co_await on concurrency::task types
 #include <pplawait.h>
 
-#include "GeometryGenerator.h"
 #include <cmath>
 #include "GameTimer.h"
 #include <DirectXColors.h>

@@ -3,9 +3,10 @@
 
 namespace winrt::wzrd_editor::implementation
 {
-	buffer_size_select_dialog::buffer_size_select_dialog()
+	buffer_size_select_dialog::buffer_size_select_dialog(int32_t current_buffer_size)
 	{
 		InitializeComponent();
+		m_minimum_buffer_size = current_buffer_size;
 	}
 
 	winrt::Windows::Foundation::IAsyncAction buffer_size_select_dialog::onclick_allocate(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::Controls::ContentDialogButtonClickEventArgs const& args)
@@ -28,6 +29,11 @@ namespace winrt::wzrd_editor::implementation
     {
 		return m_buffer_size;
     }
+
+	int32_t buffer_size_select_dialog::minimum_buffer_size()
+	{
+		return m_minimum_buffer_size;
+	}
 
     void buffer_size_select_dialog::buffer_size(int32_t value)
     {

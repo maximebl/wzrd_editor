@@ -75,7 +75,7 @@
       <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
       <WarningLevel>Level4</WarningLevel>
       <AdditionalOptions>%(AdditionalOptions) /permissive- /bigobj /Zm200</AdditionalOptions>
-      <DisableSpecificWarnings>4453;28204</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4453;28204;4267;4238</DisableSpecificWarnings>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">DISABLE_XAML_GENERATED_MAIN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ShowIncludes>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">DISABLE_XAML_GENERATED_MAIN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -95,10 +95,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="BlankUserControl.h">
-      <DependentUpon>BlankUserControl.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </ClInclude>
     <ClInclude Include="buffer_size_select_dialog.h">
       <DependentUpon>buffer_size_select_dialog.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -107,7 +103,6 @@
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="GameTimer.h" />
     <ClInclude Include="Geometry.h" />
-    <ClInclude Include="GeometryGenerator.h" />
     <ClInclude Include="GeometryViewModel.h" />
     <ClInclude Include="GraphicsResources.h" />
     <ClInclude Include="MathHelper.h" />
@@ -118,7 +113,6 @@
     <ClInclude Include="MainPage.h">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </ClInclude>
-    <ClInclude Include="resource.h" />
     <ClInclude Include="Shader.h">
       <DependentUpon>Shader.idl</DependentUpon>
       <SubType>Code</SubType>
@@ -139,9 +133,6 @@
     <ApplicationDefinition Include="App.xaml">
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Page Include="BlankUserControl.xaml">
-      <SubType>Designer</SubType>
-    </Page>
     <Page Include="buffer_size_select_dialog.xaml">
       <SubType>Designer</SubType>
     </Page>
@@ -166,10 +157,6 @@
     <Image Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="BlankUserControl.cpp">
-      <DependentUpon>BlankUserControl.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </ClCompile>
     <ClCompile Include="buffer_size_select_dialog.cpp">
       <DependentUpon>buffer_size_select_dialog.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -186,9 +173,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="FrameResource.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="GameTimer.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">NotUsing</PrecompiledHeader>
@@ -196,11 +180,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Geometry.cpp" />
-    <ClCompile Include="GeometryGenerator.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="GeometryViewModel.cpp" />
     <ClCompile Include="GraphicsResources.cpp" />
     <ClCompile Include="MathHelper.cpp">
@@ -217,7 +196,6 @@
     <ClCompile Include="MainPage.cpp">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </ClCompile>
-    <ClCompile Include="Generated Files\module.g.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Shader.cpp">
       <DependentUpon>Shader.idl</DependentUpon>
@@ -239,10 +217,6 @@
     <Midl Include="App.idl">
       <DependentUpon>App.xaml</DependentUpon>
     </Midl>
-    <Midl Include="BlankUserControl.idl">
-      <DependentUpon>BlankUserControl.xaml</DependentUpon>
-      <SubType>Code</SubType>
-    </Midl>
     <Midl Include="buffer_size_select_dialog.idl">
       <DependentUpon>buffer_size_select_dialog.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -262,11 +236,6 @@
       <SubType>Designer</SubType>
     </Midl>
     <Midl Include="wzrd_vec3.idl" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="readme.txt">
-      <DeploymentContent>false</DeploymentContent>
-    </Text>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="wzrd_editor.rc" />

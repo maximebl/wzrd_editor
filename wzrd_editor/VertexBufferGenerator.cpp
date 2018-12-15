@@ -8,7 +8,7 @@ VertexBufferGenerator::VertexBufferGenerator()
 void VertexBufferGenerator::regenerate_vertices_from_model(winrt::Windows::Foundation::Collections::IObservableVector<winrt::Windows::Foundation::IInspectable> model_vertices)
 {
 	m_vertices.clear();
-	for (size_t i = 0; i < model_vertices.Size(); i++)
+	for (uint32_t i = 0; i < model_vertices.Size(); i++)
 	{
 		Vertex_tex new_vertex;
 
