@@ -100,6 +100,10 @@
       <SubType>Code</SubType>
     </ClInclude>
     <ClInclude Include="d3dx12.h" />
+    <ClInclude Include="data_converter.h">
+      <DependentUpon>data_converter.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="GameTimer.h" />
     <ClInclude Include="Geometry.h" />
@@ -113,6 +117,7 @@
     <ClInclude Include="MainPage.h">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </ClInclude>
+    <ClInclude Include="resource.h" />
     <ClInclude Include="Shader.h">
       <DependentUpon>Shader.idl</DependentUpon>
       <SubType>Code</SubType>
@@ -145,6 +150,8 @@
       <SubType>Designer</SubType>
     </AppxManifest>
     <None Include="packages.config" />
+    <None Include="wzrd_editor.aps" />
+    <None Include="wzrd_editor.vcxproj.maxim.nvuser" />
     <None Include="wzrd_editor_TemporaryKey.pfx" />
   </ItemGroup>
   <ItemGroup>
@@ -159,6 +166,10 @@
   <ItemGroup>
     <ClCompile Include="buffer_size_select_dialog.cpp">
       <DependentUpon>buffer_size_select_dialog.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
+    <ClCompile Include="data_converter.cpp">
+      <DependentUpon>data_converter.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
     <ClCompile Include="DDSTextureLoader.cpp">
@@ -197,6 +208,7 @@
       <DependentUpon>MainPage.xaml</DependentUpon>
     </ClCompile>
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Generated Files\module.g.cpp" />
     <ClCompile Include="Shader.cpp">
       <DependentUpon>Shader.idl</DependentUpon>
       <SubType>Code</SubType>
@@ -221,6 +233,9 @@
       <DependentUpon>buffer_size_select_dialog.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Midl>
+    <Midl Include="data_converter.idl">
+      <SubType>Designer</SubType>
+    </Midl>
     <Midl Include="Geometry.idl" />
     <Midl Include="GeometryViewModel.idl" />
     <Midl Include="MainPage.idl">
@@ -239,6 +254,10 @@
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="wzrd_editor.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="readme.txt" />
+    <Text Include="wzrd_editor.log" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -31,22 +31,22 @@ winrt::Windows::Foundation::IAsyncOperation<winrt::Windows::Storage::Streams::IB
 
 	switch (pick_mode)
 	{
-		case pick_modes::single_file_async:
+	case pick_modes::single_file_async:
+	{
+		auto file = co_await filePicker.PickSingleFileAsync();
+		if (file != nullptr)
 		{
-			auto file = co_await filePicker.PickSingleFileAsync();
-			if (file != nullptr)
-			{
-				return co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
-			}
+			return co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
 		}
-		break;
+	}
+	break;
 
-		case pick_modes::multiple_files_async:
-		{
-			//TODO: add support for selecting multiple files
-			throw winrt::hresult_not_implemented();
-		}
-		break;
+	case pick_modes::multiple_files_async:
+	{
+		//TODO: add support for selecting multiple files
+		throw winrt::hresult_not_implemented();
+	}
+	break;
 	}
 }
 
@@ -56,18 +56,18 @@ concurrency::task<std::vector<unsigned char>> Utilities::pick_file(winrt::hstrin
 	return co_await read_file_bytes(file_buffer);
 }
 
-winrt::com_ptr<ID3DBlob> Utilities::compile_shader(const std::string& shaderType, const std::vector<unsigned char>& file_bytes, const std::string& entryPoint)
+Utilities::compilation_result Utilities::compile_shader(const std::string shaderType, const std::vector<unsigned char>& file_bytes, const std::string entryPoint)
 {
 	UINT compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 	winrt::com_ptr<ID3DBlob> byteCode = nullptr;
 	winrt::com_ptr<ID3DBlob> errors = nullptr;
+	compilation_result result;
 
 	D3DCompile(
 		&file_bytes.front(),
 		file_bytes.size(),
 		nullptr,
 		nullptr,
-		//TODO: Replace this macro with custom ID3DInclude
 		D3D_COMPILE_STANDARD_FILE_INCLUDE,
 		entryPoint.c_str(),
 		shaderType.c_str(),
@@ -79,20 +79,13 @@ winrt::com_ptr<ID3DBlob> Utilities::compile_shader(const std::string& shaderType
 
 	if (errors != nullptr)
 	{
-		auto errorBufferPtr = errors.get()->GetBufferPointer();
-		LPCSTR errorMessagePtr = (const char*)errorBufferPtr;
-		std::wstring title = L"Shader compilation error.";
-
-		//TODO: This is kind of ghetto string conversion, need to research this later if it's slow
-		std::string errorMessage(errorMessagePtr);
-		std::wstring message(errorMessage.begin(), errorMessage.end());
-
-		OutputDebugStringA(errorMessagePtr);
-		auto dialog = winrt::Windows::UI::Popups::MessageDialog(message, title);
-		//co_await dialog.ShowAsync();
+		result.is_success = false;
+		result.result_blob = errors;
+		return result;
 	}
-
-	return byteCode;
+	result.is_success = true;
+	result.result_blob = byteCode;
+	return result;
 }
 
 winrt::com_ptr<ID3D12Resource> Utilities::create_default_buffer(

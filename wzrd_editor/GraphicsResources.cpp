@@ -621,10 +621,13 @@ void GraphicsResources::update_vbv_content(
 
 void GraphicsResources::init_psos()
 {
+	auto vs = std::string("woodCrateVS");
+	auto ps = std::string("woodCratePS");
+
 	create_basic_input_layout();
-	create_points_pso(m_shaders["woodCrateVS"], m_shaders["woodCratePS"]);
-	create_triangles_pso(m_shaders["woodCrateVS"], m_shaders["woodCratePS"]);
-	create_lines_pso(m_shaders["woodCrateVS"], m_shaders["woodCratePS"]);
+	create_points_pso(m_shaders[vs], m_shaders[ps]);
+	create_triangles_pso(m_shaders[vs], m_shaders[ps]);
+	create_lines_pso(m_shaders[vs], m_shaders[ps]);
 	execute_cmd_list();
 }
 

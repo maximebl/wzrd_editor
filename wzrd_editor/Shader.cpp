@@ -60,6 +60,17 @@ namespace winrt::wzrd_editor::implementation
 		m_type = value;
 	}
 
+	bool Shader::is_error()
+	{
+		return m_is_error;
+	}
+
+	void Shader::is_error(bool value)
+	{
+		m_is_error = value;
+		m_propertyChanged(*this, winrt::Windows::UI::Xaml::Data::PropertyChangedEventArgs{ L"is_error" });
+	}
+
 	bool Shader::Loading()
 	{
 		return m_loading;

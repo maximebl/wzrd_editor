@@ -1,0 +1,7 @@
+namespace wzrd_editor
+{
+    runtimeclass data_converter : Windows.UI.Xaml.Data.IValueConverter
+    {
+		data_converter();
+    }
+}

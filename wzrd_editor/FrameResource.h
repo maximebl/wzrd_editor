@@ -1,12 +1,6 @@
 #pragma once
 #include "MathHelper.h"
 #include "utilities.h"
-//
-//struct Vertex
-//{
-//	DirectX::XMFLOAT3 Pos;
-//	DirectX::XMFLOAT4 Color;
-//};
 
 struct Vertex_tex
 {

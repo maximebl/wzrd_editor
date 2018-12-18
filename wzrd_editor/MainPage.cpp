@@ -146,18 +146,6 @@ namespace winrt::wzrd_editor::implementation
 		}
 	}
 
-	void MainPage::set_shaders_list_visibility()
-	{
-		if (m_geometryViewModel.Shaders().Size() > 0)
-		{
-			shaders_list().Visibility(winrt::Windows::UI::Xaml::Visibility::Visible);
-		}
-		else
-		{
-			shaders_list().Visibility(winrt::Windows::UI::Xaml::Visibility::Collapsed);
-		}
-	}
-
 	void MainPage::set_textures_visibility()
 	{
 		if (m_geometryViewModel.Textures().Size() > 0)
@@ -190,7 +178,6 @@ namespace winrt::wzrd_editor::implementation
 	{
 		m_graphics_resources.m_shaders.clear();
 		m_geometryViewModel.Shaders().Clear();
-		set_shaders_list_visibility();
 		co_return;
 	}
 
@@ -221,38 +208,55 @@ namespace winrt::wzrd_editor::implementation
 		new_texture.Loading(false);
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::onclick_pixelshader_picker(IInspectable const&, RoutedEventArgs const&)
+	Windows::Foundation::IAsyncAction MainPage::show_error_dialog(LPVOID error_buffer_ptr)
+	{
+		LPCSTR errorMessagePtr = (const char*)error_buffer_ptr;
+		std::string errorMessage(errorMessagePtr);
+		std::wstring title = L"Shader compilation error.";
+		std::wstring message(errorMessage.begin(), errorMessage.end());
+
+		OutputDebugStringA(errorMessagePtr);
+
+		auto dialog = winrt::Windows::UI::Xaml::Controls::ContentDialog();
+		dialog.Title(winrt::box_value(title));
+		dialog.Content(winrt::box_value(message));
+		dialog.CloseButtonText(L"Ok");
+		co_await dialog.ShowAsync();
+	}
+
+	Windows::Foundation::IAsyncAction MainPage::pick_and_compile_shader(const std::string shader_name, wzrd_editor::ShaderType shader_type, const std::string entry_point, const std::string version)
 	{
 		auto shader_file_bytes = co_await Utilities::pick_file(winrt::hstring(L".hlsl"));
 
-		wzrd_editor::Shader new_shader = winrt::make<wzrd_editor::implementation::Shader>(hstring(L"woodCratePS"), wzrd_editor::ShaderType::pixel);
-		m_geometryViewModel.Shaders().Append(new_shader);
+		wzrd_editor::Shader new_shader = winrt::make<wzrd_editor::implementation::Shader>(winrt::to_hstring(shader_name), shader_type);
 		new_shader.Loading(true);
-
-		set_shaders_list_visibility();
+		m_geometryViewModel.Shaders().Append(new_shader);
 
 		co_await winrt::resume_background();
-		m_graphics_resources.m_shaders["woodCratePS"] = Utilities::compile_shader("ps_5_0", shader_file_bytes, "PS");
+		auto compilation_result = Utilities::compile_shader(version, shader_file_bytes, entry_point);
+
+		if (compilation_result.is_success)
+		{
+			m_graphics_resources.m_shaders[shader_name] = compilation_result.result_blob;
+		}
+		else {
+			co_await m_ui_thread;
+			new_shader.is_error(true);
+			show_error_dialog(compilation_result.result_blob.get()->GetBufferPointer());
+		}
 
 		co_await m_ui_thread;
 		new_shader.Loading(false);
 	}
 
+	Windows::Foundation::IAsyncAction MainPage::onclick_pixelshader_picker(IInspectable const&, RoutedEventArgs const&)
+	{
+		co_await pick_and_compile_shader("woodCratePS", wzrd_editor::ShaderType::pixel, "PS", "ps_5_0");
+	}
+
 	Windows::Foundation::IAsyncAction MainPage::onclick_vertexshader_picker(IInspectable const&, RoutedEventArgs const&)
 	{
-		auto shader_file_bytes = co_await Utilities::pick_file(winrt::hstring(L".hlsl"));
-
-		wzrd_editor::Shader new_shader = winrt::make<wzrd_editor::implementation::Shader>(hstring(L"woodCrateVS"), wzrd_editor::ShaderType::vertex);
-		m_geometryViewModel.Shaders().Append(new_shader);
-		new_shader.Loading(true);
-
-		set_shaders_list_visibility();
-
-		co_await winrt::resume_background();
-		m_graphics_resources.m_shaders["woodCrateVS"] = Utilities::compile_shader("vs_5_0", shader_file_bytes, "VS");
-
-		co_await m_ui_thread;
-		new_shader.Loading(false);
+		co_await pick_and_compile_shader("woodCrateVS", wzrd_editor::ShaderType::vertex, "VS", "vs_5_0");
 	}
 
 	Windows::Foundation::IAsyncAction MainPage::onclick_build_pointlist(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)

@@ -142,9 +142,9 @@ template <typename T>
 class upload_buffer
 {
 public:
-	upload_buffer(ID3D12Device* device, UINT element_count, bool is_constant_buffer, bool is_auto_resize) : 
-		m_is_constant_buffer(is_constant_buffer), 
-		m_element_count(element_count), 
+	upload_buffer(ID3D12Device* device, UINT element_count, bool is_constant_buffer, bool is_auto_resize) :
+		m_is_constant_buffer(is_constant_buffer),
+		m_element_count(element_count),
 		m_is_auto_resize(is_auto_resize)
 	{
 		m_element_byte_size = sizeof(T);
@@ -213,13 +213,19 @@ private:
 
 class Utilities
 {
+private:
+	struct compilation_result
+	{
+		bool is_success;
+		winrt::com_ptr<ID3D10Blob> result_blob;
+	};
 public:
 	Utilities();
 	static concurrency::task<std::vector<unsigned char>> read_file_bytes(winrt::Windows::Storage::Streams::IBuffer fileBuffer);
-	static winrt::com_ptr<ID3DBlob> compile_shader(
-		const std::string& shaderType,
+	static compilation_result compile_shader(
+		const std::string shaderType,
 		const std::vector<unsigned char>& file_bytes,
-		const std::string& entryPoint);
+		const std::string entryPoint);
 	static winrt::Windows::Foundation::IAsyncOperation<winrt::Windows::Storage::Streams::IBuffer> pick_file_buffer(winrt::hstring file_extension, pick_modes pick_mode);
 	static concurrency::task<std::vector<unsigned char>> pick_file(winrt::hstring file_extension);
 	static winrt::com_ptr<ID3D12Resource> create_default_buffer(

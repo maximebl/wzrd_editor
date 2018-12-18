@@ -5,10 +5,16 @@
     xmlns:local="using:wzrd_editor"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    mc:Ignorable="d" HorizontalAlignment="Stretch" Margin="0,0,0,0" VerticalAlignment="Stretch">
-    
+    xmlns:converters="using:wzrd_editor"
+    mc:Ignorable="d"  
+    HorizontalAlignment="Stretch" 
+    Margin="0,0,0,0" 
+    VerticalAlignment="Stretch">
+
     <Page.Resources>
-    
+
+        <converters:data_converter x:Key="visibility_converter"/>
+
         <DataTemplate x:Key="textures_list_header">
             <Grid HorizontalAlignment="Stretch">
                 <Grid.ColumnDefinitions>
@@ -87,9 +93,10 @@
 
         <DataTemplate x:Key="shaders_list_template" x:DataType="local:Shader">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="8,8,0,0">
-                <SymbolIcon x:Name="shader_type_icon" Symbol="{x:Bind TypeGlyph}"></SymbolIcon>
-                <TextBlock Text="{x:Bind Name}"></TextBlock>
-                <ProgressRing Margin="1,0,0,0" IsActive="{x:Bind Loading, Mode=TwoWay}"/>
+                <SymbolIcon Margin="0,0,13,0" x:Name="shader_type_icon" Symbol="{x:Bind TypeGlyph}"></SymbolIcon>
+                <TextBlock Margin="0,0,13,0" Text="{x:Bind Name}"/>
+                <ProgressRing Margin="0,0,13,0" Visibility="{x:Bind Loading, Mode=OneWay}" IsActive="{x:Bind Loading, Mode=TwoWay}"/>
+                <TextBlock Text="Compilation failed." Visibility="{x:Bind is_error,Mode=OneWay}" Foreground="{StaticResource SystemControlErrorTextForegroundBrush}"/>
             </StackPanel>
         </DataTemplate>
 
@@ -100,11 +107,9 @@
                 <ProgressRing Margin="1,0,0,0" IsActive="{x:Bind Loading, Mode=TwoWay}"/>
             </StackPanel>
         </DataTemplate>
-
     </Page.Resources>
 
     <StackPanel x:Name="outer_stackpanel" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Height="829" Width="auto">
-
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup>
 
@@ -113,7 +118,7 @@
                         <Setter Target="new_vertex_button.IsEnabled" Value="False"/>
                         <Setter Target="render_as_dynamic.IsEnabled" Value="False"/>
                         <Setter Target="render_as_static.IsEnabled" Value="False"/>
-                    </VisualState.Setters> 
+                    </VisualState.Setters>
                 </VisualState>
 
                 <VisualState x:Name="dynamic_buffer_selected">
@@ -121,7 +126,7 @@
                         <Setter Target="render_as_dynamic.IsEnabled" Value="False"/>
                         <Setter Target="render_as_static.IsEnabled" Value="False"/>
                         <Setter Target="buffer_capacity.Visibility" Value="Visible"/>
-                    </VisualState.Setters> 
+                    </VisualState.Setters>
                 </VisualState>
 
                 <VisualState x:Name="static_buffer_selected">
@@ -216,16 +221,12 @@
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
-
-                <CommandBar.SecondaryCommands>
-                    <AppBarButton Icon="Edit" Label="Settings"/>
-                </CommandBar.SecondaryCommands>
             </CommandBar>
 
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
                 <ListView x:Name="shaders_list" HorizontalAlignment="Stretch" Width="auto" Height="auto" VerticalAlignment="Top"
                       HeaderTemplate="{StaticResource shaders_list_header}" 
-                      Visibility="Collapsed"
+                      Visibility="{x:Bind Path=GeometryViewModel.Shaders.Size, Converter={StaticResource visibility_converter}, Mode=OneWay}"
                       ItemsSource="{x:Bind GeometryViewModel.Shaders}" 
                       ItemTemplate="{StaticResource shaders_list_template}">
                 </ListView>

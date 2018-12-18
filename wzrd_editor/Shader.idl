@@ -11,6 +11,7 @@ namespace wzrd_editor
 		String Name;
 		String TypeGlyph;
 		Boolean Loading;
+		Boolean is_error;
 		ShaderType Type;
 	}
 }

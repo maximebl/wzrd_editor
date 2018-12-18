@@ -1,9 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ApplicationDefinition Include="App.xaml" />
-  </ItemGroup>
-  <ItemGroup>
     <Page Include="buffer_size_select_dialog.xaml">
       <Filter>views</Filter>
     </Page>
@@ -15,78 +12,88 @@
     <Midl Include="App.idl" />
     <Midl Include="MainPage.idl" />
     <Midl Include="Geometry.idl">
-      <Filter>Models</Filter>
+      <Filter>ViewModels</Filter>
     </Midl>
     <Midl Include="GeometryViewModel.idl">
-      <Filter>Models</Filter>
+      <Filter>ViewModels</Filter>
     </Midl>
     <Midl Include="wzrd_vec3.idl">
-      <Filter>Models</Filter>
+      <Filter>ViewModels</Filter>
     </Midl>
     <Midl Include="Shader.idl">
-      <Filter>Models</Filter>
+      <Filter>ViewModels</Filter>
     </Midl>
     <Midl Include="Texture.idl">
-      <Filter>Models</Filter>
+      <Filter>ViewModels</Filter>
     </Midl>
     <Midl Include="Vertex.idl">
-      <Filter>Models</Filter>
+      <Filter>ViewModels</Filter>
     </Midl>
-    <Midl Include="BlankUserControl.idl" />
     <Midl Include="buffer_size_select_dialog.idl" />
+    <Midl Include="data_converter.idl">
+      <Filter>views\converters</Filter>
+    </Midl>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
     <ClCompile Include="App.cpp" />
     <ClCompile Include="MainPage.cpp" />
-    <ClCompile Include="DDSTextureLoader.h" />
-    <ClCompile Include="DDSTextureLoader.cpp" />
     <ClCompile Include="utilities.cpp" />
     <ClCompile Include="MathHelper.cpp" />
     <ClCompile Include="GameTimer.cpp" />
     <ClCompile Include="GraphicsResources.cpp" />
     <ClCompile Include="Geometry.cpp">
-      <Filter>Models</Filter>
+      <Filter>ViewModels</Filter>
     </ClCompile>
     <ClCompile Include="GeometryViewModel.cpp">
-      <Filter>Models</Filter>
+      <Filter>ViewModels</Filter>
     </ClCompile>
     <ClCompile Include="wzrd_vec3.cpp">
-      <Filter>Models</Filter>
+      <Filter>ViewModels</Filter>
     </ClCompile>
     <ClCompile Include="VertexBufferGenerator.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Vertex.cpp" />
-    <ClCompile Include="BlankUserControl.cpp" />
     <ClCompile Include="buffer_size_select_dialog.cpp" />
+    <ClCompile Include="Generated Files\module.g.cpp" />
+    <ClCompile Include="DDSTextureLoader.h">
+      <Filter>external_libraries</Filter>
+    </ClCompile>
+    <ClCompile Include="DDSTextureLoader.cpp">
+      <Filter>external_libraries</Filter>
+    </ClCompile>
+    <ClCompile Include="data_converter.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
     <ClInclude Include="App.h" />
     <ClInclude Include="MainPage.h" />
-    <ClInclude Include="d3dx12.h" />
     <ClInclude Include="utilities.h" />
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="MathHelper.h" />
     <ClInclude Include="GameTimer.h" />
     <ClInclude Include="GraphicsResources.h" />
     <ClInclude Include="Geometry.h">
-      <Filter>Models</Filter>
+      <Filter>ViewModels</Filter>
     </ClInclude>
     <ClInclude Include="GeometryViewModel.h">
-      <Filter>Models</Filter>
+      <Filter>ViewModels</Filter>
     </ClInclude>
     <ClInclude Include="wzrd_vec3.h">
-      <Filter>Models</Filter>
+      <Filter>ViewModels</Filter>
     </ClInclude>
     <ClInclude Include="VertexBufferGenerator.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Vertex.h" />
-    <ClInclude Include="BlankUserControl.h" />
     <ClInclude Include="buffer_size_select_dialog.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="d3dx12.h">
+      <Filter>external_libraries</Filter>
+    </ClInclude>
+    <ClInclude Include="data_converter.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Wide310x150Logo.scale-200.png">
@@ -117,22 +124,36 @@
   <ItemGroup>
     <None Include="wzrd_editor_TemporaryKey.pfx" />
     <None Include="packages.config" />
+    <None Include="wzrd_editor.vcxproj.maxim.nvuser" />
+    <None Include="wzrd_editor.aps" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Assets">
       <UniqueIdentifier>{e48dc53e-40b1-40cb-970a-f89935452892}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Models">
-      <UniqueIdentifier>{490f3483-9785-47ea-9215-771ad4e35684}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="ViewModels">
-      <UniqueIdentifier>{66a95b7e-03a9-4066-aef3-6f40cdfdf90d}</UniqueIdentifier>
-    </Filter>
     <Filter Include="views">
       <UniqueIdentifier>{4070b2eb-2179-4235-87ba-2b5a78f74d25}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="external_libraries">
+      <UniqueIdentifier>{49c3e225-620d-4e76-96bc-9f62878330ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="views\converters">
+      <UniqueIdentifier>{1e1d06dd-bdc0-42bf-88dc-f10515b4f30b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ViewModels">
+      <UniqueIdentifier>{490f3483-9785-47ea-9215-771ad4e35684}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="wzrd_editor.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="wzrd_editor.log" />
+    <Text Include="readme.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ApplicationDefinition Include="App.xaml">
+      <Filter>views</Filter>
+    </ApplicationDefinition>
   </ItemGroup>
 </Project>

@@ -16,6 +16,9 @@ namespace winrt::wzrd_editor::implementation
 		hstring TypeGlyph();
 		void TypeGlyph(hstring const& value);
 
+		bool is_error();
+		void is_error(bool value);
+
 		wzrd_editor::ShaderType Type();
 		void Type(wzrd_editor::ShaderType const& value);
 
@@ -24,11 +27,12 @@ namespace winrt::wzrd_editor::implementation
 
 		winrt::event_token PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& handler);
 		void PropertyChanged(winrt::event_token const& token) noexcept;
+
 	private:
 		hstring m_name;
 		hstring m_type_glyph;
 		bool m_loading = false;
-
+		bool m_is_error = false;
 		wzrd_editor::ShaderType m_type;
 		winrt::event<Windows::UI::Xaml::Data::PropertyChangedEventHandler> m_propertyChanged;
 	};
