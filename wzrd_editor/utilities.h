@@ -55,13 +55,6 @@ namespace winrt::wzrd_editor::data
 	};
 }
 
-struct SubmeshGeometry
-{
-	UINT IndexCount = 0;
-	UINT StartIndexLocation = 0;
-	INT BaseVertexLocation = 0;
-};
-
 struct MeshGeometry
 {
 	std::string Name;
@@ -88,7 +81,9 @@ struct MeshGeometry
 
 	DXGI_FORMAT IndexFormat = DXGI_FORMAT_R16_UINT;
 
-	std::unordered_map<std::string, SubmeshGeometry> DrawArgs;
+	UINT index_count = 0;
+	UINT start_index_location = 0;
+	INT base_vertex_location = 0;
 
 	D3D12_VERTEX_BUFFER_VIEW VertexBufferView() const
 	{

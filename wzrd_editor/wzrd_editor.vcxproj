@@ -100,15 +100,15 @@
       <SubType>Code</SubType>
     </ClInclude>
     <ClInclude Include="d3dx12.h" />
-    <ClInclude Include="data_converter.h">
-      <DependentUpon>data_converter.idl</DependentUpon>
-      <SubType>Code</SubType>
-    </ClInclude>
     <ClInclude Include="FrameResource.h" />
     <ClInclude Include="GameTimer.h" />
     <ClInclude Include="Geometry.h" />
     <ClInclude Include="GeometryViewModel.h" />
     <ClInclude Include="GraphicsResources.h" />
+    <ClInclude Include="int_to_visibility.h">
+      <DependentUpon>int_to_visibility.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="MathHelper.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="App.h">
@@ -168,10 +168,6 @@
       <DependentUpon>buffer_size_select_dialog.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
-    <ClCompile Include="data_converter.cpp">
-      <DependentUpon>data_converter.idl</DependentUpon>
-      <SubType>Code</SubType>
-    </ClCompile>
     <ClCompile Include="DDSTextureLoader.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
@@ -193,6 +189,10 @@
     <ClCompile Include="Geometry.cpp" />
     <ClCompile Include="GeometryViewModel.cpp" />
     <ClCompile Include="GraphicsResources.cpp" />
+    <ClCompile Include="int_to_visibility.cpp">
+      <DependentUpon>int_to_visibility.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="MathHelper.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">NotUsing</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">NotUsing</PrecompiledHeader>
@@ -233,11 +233,11 @@
       <DependentUpon>buffer_size_select_dialog.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Midl>
-    <Midl Include="data_converter.idl">
-      <SubType>Designer</SubType>
-    </Midl>
     <Midl Include="Geometry.idl" />
     <Midl Include="GeometryViewModel.idl" />
+    <Midl Include="int_to_visibility.idl">
+      <SubType>Designer</SubType>
+    </Midl>
     <Midl Include="MainPage.idl">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Midl>

@@ -441,7 +441,7 @@ void GraphicsResources::swap_upload_buffer(int32_t new_element_count, std::vecto
 		m_box_geo->SwapVertexBufferByteSize = new_element_count * sizeof(Vertex_tex);
 		m_box_geo->SwapIndexBufferByteSize = new_element_count * sizeof(std::uint16_t);
 		m_box_geo->SwapVertexByteStride = sizeof(Vertex_tex);
-		m_box_geo->DrawArgs["box"].IndexCount = new_element_count;
+		m_box_geo->index_count = new_element_count;
 
 		for (size_t i = 0; i < current_size; ++i)
 		{
@@ -469,7 +469,7 @@ void GraphicsResources::swap_upload_buffer(int32_t new_element_count, std::vecto
 		m_box_geo->VertexBufferByteSize = new_element_count * sizeof(Vertex_tex);
 		m_box_geo->IndexBufferByteSize = new_element_count * sizeof(std::uint16_t);
 		m_box_geo->VertexByteStride = sizeof(Vertex_tex);
-		m_box_geo->DrawArgs["box"].IndexCount = new_element_count;
+		m_box_geo->index_count = new_element_count;
 		// assign new data to it
 		for (size_t i = 0; i < current_size; ++i)
 		{
@@ -521,12 +521,9 @@ void GraphicsResources::init_static_buffer(std::vector<Vertex_tex>& vertices)
 	m_box_geo->IndexFormat = DXGI_FORMAT_R16_UINT;
 	m_box_geo->IndexBufferByteSize = ibByteSize;
 
-	SubmeshGeometry submesh;
-	submesh.IndexCount = indices.size();
-	submesh.StartIndexLocation = 0;
-	submesh.BaseVertexLocation = 0;
-
-	m_box_geo->DrawArgs["box"] = submesh;
+	m_box_geo->index_count = indices.size();
+	m_box_geo->start_index_location = 0;
+	m_box_geo->base_vertex_location = 0;
 }
 
 void GraphicsResources::init_dynamic_buffer(int32_t vertex_count, bool is_auto_resize)
@@ -551,12 +548,9 @@ void GraphicsResources::init_dynamic_buffer(int32_t vertex_count, bool is_auto_r
 	m_box_geo->VertexBufferGPU->SetName(std::wstring(L"initial_vertex_buffer_GPU").c_str());
 	m_box_geo->IndexBufferGPU->SetName(std::wstring(L"initial_index_buffer_GPU").c_str());
 
-	SubmeshGeometry submesh;
-	submesh.IndexCount = vertex_count;
-	submesh.StartIndexLocation = 0;
-	submesh.BaseVertexLocation = 0;
-
-	m_box_geo->DrawArgs["box"] = submesh;
+	m_box_geo->index_count = vertex_count;
+	m_box_geo->start_index_location = 0;
+	m_box_geo->base_vertex_location = 0;
 }
 
 D3D12_CPU_DESCRIPTOR_HANDLE GraphicsResources::current_backbuffer_view() const
@@ -602,7 +596,7 @@ void GraphicsResources::update_vbv_content(
 	{
 		m_box_geo->VertexBufferByteSize = 0;
 		m_box_geo->IndexBufferByteSize = 0;
-		m_box_geo->DrawArgs["box"].IndexCount = 0;
+		m_box_geo->index_count = 0;
 		target_vertex_buffer->clear_data();
 		target_index_buffer->clear_data();
 	}
@@ -612,7 +606,7 @@ void GraphicsResources::update_vbv_content(
 		{
 			m_box_geo->VertexBufferByteSize = current_size * sizeof(Vertex_tex);
 			m_box_geo->IndexBufferByteSize = current_size * sizeof(std::uint16_t);
-			m_box_geo->DrawArgs["box"].IndexCount = current_size;
+			m_box_geo->index_count = current_size;
 			target_vertex_buffer->copy_data(i, vertices[i]);
 			target_index_buffer->copy_data(i, i);
 		}
@@ -724,10 +718,6 @@ void GraphicsResources::render()
 	m_graphics_cmdlist->OMSetRenderTargets(1, &current_backbuffer_view(), true, &m_dsv_heap->GetCPUDescriptorHandleForHeapStart());
 
 	m_graphics_cmdlist->SetGraphicsRootSignature(m_rootsig.get());
-	// only necessary when we will use texture resources
-	//std::array<ID3D12DescriptorHeap*, 1> descriptor_heaps = { m_srv_heap.get() };
-	//m_graphics_cmdlist->SetDescriptorHeaps(descriptor_heaps.size(), &descriptor_heaps[0]);
-	//m_graphics_cmdlist->SetGraphicsRootDescriptorTable(0, m_srv_heap->GetGPUDescriptorHandleForHeapStart());
 	m_graphics_cmdlist->SetGraphicsRootConstantBufferView(0, m_object_cb->get_resource()->GetGPUVirtualAddress());
 
 	if (is_using_swap_buffer)
@@ -741,7 +731,7 @@ void GraphicsResources::render()
 		m_graphics_cmdlist->IASetIndexBuffer(&m_box_geo->IndexBufferView());
 	}
 
-	m_graphics_cmdlist->DrawIndexedInstanced(m_box_geo->DrawArgs["box"].IndexCount, 1, 0, 0, 0);
+	m_graphics_cmdlist->DrawIndexedInstanced(m_box_geo->index_count, 1, 0, 0, 0);
 
 	m_graphics_cmdlist->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(
 		m_swapchain_buffer[m_current_backbuffer].get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));

@@ -1,5 +1,6 @@
 namespace wzrd_editor
 {
+	[bindable]
     runtimeclass Texture : Windows.UI.Xaml.Data.INotifyPropertyChanged
     {
 		String Name;

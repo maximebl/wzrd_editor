@@ -3,6 +3,7 @@ import "wzrd_vec3.idl";
 
 namespace wzrd_editor
 {
+	[bindable]
 	runtimeclass Geometry : Windows.UI.Xaml.Data.INotifyPropertyChanged
 	{
 		wzrd_vec3 Position{ get; };

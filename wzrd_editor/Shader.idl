@@ -6,6 +6,7 @@ namespace wzrd_editor
 		pixel = 1
 	};
 
+	[bindable]
 	runtimeclass Shader : Windows.UI.Xaml.Data.INotifyPropertyChanged
 	{
 		String Name;

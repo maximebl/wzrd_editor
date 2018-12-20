@@ -16,7 +16,7 @@
 #include "Vertex.h"
 #include "wzrd_vec3.h"
 #include "VertexBufferGenerator.h"
-#include "data_converter.h"
+#include "int_to_visibility.h"
 
 namespace winrt::wzrd_editor::implementation
 {
@@ -30,8 +30,6 @@ namespace winrt::wzrd_editor::implementation
 
 		wzrd_editor::GeometryViewModel m_geometryViewModel = winrt::make<wzrd_editor::implementation::GeometryViewModel>();
 
-		void set_vertices_list_visibility();
-		void set_textures_visibility();
 		winrt::Windows::Foundation::IAsyncAction start_render_loop();
 
 	public:

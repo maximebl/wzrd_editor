@@ -30,7 +30,7 @@
       <Filter>ViewModels</Filter>
     </Midl>
     <Midl Include="buffer_size_select_dialog.idl" />
-    <Midl Include="data_converter.idl">
+    <Midl Include="int_to_visibility.idl">
       <Filter>views\converters</Filter>
     </Midl>
   </ItemGroup>

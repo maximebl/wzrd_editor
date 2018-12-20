@@ -13,7 +13,7 @@
 
     <Page.Resources>
 
-        <converters:data_converter x:Key="visibility_converter"/>
+        <converters:int_to_visibility x:Key="int_to_visibility_converter"/>
 
         <DataTemplate x:Key="textures_list_header">
             <Grid HorizontalAlignment="Stretch">
@@ -152,7 +152,8 @@
 
         <StackPanel HorizontalAlignment="Left" Orientation="Vertical">
             <CommandBar x:Name="main_cmd_bar" Background="Transparent" IsOpen="False" DefaultLabelPosition="Right">
-                <!--<AppBarButton Icon="OpenFile" Label="Texture">
+
+                <AppBarButton Icon="OpenFile" Label="Texture">
                     <AppBarButton.Flyout>
                         <MenuFlyout>
                             <MenuFlyoutItem x:Name="texturePicker" Click="onclick_texture_picker">
@@ -176,7 +177,7 @@
                         </MenuFlyout>
                     </AppBarButton.Flyout>
 
-                </AppBarButton>-->
+                </AppBarButton>
 
                 <AppBarButton x:Name="shaderPicker" Icon="OpenFile" Label="Shaders" HorizontalAlignment="Center" VerticalAlignment="Center">
                     <AppBarButton.Flyout>
@@ -226,14 +227,14 @@
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
                 <ListView x:Name="shaders_list" HorizontalAlignment="Stretch" Width="auto" Height="auto" VerticalAlignment="Top"
                       HeaderTemplate="{StaticResource shaders_list_header}" 
-                      Visibility="{x:Bind Path=GeometryViewModel.Shaders.Size, Converter={StaticResource visibility_converter}, Mode=OneWay}"
+                      Visibility="{x:Bind Path=GeometryViewModel.Shaders.Size, Converter={StaticResource int_to_visibility_converter}, Mode=OneWay}"
                       ItemsSource="{x:Bind GeometryViewModel.Shaders}" 
                       ItemTemplate="{StaticResource shaders_list_template}">
                 </ListView>
 
                 <ListView x:Name="textures_list" HorizontalAlignment="Stretch" Width="auto" Height="auto" VerticalAlignment="Top"
                       HeaderTemplate="{StaticResource textures_list_header}" 
-                      Visibility="Collapsed"
+                      Visibility="{x:Bind GeometryViewModel.Textures.Size, Converter={StaticResource int_to_visibility_converter}, Mode=OneWay}"
                       ItemsSource="{x:Bind GeometryViewModel.Textures}" 
                       ItemTemplate="{StaticResource texture_list_template}">
                 </ListView>
@@ -434,7 +435,7 @@
             </StackPanel>
 
             <ListView x:Name="vertices_list" HorizontalAlignment="Stretch" Width="auto" Height="auto" Margin="-2,3" VerticalAlignment="Center"
-                      Visibility="Collapsed"
+                      Visibility="{x:Bind Path=GeometryViewModel.Geometry.Vertices.Size, Converter={StaticResource int_to_visibility_converter}, Mode=OneWay}"
                       Background="{StaticResource ContentDialogDimmingThemeBrush}"
                       ItemsSource="{x:Bind Path=GeometryViewModel.Geometry.Vertices}" 
                       HeaderTemplate="{StaticResource vertices_list_header}" 

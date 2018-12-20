@@ -1,5 +1,6 @@
 namespace wzrd_editor
 {
+	[bindable]
 	runtimeclass Vertex : Windows.UI.Xaml.Data.INotifyPropertyChanged
 	{
 		Single x;

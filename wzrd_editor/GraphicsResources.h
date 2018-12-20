@@ -11,7 +11,7 @@ private:
 	DXGI_FORMAT m_backbuffer_format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	DXGI_FORMAT m_depthstencil_format = DXGI_FORMAT_D24_UNORM_S8_UINT;
 
-	constexpr static int m_swapchain_buffer_count = 3;
+	constexpr static int m_swapchain_buffer_count = 2;
 	constexpr static int m_output_width = 700;
 	constexpr static int m_output_height = 700;
 	D3D12_VIEWPORT m_screen_viewport;

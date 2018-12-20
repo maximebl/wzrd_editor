@@ -1,0 +1,7 @@
+namespace wzrd_editor
+{
+    runtimeclass int_to_visibility : Windows.UI.Xaml.Data.IValueConverter
+    {
+        int_to_visibility();
+    }
+}

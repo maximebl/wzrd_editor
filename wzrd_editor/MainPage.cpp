@@ -130,32 +130,7 @@ namespace winrt::wzrd_editor::implementation
 			auto current_capacity_percentage = (m_geometryViewModel.Geometry().Vertices().Size() * 100) / current_buffer_capacity;
 			m_geometryViewModel.Geometry().BufferCapacity(current_capacity_percentage);
 		}
-		set_vertices_list_visibility();
 		co_return;
-	}
-
-	void MainPage::set_vertices_list_visibility()
-	{
-		if (m_geometryViewModel.Geometry().Vertices().Size() > 0)
-		{
-			vertices_list().Visibility(winrt::Windows::UI::Xaml::Visibility::Visible);
-		}
-		else
-		{
-			vertices_list().Visibility(winrt::Windows::UI::Xaml::Visibility::Collapsed);
-		}
-	}
-
-	void MainPage::set_textures_visibility()
-	{
-		if (m_geometryViewModel.Textures().Size() > 0)
-		{
-			textures_list().Visibility(winrt::Windows::UI::Xaml::Visibility::Visible);
-		}
-		else
-		{
-			textures_list().Visibility(winrt::Windows::UI::Xaml::Visibility::Collapsed);
-		}
 	}
 
 	Windows::Foundation::IAsyncAction MainPage::onclick_clear_vertex(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
@@ -169,8 +144,6 @@ namespace winrt::wzrd_editor::implementation
 			auto current_capacity_percentage = (m_geometryViewModel.Geometry().Vertices().Size() * 100) / current_buffer_capacity;
 			m_geometryViewModel.Geometry().BufferCapacity(current_capacity_percentage);
 		}
-
-		set_vertices_list_visibility();
 		co_return;
 	}
 
@@ -185,7 +158,6 @@ namespace winrt::wzrd_editor::implementation
 	{
 		m_graphics_resources.m_textures.clear();
 		m_geometryViewModel.Textures().Clear();
-		set_textures_visibility();
 		co_return;
 	}
 
@@ -196,8 +168,6 @@ namespace winrt::wzrd_editor::implementation
 		wzrd_editor::Texture new_texture = winrt::make<wzrd_editor::implementation::Texture>(winrt::hstring(L"woodCrateTexture"));
 		m_geometryViewModel.Textures().Append(new_texture);
 		new_texture.Loading(true);
-
-		set_textures_visibility();
 
 		co_await winrt::resume_background();
 		auto woodcrate_texture = m_graphics_resources.create_texture(texture_file_bytes, texture_file_bytes.size(), "woodCrateTexture");
@@ -277,7 +247,6 @@ namespace winrt::wzrd_editor::implementation
 		co_return;
 	}
 
-
 	Windows::Foundation::IAsyncAction MainPage::onclick_build_linestrips(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
 		m_graphics_resources.m_current_rendering_mode = GraphicsResources::rendering_mode::linestrips;
@@ -346,7 +315,6 @@ namespace winrt::wzrd_editor::implementation
 			m_vertex_generator.vertices()[i].TexC.y = m_geometryViewModel.Geometry().Vertices().GetAt(i).try_as<wzrd_editor::implementation::Vertex>()->v();
 		}
 
-		//m_graphics_resources.update_vbv_content(m_vertex_generator.vertices());
 		m_graphics_resources.update_current_buffer(m_vertex_generator.vertices());
 		co_return;
 	}

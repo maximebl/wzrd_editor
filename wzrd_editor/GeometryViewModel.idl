@@ -3,6 +3,7 @@ import "Shader.idl";
 
 namespace wzrd_editor
 {
+	[bindable]
 	runtimeclass GeometryViewModel
 	{
 		Geometry Geometry{get; };
