@@ -12,7 +12,7 @@ namespace winrt::wzrd_editor::implementation
 	{
 		InitializeComponent();
 		m_ui_thread = winrt::apartment_context();
-
+		
 		swapChainPanel().PointerMoved([this](IInspectable sender, winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs args) {
 
 			auto current_point = args.GetCurrentPoint(sender.try_as<winrt::Windows::UI::Xaml::Controls::SwapChainPanel>());
