@@ -5,7 +5,6 @@ GraphicsResources::GraphicsResources()
 {
 }
 
-
 GraphicsResources::~GraphicsResources()
 {
 }
@@ -38,6 +37,7 @@ void GraphicsResources::create_device()
 			m_device.put_void()
 		)
 	);
+	Utilities::device = m_device.get();
 }
 
 void GraphicsResources::create_fence()

@@ -12,7 +12,7 @@ namespace winrt::wzrd_editor::implementation
 	{
 		InitializeComponent();
 		m_ui_thread = winrt::apartment_context();
-		
+
 		swapChainPanel().PointerMoved([this](IInspectable sender, winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs args) {
 
 			auto current_point = args.GetCurrentPoint(sender.try_as<winrt::Windows::UI::Xaml::Controls::SwapChainPanel>());
@@ -95,41 +95,53 @@ namespace winrt::wzrd_editor::implementation
 		auto tex_u = 0.0f;
 		auto tex_v = 0.0f;
 
-		auto new_vertex = winrt::make<winrt::wzrd_editor::implementation::Vertex>(
+		auto new_vertex = winrt::make<winrt::wzrd_editor::implementation::vertex2>(
 			pos_x, pos_y, pos_z,
 			color_r, color_g, color_b, color_a,
 			tex_u, tex_v);
+
 		m_geometryViewModel.Geometry().Vertices().Append(new_vertex);
 
-		if (m_running)
-		{
-			if (m_geometryViewModel.Geometry().Vertices().Size() <= current_buffer_capacity)
-			{
-				m_vertex_generator.push_vertex(pos_x, pos_y, pos_z, color_r, color_g, color_b, color_a, tex_u, tex_v);
-				m_graphics_resources.update_current_buffer(m_vertex_generator.vertices());
+		//if (m_running)
+		//{
+			m_vertex_buffer->add_to_view(new_vertex);
+		//}
 
-				if (!m_graphics_resources.m_dynamic_vertex_buffer->m_is_auto_resize && m_geometryViewModel.Geometry().Vertices().Size() == current_buffer_capacity)
-				{
-					VisualStateManager().GoToState(*this, L"buffer_full", false);
-				}
-			}
-			else {
-				if (m_graphics_resources.m_dynamic_vertex_buffer->m_is_auto_resize)
-				{
-					// recreate the upload_heap committed resource
-					current_buffer_capacity += m_buffer_resize_increment;
-					m_graphics_resources.swap_upload_buffer(current_buffer_capacity, m_vertex_generator.vertices());
-					// update the swapped buffer with the newly added vertex
-					m_vertex_generator.push_vertex(pos_x, pos_y, pos_z, color_r, color_g, color_b, color_a, tex_u, tex_v);
-					m_graphics_resources.update_current_buffer(m_vertex_generator.vertices());
-				}
-				else {
-					VisualStateManager().GoToState(*this, L"buffer_full", false);
-				}
-			}
-			auto current_capacity_percentage = (m_geometryViewModel.Geometry().Vertices().Size() * 100) / current_buffer_capacity;
+		//auto new_vertex = winrt::make<winrt::wzrd_editor::implementation::Vertex>(
+		//	pos_x, pos_y, pos_z,
+		//	color_r, color_g, color_b, color_a,
+		//	tex_u, tex_v);
+		//m_geometryViewModel.Geometry().Vertices().Append(new_vertex);
+
+		//if (m_running)
+		//{
+		//	if (m_geometryViewModel.Geometry().Vertices().Size() <= current_buffer_capacity)
+		//	{
+		//		m_vertex_generator.push_vertex(pos_x, pos_y, pos_z, color_r, color_g, color_b, color_a, tex_u, tex_v);
+		//		m_graphics_resources.update_current_buffer(m_vertex_generator.vertices());
+
+		//		if (!m_graphics_resources.m_dynamic_vertex_buffer->m_is_auto_resize && m_geometryViewModel.Geometry().Vertices().Size() == current_buffer_capacity)
+		//		{
+		//			VisualStateManager().GoToState(*this, L"buffer_full", false);
+		//		}
+		//	}
+		//	else {
+		//		if (m_graphics_resources.m_dynamic_vertex_buffer->m_is_auto_resize)
+		//		{
+		//			// recreate the upload_heap committed resource
+		//			current_buffer_capacity += m_buffer_resize_increment;
+		//			m_graphics_resources.swap_upload_buffer(current_buffer_capacity, m_vertex_generator.vertices());
+		//			// update the swapped buffer with the newly added vertex
+		//			m_vertex_generator.push_vertex(pos_x, pos_y, pos_z, color_r, color_g, color_b, color_a, tex_u, tex_v);
+		//			m_graphics_resources.update_current_buffer(m_vertex_generator.vertices());
+		//		}
+		//		else {
+		//			VisualStateManager().GoToState(*this, L"buffer_full", false);
+		//		}
+		//	}
+			auto current_capacity_percentage = (m_vertex_buffer->current_size() * 100) / m_vertex_buffer->max_size();
 			m_geometryViewModel.Geometry().BufferCapacity(current_capacity_percentage);
-		}
+		//}
 		co_return;
 	}
 
@@ -281,14 +293,20 @@ namespace winrt::wzrd_editor::implementation
 
 		case winrt::Windows::UI::Xaml::Controls::ContentDialogResult::Primary:
 			VisualStateManager().GoToState(*this, L"dynamic_buffer_selected", false);
-			m_is_buffer_dynamic = true;
-			current_buffer_capacity = dialog.buffer_size();
-			m_buffer_resize_increment = dialog.buffer_increment_size();
-			m_graphics_resources.init_dynamic_buffer(dialog.buffer_size(), dialog.is_auto_resizeable());
-			m_vertex_generator.regenerate_vertices_from_model(m_geometryViewModel.Geometry().Vertices());
-			m_graphics_resources.update_current_buffer(m_vertex_generator.vertices());
 
-			start_render_loop();
+			m_vertex_buffer = winrt::make_self<winrt::wzrd_editor::implementation::vertex_buffer>(
+				wzrd_editor::buffer_type::dynamic_buffer,
+				dialog.buffer_size(),
+				dialog.buffer_increment_size(),
+				dialog.is_auto_resizeable());
+			//m_is_buffer_dynamic = true;
+			//current_buffer_capacity = dialog.buffer_size();
+			//m_buffer_resize_increment = dialog.buffer_increment_size();
+			//m_graphics_resources.init_dynamic_buffer(dialog.buffer_size(), dialog.is_auto_resizeable());
+			//m_vertex_generator.regenerate_vertices_from_model(m_geometryViewModel.Geometry().Vertices());
+			//m_graphics_resources.update_current_buffer(m_vertex_generator.vertices());
+
+			//start_render_loop();
 			co_return;
 		default:
 			break;

@@ -1,0 +1,32 @@
+import "vertex2.idl";
+
+namespace wzrd_editor
+{
+	struct view
+	{
+		UInt64 buffer_location;
+		UInt32 size_in_bytes;
+		UInt32 stride_in_bytes;
+	};
+
+	enum buffer_type
+	{
+		dynamic_buffer = 0,
+		static_buffer = 1
+	};
+
+	[bindable]
+	[default_interface]
+	runtimeclass vertex_buffer
+	{
+		vertex_buffer();
+		vertex_buffer(buffer_type type, Int32 max_size, Int32 resize_increment, Boolean is_auto_resize);
+		view get_view();
+		void add_to_view(vertex2 new_vertex);
+
+		Int32 max_size;
+		Int32 current_size;
+		Int32 resize_increment;
+		Boolean is_auto_resize;
+	}
+}

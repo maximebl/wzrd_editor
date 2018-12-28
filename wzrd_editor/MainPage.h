@@ -17,6 +17,8 @@
 #include "wzrd_vec3.h"
 #include "VertexBufferGenerator.h"
 #include "int_to_visibility.h"
+#include "vertex_buffer.h"
+#include "vertex2.h"
 
 namespace winrt::wzrd_editor::implementation
 {
@@ -25,6 +27,7 @@ namespace winrt::wzrd_editor::implementation
 		MainPage();
 
 	private:
+		com_ptr<wzrd_editor::implementation::vertex_buffer> m_vertex_buffer;
 		GraphicsResources m_graphics_resources;
 		VertexBufferGenerator m_vertex_generator;
 

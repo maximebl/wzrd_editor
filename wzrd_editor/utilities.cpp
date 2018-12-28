@@ -5,6 +5,8 @@ Utilities::Utilities()
 {
 }
 
+ID3D12Device* Utilities::device = nullptr;
+
 UINT Utilities::constant_buffer_byte_size(UINT byte_size)
 {
 	return (byte_size + 255) & ~255;

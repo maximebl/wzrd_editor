@@ -48,6 +48,9 @@
     <PlatformToolset>v141</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)'=='Debug'" Label="Configuration">
     <UseDebugLibraries>true</UseDebugLibraries>
     <LinkIncremental>true</LinkIncremental>
@@ -74,7 +77,7 @@
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <PrecompiledHeaderOutputFile>$(IntDir)pch.pch</PrecompiledHeaderOutputFile>
       <WarningLevel>Level4</WarningLevel>
-      <AdditionalOptions>%(AdditionalOptions) /permissive- /bigobj /Zm200</AdditionalOptions>
+      <AdditionalOptions>%(AdditionalOptions) /permissive- /bigobj</AdditionalOptions>
       <DisableSpecificWarnings>4453;28204;4267;4238</DisableSpecificWarnings>
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">DISABLE_XAML_GENERATED_MAIN;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ShowIncludes Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</ShowIncludes>
@@ -131,7 +134,15 @@
       <DependentUpon>Vertex.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
+    <ClInclude Include="vertex2.h">
+      <DependentUpon>vertex2.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="VertexBufferGenerator.h" />
+    <ClInclude Include="vertex_buffer.h">
+      <DependentUpon>vertex_buffer.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="wzrd_vec3.h" />
   </ItemGroup>
   <ItemGroup>
@@ -222,7 +233,15 @@
       <DependentUpon>Vertex.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
+    <ClCompile Include="vertex2.cpp">
+      <DependentUpon>vertex2.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="VertexBufferGenerator.cpp" />
+    <ClCompile Include="vertex_buffer.cpp">
+      <DependentUpon>vertex_buffer.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="wzrd_vec3.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -248,6 +267,12 @@
       <SubType>Designer</SubType>
     </Midl>
     <Midl Include="Vertex.idl">
+      <SubType>Designer</SubType>
+    </Midl>
+    <Midl Include="vertex2.idl">
+      <SubType>Designer</SubType>
+    </Midl>
+    <Midl Include="vertex_buffer.idl">
       <SubType>Designer</SubType>
     </Midl>
     <Midl Include="wzrd_vec3.idl" />

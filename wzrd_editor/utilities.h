@@ -4,6 +4,8 @@
 #include "winrt/Windows.Foundation.h"
 #include "MathHelper.h"
 
+
+
 namespace winrt::wzrd_editor::data
 {
 	struct Texture
@@ -18,9 +20,6 @@ namespace winrt::wzrd_editor::data
 struct MeshGeometry
 {
 	std::string Name;
-
-	winrt::com_ptr<ID3DBlob> VertexBufferCPU = nullptr;
-	winrt::com_ptr<ID3DBlob> IndexBufferCPU = nullptr;
 
 	winrt::com_ptr<ID3D12Resource> VertexBufferGPU = nullptr;
 	winrt::com_ptr<ID3D12Resource> SwapVertexBufferGPU = nullptr;
@@ -193,5 +192,6 @@ public:
 	static std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> get_static_samplers();
 	static void print_coordinates(float x, float y);
 	static void wait(DWORD duration);
+	static ID3D12Device* device;
 };
 

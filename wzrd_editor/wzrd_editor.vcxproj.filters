@@ -33,6 +33,12 @@
     <Midl Include="int_to_visibility.idl">
       <Filter>views\converters</Filter>
     </Midl>
+    <Midl Include="vertex_buffer.idl">
+      <Filter>ViewModels</Filter>
+    </Midl>
+    <Midl Include="vertex2.idl">
+      <Filter>ViewModels</Filter>
+    </Midl>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -64,7 +70,9 @@
     <ClCompile Include="DDSTextureLoader.cpp">
       <Filter>external_libraries</Filter>
     </ClCompile>
-    <ClCompile Include="data_converter.cpp" />
+    <ClCompile Include="int_to_visibility.cpp" />
+    <ClCompile Include="vertex_buffer.cpp" />
+    <ClCompile Include="vertex2.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -93,7 +101,9 @@
     <ClInclude Include="d3dx12.h">
       <Filter>external_libraries</Filter>
     </ClInclude>
-    <ClInclude Include="data_converter.h" />
+    <ClInclude Include="int_to_visibility.h" />
+    <ClInclude Include="vertex_buffer.h" />
+    <ClInclude Include="vertex2.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Wide310x150Logo.scale-200.png">

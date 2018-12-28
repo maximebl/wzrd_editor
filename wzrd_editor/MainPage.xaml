@@ -62,7 +62,7 @@
             </StackPanel>
         </DataTemplate>
 
-        <DataTemplate x:Key="vertices_list_template" x:DataType="local:Vertex">
+        <DataTemplate x:Key="vertices_list_template" x:DataType="local:vertex2">
             <ListViewItem HorizontalContentAlignment="Stretch" >
                 <Grid HorizontalAlignment="Stretch">
                     <Grid.ColumnDefinitions>
