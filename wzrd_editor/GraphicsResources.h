@@ -3,6 +3,7 @@
 #include "DDSTextureLoader.h"
 #include "FrameResource.h"
 #include "Vertex.h"
+#include "vertex_buffer.h"
 
 class GraphicsResources
 {
@@ -109,7 +110,7 @@ public:
 	void update();
 	void render();
 
-	enum class rendering_mode 
+	enum class rendering_mode
 	{
 		points = 0,
 		triangles = 1,
@@ -125,4 +126,5 @@ public:
 	};
 	bool is_using_swap_buffer = false;
 	rendering_mode m_current_rendering_mode{ rendering_mode::points };
+	winrt::com_ptr<winrt::wzrd_editor::implementation::vertex_buffer> vertex_buffer;
 };

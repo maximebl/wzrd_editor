@@ -23,6 +23,7 @@ namespace wzrd_editor
 		vertex_buffer(buffer_type type, Int32 max_size, Int32 resize_increment, Boolean is_auto_resize);
 		view get_view();
 		void add_to_view(vertex2 new_vertex);
+		void clear();
 
 		Int32 max_size;
 		Int32 current_size;

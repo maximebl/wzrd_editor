@@ -720,18 +720,20 @@ void GraphicsResources::render()
 	m_graphics_cmdlist->SetGraphicsRootSignature(m_rootsig.get());
 	m_graphics_cmdlist->SetGraphicsRootConstantBufferView(0, m_object_cb->get_resource()->GetGPUVirtualAddress());
 
-	if (is_using_swap_buffer)
-	{
-		m_graphics_cmdlist->IASetVertexBuffers(0, 1, &m_box_geo->SwapBufferView());
-		m_graphics_cmdlist->IASetIndexBuffer(&m_box_geo->SwapIndexBufferView());
-	}
-	else
-	{
-		m_graphics_cmdlist->IASetVertexBuffers(0, 1, &m_box_geo->VertexBufferView());
-		m_graphics_cmdlist->IASetIndexBuffer(&m_box_geo->IndexBufferView());
-	}
-
-	m_graphics_cmdlist->DrawIndexedInstanced(m_box_geo->index_count, 1, 0, 0, 0);
+	//if (is_using_swap_buffer)
+	//{
+	//	m_graphics_cmdlist->IASetVertexBuffers(0, 1, &m_box_geo->SwapBufferView());
+	//	m_graphics_cmdlist->IASetIndexBuffer(&m_box_geo->SwapIndexBufferView());
+	//}
+	//else
+	//{
+	//	m_graphics_cmdlist->IASetVertexBuffers(0, 1, &m_box_geo->VertexBufferView());
+	//	m_graphics_cmdlist->IASetIndexBuffer(&m_box_geo->IndexBufferView());
+	//}
+	//m_graphics_cmdlist->IASetIndexBuffer((D3D12_INDEX_BUFFER_VIEW*)&index_buffer->get_view());
+	m_graphics_cmdlist->IASetVertexBuffers(0, 1, (D3D12_VERTEX_BUFFER_VIEW*)&vertex_buffer->get_view());
+	//m_graphics_cmdlist->DrawIndexedInstanced(m_box_geo->index_count, 1, 0, 0, 0);
+	m_graphics_cmdlist->DrawInstanced(vertex_buffer->current_size(), 1, 0, 0);
 
 	m_graphics_cmdlist->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(
 		m_swapchain_buffer[m_current_backbuffer].get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));

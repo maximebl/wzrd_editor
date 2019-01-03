@@ -28,7 +28,7 @@
         <CheckBox IsChecked="{x:Bind is_auto_resizeable, Mode=TwoWay}">
             <StackPanel Orientation="Horizontal">
                 <ContentControl>Auto resize the buffer when out of memory.</ContentControl>
-                <SymbolIcon Symbol="Important" ToolTipService.ToolTip="This is an expensive operation. It will cause the underlying default heap to be replaced by a new larger one." />
+                <SymbolIcon Symbol="Important" ToolTipService.ToolTip="This is an costly operation. It will cause the underlying default heap to be replaced by a new larger one." />
             </StackPanel>
         </CheckBox>
         <StackPanel x:Name="resize_options" Visibility="{x:Bind is_auto_resizeable, Mode=OneWay}" VerticalAlignment="Stretch" HorizontalAlignment="Stretch">

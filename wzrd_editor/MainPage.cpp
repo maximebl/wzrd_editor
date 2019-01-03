@@ -102,10 +102,12 @@ namespace winrt::wzrd_editor::implementation
 
 		m_geometryViewModel.Geometry().Vertices().Append(new_vertex);
 
-		//if (m_running)
-		//{
-			m_vertex_buffer->add_to_view(new_vertex);
-		//}
+		if (m_running)
+		{
+			m_graphics_resources.vertex_buffer->add_to_view(new_vertex);
+			auto current_capacity_percentage = (m_graphics_resources.vertex_buffer->current_size() * 100) / m_graphics_resources.vertex_buffer->max_size();
+			m_geometryViewModel.Geometry().BufferCapacity(current_capacity_percentage);
+		}
 
 		//auto new_vertex = winrt::make<winrt::wzrd_editor::implementation::Vertex>(
 		//	pos_x, pos_y, pos_z,
@@ -139,16 +141,15 @@ namespace winrt::wzrd_editor::implementation
 		//			VisualStateManager().GoToState(*this, L"buffer_full", false);
 		//		}
 		//	}
-			auto current_capacity_percentage = (m_vertex_buffer->current_size() * 100) / m_vertex_buffer->max_size();
-			m_geometryViewModel.Geometry().BufferCapacity(current_capacity_percentage);
 		//}
 		co_return;
 	}
 
 	Windows::Foundation::IAsyncAction MainPage::onclick_clear_vertex(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
-		m_vertex_generator.vertices().clear();
+		//m_vertex_generator.vertices().clear();
 		m_geometryViewModel.Geometry().Vertices().Clear();
+		m_vertex_buffer->clear();
 		m_graphics_resources.update_current_buffer(m_vertex_generator.vertices());
 
 		if (m_is_buffer_dynamic)
@@ -294,7 +295,7 @@ namespace winrt::wzrd_editor::implementation
 		case winrt::Windows::UI::Xaml::Controls::ContentDialogResult::Primary:
 			VisualStateManager().GoToState(*this, L"dynamic_buffer_selected", false);
 
-			m_vertex_buffer = winrt::make_self<winrt::wzrd_editor::implementation::vertex_buffer>(
+			m_graphics_resources.vertex_buffer = winrt::make_self<winrt::wzrd_editor::implementation::vertex_buffer>(
 				wzrd_editor::buffer_type::dynamic_buffer,
 				dialog.buffer_size(),
 				dialog.buffer_increment_size(),
@@ -306,7 +307,7 @@ namespace winrt::wzrd_editor::implementation
 			//m_vertex_generator.regenerate_vertices_from_model(m_geometryViewModel.Geometry().Vertices());
 			//m_graphics_resources.update_current_buffer(m_vertex_generator.vertices());
 
-			//start_render_loop();
+			start_render_loop();
 			co_return;
 		default:
 			break;

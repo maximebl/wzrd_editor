@@ -33,18 +33,34 @@ namespace winrt::wzrd_editor::implementation
 		{
 			auto impl_vertex = new_vertex.as<wzrd_editor::implementation::vertex2>();
 			m_vertices.push_back(impl_vertex->m_vertex);
+
 			update_current_buffer();
 		}
 		else
 		{
 			if (m_type == wzrd_editor::buffer_type::dynamic_buffer && m_is_auto_resize)
 			{
+				auto impl_vertex = new_vertex.as<wzrd_editor::implementation::vertex2>();
+				m_vertices.push_back(impl_vertex->m_vertex);
+
 				m_max_size += m_resize_increment;
 				swap_upload_buffer();
 				update_current_buffer();
 			}
 		}
 		return;
+	}
+
+	void vertex_buffer::clear()
+	{
+		if (m_is_using_swap_buffer)
+		{
+			m_swap_buffer->clear_data();
+		}
+		else
+		{
+			m_buffer->clear_data();
+		}
 	}
 
 	void vertex_buffer::update_current_buffer()
@@ -65,15 +81,16 @@ namespace winrt::wzrd_editor::implementation
 
 		if (m_current_size == 0)
 		{
-			buffer->clear_data();
 			view.size_in_bytes = 0;
+			buffer->clear_data();
 		}
 		else
 		{
+			view.size_in_bytes = m_current_size * m_buffer_element_size;
+
 			for (size_t i = 0; i < m_current_size; ++i)
 			{
 				buffer->copy_data(i, m_vertices[i]);
-				view.size_in_bytes = m_current_size * m_buffer_element_size;
 			}
 		}
 	}
@@ -88,8 +105,8 @@ namespace winrt::wzrd_editor::implementation
 				new upload_buffer<xm_vertex>(Utilities::device, m_max_size, false, true)
 			);
 
-			//m_swap_view.size_in_bytes = m_max_size * m_buffer_element_size;
-			//m_swap_view.stride_in_bytes = m_buffer_element_size;
+			m_swap_view.size_in_bytes = m_current_size * m_buffer_element_size;
+			m_swap_view.stride_in_bytes = m_buffer_element_size;
 			m_swap_view.buffer_location = m_swap_buffer->get_resource()->GetGPUVirtualAddress();
 
 			//for (size_t i = 0; i < m_current_size; i++)
@@ -107,7 +124,8 @@ namespace winrt::wzrd_editor::implementation
 			//m_view.size_in_bytes = m_max_size * m_buffer_element_size;
 			//m_view.stride_in_bytes = m_buffer_element_size;
 			m_view.buffer_location = m_buffer->get_resource()->GetGPUVirtualAddress();
-
+			m_view.stride_in_bytes = m_buffer_element_size;
+			m_view.size_in_bytes = m_current_size * m_buffer_element_size;
 			//for (size_t i = 0; i < m_current_size; i++)
 			//{
 			//	m_buffer->copy_data(i, m_vertices[i]);

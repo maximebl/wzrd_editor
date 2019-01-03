@@ -17,6 +17,7 @@ namespace winrt::wzrd_editor::implementation
 
 		wzrd_editor::view get_view();
 		void add_to_view(wzrd_editor::vertex2 new_vertex);
+		void clear();
 
 		int32_t max_size();
 		void max_size(int32_t value);
@@ -47,9 +48,6 @@ namespace winrt::wzrd_editor::implementation
 
 		std::unique_ptr<upload_buffer<xm_vertex>> m_buffer = nullptr;
 		std::unique_ptr<upload_buffer<xm_vertex>> m_swap_buffer = nullptr;
-
-		//winrt::com_ptr<ID3D12Resource> vertex_buffer_gpu = nullptr;
-		//winrt::com_ptr<ID3D12Resource> swap_vertex_buffer_gpu = nullptr;
 
 		std::vector<xm_vertex> m_vertices = {};
 	};
