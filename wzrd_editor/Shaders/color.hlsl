@@ -26,7 +26,7 @@ struct VertexOut
 
 VertexOut VS(VertexIn vin)
 {
-	VertexOut vout;
+	VertexOu vout;
 	
 	// Transform to homogeneous clip space.
 	vout.PosH = mul(float4(vin.PosL, 1.0f), gWorldViewProj);

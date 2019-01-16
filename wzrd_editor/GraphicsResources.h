@@ -5,6 +5,8 @@
 #include "Vertex.h"
 #include "vertex_buffer.h"
 
+#include "winrt\graphics.h"
+
 class GraphicsResources
 {
 private:
@@ -127,4 +129,5 @@ public:
 	bool is_using_swap_buffer = false;
 	rendering_mode m_current_rendering_mode{ rendering_mode::points };
 	winrt::com_ptr<winrt::wzrd_editor::implementation::vertex_buffer> vertex_buffer;
+	winrt::graphics::buffer buffer;
 };

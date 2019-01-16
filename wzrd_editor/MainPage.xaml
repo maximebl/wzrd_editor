@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:wzrd_editor"
+    xmlns:graphics="using:graphics"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:converters="using:wzrd_editor"
@@ -74,13 +75,13 @@
                         <ColumnDefinition Width="*"></ColumnDefinition>
                         <ColumnDefinition Width="*"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
-                    <TextBox TextChanged="onchanged_vertex_input" Grid.Column="0" Text="{Binding x, Mode=TwoWay, UpdateSourceTrigger=Explicit}" VerticalAlignment="Center"/>
-                    <TextBox TextChanged="onchanged_vertex_input" Grid.Column="1" Text="{Binding y, Mode=TwoWay, UpdateSourceTrigger=Explicit}" VerticalAlignment="Center"/>
-                    <TextBox TextChanged="onchanged_vertex_input" Grid.Column="2" Text="{Binding z, Mode=TwoWay, UpdateSourceTrigger=Explicit}" VerticalAlignment="Center"/>
-                    <TextBox TextChanged="onchanged_vertex_input" Grid.Column="3" Text="{Binding r, Mode=TwoWay, UpdateSourceTrigger=Explicit}" VerticalAlignment="Center"/>
-                    <TextBox TextChanged="onchanged_vertex_input" Grid.Column="4" Text="{Binding g, Mode=TwoWay, UpdateSourceTrigger=Explicit}" VerticalAlignment="Center"/>
-                    <TextBox TextChanged="onchanged_vertex_input" Grid.Column="5" Text="{Binding b, Mode=TwoWay, UpdateSourceTrigger=Explicit}" VerticalAlignment="Center"/>
-                    <TextBox TextChanged="onchanged_vertex_input" Grid.Column="6" Text="{Binding a, Mode=TwoWay, UpdateSourceTrigger=Explicit}" VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="0" Text="{Binding x, Mode=OneWay}" VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="1" Text="{Binding y, Mode=OneWay}" VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="2" Text="{Binding z, Mode=OneWay}" VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="3" Text="{Binding r, Mode=OneWay}" VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="4" Text="{Binding g, Mode=OneWay}" VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="5" Text="{Binding b, Mode=OneWay}" VerticalAlignment="Center"/>
+                    <TextBox Grid.Column="6" Text="{Binding a, Mode=OneWay}" VerticalAlignment="Center"/>
                 </Grid>
             </ListViewItem>
         </DataTemplate>
@@ -91,11 +92,11 @@
             </ListViewItem>
         </DataTemplate>
 
-        <DataTemplate x:Key="shaders_list_template" x:DataType="local:Shader">
+        <DataTemplate x:Key="shaders_list_template" x:DataType="graphics:shader">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="8,8,0,0">
-                <SymbolIcon Margin="0,0,13,0" x:Name="shader_type_icon" Symbol="{x:Bind TypeGlyph}"></SymbolIcon>
-                <TextBlock Margin="0,0,13,0" Text="{x:Bind Name}"/>
-                <ProgressRing Margin="0,0,13,0" Visibility="{x:Bind Loading, Mode=OneWay}" IsActive="{x:Bind Loading, Mode=TwoWay}"/>
+                <SymbolIcon Margin="0,0,13,0" x:Name="shader_type_icon" Symbol="{x:Bind type_glyph}"></SymbolIcon>
+                <TextBlock Margin="0,0,13,0" Text="{x:Bind shader_name}"/>
+                <ProgressRing Margin="0,0,13,0" Visibility="{x:Bind is_loading, Mode=OneWay}" IsActive="{x:Bind is_loading, Mode=TwoWay}"/>
                 <TextBlock Text="Compilation failed." Visibility="{x:Bind is_error,Mode=OneWay}" Foreground="{StaticResource SystemControlErrorTextForegroundBrush}"/>
             </StackPanel>
         </DataTemplate>
@@ -118,11 +119,13 @@
                         <Setter Target="new_vertex_button.IsEnabled" Value="False"/>
                         <Setter Target="render_as_dynamic.IsEnabled" Value="False"/>
                         <Setter Target="render_as_static.IsEnabled" Value="False"/>
+                        <Setter Target="buffer_capacity.Visibility" Value="Visible"/>
                     </VisualState.Setters>
                 </VisualState>
 
                 <VisualState x:Name="dynamic_buffer_selected">
                     <VisualState.Setters>
+                        <Setter Target="new_vertex_button.IsEnabled" Value="True"/>
                         <Setter Target="render_as_dynamic.IsEnabled" Value="False"/>
                         <Setter Target="render_as_static.IsEnabled" Value="False"/>
                         <Setter Target="buffer_capacity.Visibility" Value="Visible"/>

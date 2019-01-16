@@ -1,0 +1,33 @@
+import "buffer.idl";
+import "shader.idl";
+
+namespace graphics
+{
+	enum primitive_types
+	{
+		points = 0,
+		triangles = 1,
+		lines = 2,
+		trianglestrips = 3,
+		linestrips = 4
+	};
+
+	struct compilation_result
+	{
+		Boolean is_success;
+		String error_message;
+	};
+
+    [default_interface]
+    runtimeclass renderer 
+    {
+        renderer();
+
+		void enable_debug_layer();
+		void initialize(Windows.UI.Xaml.Controls.SwapChainPanel target_swapchain);
+		void start_render_loop();
+
+		Windows.Foundation.IAsyncOperation<compilation_result> pick_and_compile_shader(String shader_name, String entry_point, String version);
+		buffer current_buffer{ get; set; };
+    }
+}

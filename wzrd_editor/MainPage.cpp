@@ -11,48 +11,53 @@ namespace winrt::wzrd_editor::implementation
 	MainPage::MainPage()
 	{
 		InitializeComponent();
+
 		m_ui_thread = winrt::apartment_context();
 
-		swapChainPanel().PointerMoved([this](IInspectable sender, winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs args) {
+		m_renderer.enable_debug_layer();
+		m_renderer.initialize(swapChainPanel());
+		//m_renderer.start_render_loop();
 
-			auto current_point = args.GetCurrentPoint(sender.try_as<winrt::Windows::UI::Xaml::Controls::SwapChainPanel>());
+		//swapChainPanel().PointerMoved([this](IInspectable sender, winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs args) {
 
-			if (current_point.Properties().IsLeftButtonPressed())
-			{
-				auto point = current_point.Position();
-				m_graphics_resources.last_mouse_position = m_graphics_resources.current_mouse_position;
-				m_graphics_resources.current_mouse_position = point;
-			}
-			else
-			{
-				m_graphics_resources.last_mouse_position = { 0.0f, 0.0f };
-				m_graphics_resources.current_mouse_position = { 0.0f, 0.0f };
-			}
-		});
+		//	auto current_point = args.GetCurrentPoint(sender.try_as<winrt::Windows::UI::Xaml::Controls::SwapChainPanel>());
 
-		swapChainPanel().PointerReleased([this](IInspectable sender, winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs args) {
-			m_graphics_resources.last_mouse_position = { 0.0f, 0.0f };
-			m_graphics_resources.current_mouse_position = { 0.0f, 0.0f };
-		});
+		//	if (current_point.Properties().IsLeftButtonPressed())
+		//	{
+		//		auto point = current_point.Position();
+		//		m_graphics_resources.last_mouse_position = m_graphics_resources.current_mouse_position;
+		//		m_graphics_resources.current_mouse_position = point;
+		//	}
+		//	else
+		//	{
+		//		m_graphics_resources.last_mouse_position = { 0.0f, 0.0f };
+		//		m_graphics_resources.current_mouse_position = { 0.0f, 0.0f };
+		//	}
+		//});
 
-		swapChainPanel().PointerExited([this](IInspectable sender, winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs args) {
-			m_graphics_resources.last_mouse_position = { 0.0f, 0.0f };
-			m_graphics_resources.current_mouse_position = { 0.0f, 0.0f };
-		});
+		//swapChainPanel().PointerReleased([this](IInspectable sender, winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs args) {
+		//	m_graphics_resources.last_mouse_position = { 0.0f, 0.0f };
+		//	m_graphics_resources.current_mouse_position = { 0.0f, 0.0f };
+		//});
 
-		m_graphics_resources.enable_debug_layer();
-		m_graphics_resources.create_factory();
-		m_graphics_resources.create_device();
-		m_graphics_resources.create_fence();
-		m_graphics_resources.create_cmd_objects();
-		m_graphics_resources.create_descriptor_heaps();
-		m_graphics_resources.create_depthstencil_buffer();
-		m_graphics_resources.create_swapchain_xamlpanel(swapChainPanel());
-		m_graphics_resources.create_render_targets();
-		m_graphics_resources.create_constant_buffers();
-		m_graphics_resources.create_rootsignature();
+		//swapChainPanel().PointerExited([this](IInspectable sender, winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs args) {
+		//	m_graphics_resources.last_mouse_position = { 0.0f, 0.0f };
+		//	m_graphics_resources.current_mouse_position = { 0.0f, 0.0f };
+		//});
 
-		m_window = Window::Current().CoreWindow().GetForCurrentThread();
+		//m_graphics_resources.enable_debug_layer();
+		//m_graphics_resources.create_factory();
+		//m_graphics_resources.create_device();
+		//m_graphics_resources.create_fence();
+		//m_graphics_resources.create_cmd_objects();
+		//m_graphics_resources.create_descriptor_heaps();
+		//m_graphics_resources.create_depthstencil_buffer();
+		//m_graphics_resources.create_swapchain_xamlpanel(swapChainPanel());
+		//m_graphics_resources.create_render_targets();
+		//m_graphics_resources.create_constant_buffers();
+		//m_graphics_resources.create_rootsignature();
+
+		//m_window = Window::Current().CoreWindow().GetForCurrentThread();
 	}
 
 	Windows::Foundation::IAsyncAction MainPage::ui_thread_work()
@@ -105,58 +110,22 @@ namespace winrt::wzrd_editor::implementation
 		if (m_running)
 		{
 			m_graphics_resources.vertex_buffer->add_to_view(new_vertex);
-			auto current_capacity_percentage = (m_graphics_resources.vertex_buffer->current_size() * 100) / m_graphics_resources.vertex_buffer->max_size();
-			m_geometryViewModel.Geometry().BufferCapacity(current_capacity_percentage);
+			m_geometryViewModel.Geometry().BufferCapacity(m_graphics_resources.vertex_buffer->get_capacity_percentage());
+
+			if (m_graphics_resources.vertex_buffer->is_buffer_full() && !m_graphics_resources.vertex_buffer->is_auto_resize())
+			{
+				VisualStateManager().GoToState(*this, L"buffer_full", false);
+			}
 		}
-
-		//auto new_vertex = winrt::make<winrt::wzrd_editor::implementation::Vertex>(
-		//	pos_x, pos_y, pos_z,
-		//	color_r, color_g, color_b, color_a,
-		//	tex_u, tex_v);
-		//m_geometryViewModel.Geometry().Vertices().Append(new_vertex);
-
-		//if (m_running)
-		//{
-		//	if (m_geometryViewModel.Geometry().Vertices().Size() <= current_buffer_capacity)
-		//	{
-		//		m_vertex_generator.push_vertex(pos_x, pos_y, pos_z, color_r, color_g, color_b, color_a, tex_u, tex_v);
-		//		m_graphics_resources.update_current_buffer(m_vertex_generator.vertices());
-
-		//		if (!m_graphics_resources.m_dynamic_vertex_buffer->m_is_auto_resize && m_geometryViewModel.Geometry().Vertices().Size() == current_buffer_capacity)
-		//		{
-		//			VisualStateManager().GoToState(*this, L"buffer_full", false);
-		//		}
-		//	}
-		//	else {
-		//		if (m_graphics_resources.m_dynamic_vertex_buffer->m_is_auto_resize)
-		//		{
-		//			// recreate the upload_heap committed resource
-		//			current_buffer_capacity += m_buffer_resize_increment;
-		//			m_graphics_resources.swap_upload_buffer(current_buffer_capacity, m_vertex_generator.vertices());
-		//			// update the swapped buffer with the newly added vertex
-		//			m_vertex_generator.push_vertex(pos_x, pos_y, pos_z, color_r, color_g, color_b, color_a, tex_u, tex_v);
-		//			m_graphics_resources.update_current_buffer(m_vertex_generator.vertices());
-		//		}
-		//		else {
-		//			VisualStateManager().GoToState(*this, L"buffer_full", false);
-		//		}
-		//	}
-		//}
 		co_return;
 	}
 
 	Windows::Foundation::IAsyncAction MainPage::onclick_clear_vertex(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
-		//m_vertex_generator.vertices().clear();
 		m_geometryViewModel.Geometry().Vertices().Clear();
-		m_vertex_buffer->clear();
-		m_graphics_resources.update_current_buffer(m_vertex_generator.vertices());
-
-		if (m_is_buffer_dynamic)
-		{
-			auto current_capacity_percentage = (m_geometryViewModel.Geometry().Vertices().Size() * 100) / current_buffer_capacity;
-			m_geometryViewModel.Geometry().BufferCapacity(current_capacity_percentage);
-		}
+		m_graphics_resources.vertex_buffer->clear();
+		m_geometryViewModel.Geometry().BufferCapacity(m_graphics_resources.vertex_buffer->get_capacity_percentage());
+		VisualStateManager().GoToState(*this, L"dynamic_buffer_selected", false);
 		co_return;
 	}
 
@@ -191,23 +160,21 @@ namespace winrt::wzrd_editor::implementation
 		new_texture.Loading(false);
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::show_error_dialog(LPVOID error_buffer_ptr)
+	Windows::Foundation::IAsyncAction MainPage::show_error_dialog(hstring error_message)
 	{
-		LPCSTR errorMessagePtr = (const char*)error_buffer_ptr;
-		std::string errorMessage(errorMessagePtr);
-		std::wstring title = L"Shader compilation error.";
-		std::wstring message(errorMessage.begin(), errorMessage.end());
-
-		OutputDebugStringA(errorMessagePtr);
-
 		auto dialog = winrt::Windows::UI::Xaml::Controls::ContentDialog();
-		dialog.Title(winrt::box_value(title));
-		dialog.Content(winrt::box_value(message));
+		hstring title = L"Shader compilation error.";
+		dialog.Title(box_value(title));
+		dialog.Content(box_value(error_message));
 		dialog.CloseButtonText(L"Ok");
 		co_await dialog.ShowAsync();
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::pick_and_compile_shader(const std::string shader_name, wzrd_editor::ShaderType shader_type, const std::string entry_point, const std::string version)
+	Windows::Foundation::IAsyncAction MainPage::pick_and_compile_shader(
+		const std::string shader_name,
+		wzrd_editor::ShaderType shader_type,
+		const std::string entry_point,
+		const std::string version)
 	{
 		auto shader_file_bytes = co_await Utilities::pick_file(winrt::hstring(L".hlsl"));
 
@@ -225,7 +192,7 @@ namespace winrt::wzrd_editor::implementation
 		else {
 			co_await m_ui_thread;
 			new_shader.is_error(true);
-			show_error_dialog(compilation_result.result_blob.get()->GetBufferPointer());
+			//show_error_dialog(compilation_result.result_blob.get()->GetBufferPointer());
 		}
 
 		co_await m_ui_thread;
@@ -239,7 +206,20 @@ namespace winrt::wzrd_editor::implementation
 
 	Windows::Foundation::IAsyncAction MainPage::onclick_vertexshader_picker(IInspectable const&, RoutedEventArgs const&)
 	{
-		co_await pick_and_compile_shader("woodCrateVS", wzrd_editor::ShaderType::vertex, "VS", "vs_5_0");
+		//co_await pick_and_compile_shader("woodCrateVS", wzrd_editor::ShaderType::vertex, "VS", "vs_5_0");
+		graphics::shader new_shader = graphics::shader(hstring(L"default_vs"), graphics::shader_type::vertex);
+		m_geometryViewModel.Shaders().Append(new_shader);
+
+		new_shader.is_loading(true);
+		auto result = co_await m_renderer.pick_and_compile_shader(new_shader.shader_name(), hstring(L"VS"), hstring(L"vs_5_0"));
+		new_shader.is_loading(false);
+
+		if (!result.is_success)
+		{
+			new_shader.is_error(true);
+			show_error_dialog(result.error_message);
+		}
+		co_return;
 	}
 
 	Windows::Foundation::IAsyncAction MainPage::onclick_build_pointlist(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
@@ -274,10 +254,15 @@ namespace winrt::wzrd_editor::implementation
 
 	Windows::Foundation::IAsyncAction MainPage::onclick_render_as_static(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
+		m_graphics_resources.vertex_buffer = winrt::make_self<winrt::wzrd_editor::implementation::vertex_buffer>(
+			wzrd_editor::buffer_type::static_buffer,
+			m_geometryViewModel.Geometry().Vertices(),
+			m_geometryViewModel.Geometry().Vertices().Size(),
+			0,
+			false
+			);
 		VisualStateManager().GoToState(*this, L"static_buffer_selected", false);
-		m_is_buffer_dynamic = false;
-		m_vertex_generator.regenerate_vertices_from_model(m_geometryViewModel.Geometry().Vertices());
-		m_graphics_resources.init_static_buffer(m_vertex_generator.vertices());
+
 		start_render_loop();
 		co_return;
 	}
@@ -287,55 +272,38 @@ namespace winrt::wzrd_editor::implementation
 		auto dialog = winrt::make<wzrd_editor::implementation::buffer_size_select_dialog>(m_geometryViewModel.Geometry().Vertices().Size());
 		auto dialog_result = co_await dialog.ShowAsync();
 
+		auto new_vert = graphics::vertex(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
+		IVector<graphics::vertex> my_vec{ winrt::single_threaded_vector<graphics::vertex>() };
+		my_vec.Append(new_vert);
+
+		m_graphics_resources.buffer = winrt::graphics::buffer(
+			graphics::buffer_type::dynamic_buffer,
+			my_vec,
+			dialog.buffer_size(),
+			dialog.buffer_increment_size(),
+			dialog.is_auto_resizeable());
+
 		switch (dialog_result)
 		{
 		case winrt::Windows::UI::Xaml::Controls::ContentDialogResult::None:
 			co_return;
 
 		case winrt::Windows::UI::Xaml::Controls::ContentDialogResult::Primary:
-			VisualStateManager().GoToState(*this, L"dynamic_buffer_selected", false);
 
 			m_graphics_resources.vertex_buffer = winrt::make_self<winrt::wzrd_editor::implementation::vertex_buffer>(
 				wzrd_editor::buffer_type::dynamic_buffer,
+				m_geometryViewModel.Geometry().Vertices(),
 				dialog.buffer_size(),
 				dialog.buffer_increment_size(),
 				dialog.is_auto_resizeable());
-			//m_is_buffer_dynamic = true;
-			//current_buffer_capacity = dialog.buffer_size();
-			//m_buffer_resize_increment = dialog.buffer_increment_size();
-			//m_graphics_resources.init_dynamic_buffer(dialog.buffer_size(), dialog.is_auto_resizeable());
-			//m_vertex_generator.regenerate_vertices_from_model(m_geometryViewModel.Geometry().Vertices());
-			//m_graphics_resources.update_current_buffer(m_vertex_generator.vertices());
+			VisualStateManager().GoToState(*this, L"dynamic_buffer_selected", false);
+			m_geometryViewModel.Geometry().BufferCapacity(m_graphics_resources.vertex_buffer->get_capacity_percentage());
 
 			start_render_loop();
 			co_return;
 		default:
 			break;
 		}
-	}
-
-	Windows::Foundation::IAsyncAction MainPage::onchanged_vertex_input(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::Controls::TextChangedEventArgs const& args)
-	{
-		auto current_textbox = sender.try_as<Windows::UI::Xaml::Controls::TextBox>();
-		current_textbox.GetBindingExpression(current_textbox.TextProperty()).UpdateSource();
-
-		for (uint32_t i = 0; i < m_geometryViewModel.Geometry().Vertices().Size(); i++)
-		{
-			m_vertex_generator.vertices()[i].Pos.x = m_geometryViewModel.Geometry().Vertices().GetAt(i).try_as<wzrd_editor::implementation::Vertex>()->x();
-			m_vertex_generator.vertices()[i].Pos.y = m_geometryViewModel.Geometry().Vertices().GetAt(i).try_as<wzrd_editor::implementation::Vertex>()->y();
-			m_vertex_generator.vertices()[i].Pos.z = m_geometryViewModel.Geometry().Vertices().GetAt(i).try_as<wzrd_editor::implementation::Vertex>()->z();
-
-			m_vertex_generator.vertices()[i].Color.x = m_geometryViewModel.Geometry().Vertices().GetAt(i).try_as<wzrd_editor::implementation::Vertex>()->r();
-			m_vertex_generator.vertices()[i].Color.y = m_geometryViewModel.Geometry().Vertices().GetAt(i).try_as<wzrd_editor::implementation::Vertex>()->g();
-			m_vertex_generator.vertices()[i].Color.z = m_geometryViewModel.Geometry().Vertices().GetAt(i).try_as<wzrd_editor::implementation::Vertex>()->b();
-			m_vertex_generator.vertices()[i].Color.w = m_geometryViewModel.Geometry().Vertices().GetAt(i).try_as<wzrd_editor::implementation::Vertex>()->a();
-
-			m_vertex_generator.vertices()[i].TexC.x = m_geometryViewModel.Geometry().Vertices().GetAt(i).try_as<wzrd_editor::implementation::Vertex>()->u();
-			m_vertex_generator.vertices()[i].TexC.y = m_geometryViewModel.Geometry().Vertices().GetAt(i).try_as<wzrd_editor::implementation::Vertex>()->v();
-		}
-
-		m_graphics_resources.update_current_buffer(m_vertex_generator.vertices());
-		co_return;
 	}
 
 	winrt::Windows::Foundation::IAsyncAction MainPage::start_render_loop()

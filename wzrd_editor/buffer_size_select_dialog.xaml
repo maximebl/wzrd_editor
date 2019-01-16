@@ -19,7 +19,7 @@
         <TextBlock Text="Choose how many vertices you would like to allocate memory for." TextWrapping="Wrap" />
         <Slider
             Value="{x:Bind buffer_size, Mode=TwoWay}"
-            Minimum="1" 
+            Minimum="{x:Bind minimum_buffer_size, Mode=OneWay}"
             Maximum="100"
             SnapsTo="Ticks"
             TickFrequency="1"
@@ -35,7 +35,7 @@
             <TextBlock Text="Increment step size"></TextBlock>
             <Slider
                 Value="{x:Bind buffer_increment_size, Mode=TwoWay}"
-                Minimum="{x:Bind minimum_buffer_size, Mode=OneWay}"
+                Minimum="1" 
                 Maximum="100"
                 SnapsTo="Ticks"
                 TickFrequency="1"

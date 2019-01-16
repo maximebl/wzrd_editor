@@ -20,14 +20,16 @@ namespace wzrd_editor
 	runtimeclass vertex_buffer
 	{
 		vertex_buffer();
-		vertex_buffer(buffer_type type, Int32 max_size, Int32 resize_increment, Boolean is_auto_resize);
+		vertex_buffer(buffer_type type, Windows.Foundation.Collections.IVector<IInspectable> initial_data, Int32 max_size, Int32 resize_increment, Boolean is_auto_resize);
 		view get_view();
+		Int32 get_capacity_percentage();
 		void add_to_view(vertex2 new_vertex);
 		void clear();
 
 		Int32 max_size;
 		Int32 current_size;
 		Int32 resize_increment;
-		Boolean is_auto_resize;
+		Boolean is_auto_resize{ get; };
+		Boolean is_buffer_full{ get; };
 	}
 }

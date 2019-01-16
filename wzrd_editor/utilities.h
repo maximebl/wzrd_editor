@@ -4,8 +4,6 @@
 #include "winrt/Windows.Foundation.h"
 #include "MathHelper.h"
 
-
-
 namespace winrt::wzrd_editor::data
 {
 	struct Texture
@@ -117,7 +115,8 @@ public:
 				&CD3DX12_RESOURCE_DESC::Buffer(m_element_byte_size*element_count),
 				D3D12_RESOURCE_STATE_GENERIC_READ,
 				nullptr,
-				winrt::guid_of<ID3D12Resource>(),
+				//winrt::guid_of<ID3D12Resource>(),
+				__uuidof(ID3D12Resource),
 				m_upload_buffer.put_void()
 			));
 
@@ -193,5 +192,6 @@ public:
 	static void print_coordinates(float x, float y);
 	static void wait(DWORD duration);
 	static ID3D12Device* device;
+	static ID3D12GraphicsCommandList* cmd_list;
 };
 

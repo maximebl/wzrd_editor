@@ -1,0 +1,27 @@
+namespace graphics
+{
+	[bindable]
+	[default_interface]
+	runtimeclass vertex : Windows.UI.Xaml.Data.INotifyPropertyChanged
+	{
+		vertex();
+
+		vertex(
+			Single x, Single y, Single z,
+			Single r, Single g, Single b, Single a,
+			Single u, Single v
+		);
+
+		Single x;
+		Single y;
+		Single z;
+
+		Single r;
+		Single g;
+		Single b;
+		Single a;
+
+		Single u;
+		Single v;
+	}
+}

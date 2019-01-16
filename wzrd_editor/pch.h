@@ -45,4 +45,3 @@
 #include <DirectXColors.h>
 
 #include <sstream>
-#include <gsl\gsl>

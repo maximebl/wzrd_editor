@@ -159,7 +159,6 @@
   </ItemGroup>
   <ItemGroup>
     <Text Include="wzrd_editor.log" />
-    <Text Include="readme.txt" />
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">

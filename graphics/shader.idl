@@ -1,0 +1,21 @@
+namespace graphics
+{
+	enum shader_type
+	{
+		vertex = 0,
+		pixel = 1
+	};
+
+	[bindable]
+	[default_interface]
+	runtimeclass shader : Windows.UI.Xaml.Data.INotifyPropertyChanged
+	{
+		shader(String name, shader_type type);
+
+		String shader_name;
+		String type_glyph;
+		Boolean is_loading;
+		Boolean is_error;
+		shader_type shader_type;
+	}
+}

@@ -19,6 +19,7 @@
 #include "int_to_visibility.h"
 #include "vertex_buffer.h"
 #include "vertex2.h"
+#include "winrt\graphics.h"
 
 namespace winrt::wzrd_editor::implementation
 {
@@ -27,6 +28,8 @@ namespace winrt::wzrd_editor::implementation
 		MainPage();
 
 	private:
+		graphics::renderer m_renderer;
+
 		com_ptr<wzrd_editor::implementation::vertex_buffer> m_vertex_buffer;
 		GraphicsResources m_graphics_resources;
 		VertexBufferGenerator m_vertex_generator;
@@ -59,10 +62,8 @@ namespace winrt::wzrd_editor::implementation
 		Windows::Foundation::IAsyncAction onclick_new_index(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 		Windows::Foundation::IAsyncAction onclick_clear_indices(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 
-		Windows::Foundation::IAsyncAction onchanged_vertex_input(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::Controls::TextChangedEventArgs const& args);
-
 		Windows::Foundation::IAsyncAction pick_and_compile_shader(const std::string shader_name, wzrd_editor::ShaderType shader_type, const std::string entry_point, const std::string version);
-		Windows::Foundation::IAsyncAction show_error_dialog(LPVOID error_buffer_ptr);
+		Windows::Foundation::IAsyncAction show_error_dialog(hstring error_message);
 
 		GameTimer m_timer;
 		Windows::UI::Core::CoreWindow m_window = nullptr;
@@ -77,7 +78,6 @@ namespace winrt::wzrd_editor::implementation
 
 		uint32_t current_buffer_capacity = 0;
 		int32_t m_buffer_resize_increment = 0;
-		bool m_is_buffer_dynamic = false;
 		bool m_running = false;
 		int32_t m_size_limit = 0;
 		int output_width = 700;

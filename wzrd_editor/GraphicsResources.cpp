@@ -37,6 +37,7 @@ void GraphicsResources::create_device()
 			m_device.put_void()
 		)
 	);
+	
 	Utilities::device = m_device.get();
 }
 
@@ -69,6 +70,7 @@ void GraphicsResources::create_cmd_objects()
 	winrt::check_hresult(
 		m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_DIRECT, m_cmd_allocator.get(), nullptr, winrt::guid_of<ID3D12GraphicsCommandList>(), m_graphics_cmdlist.put_void())
 	);
+	Utilities::cmd_list = m_graphics_cmdlist.get();
 }
 
 void GraphicsResources::create_descriptor_heaps()
@@ -349,6 +351,7 @@ void GraphicsResources::create_lines_pso(winrt::com_ptr<ID3D10Blob> vertex_shade
 
 	winrt::check_hresult(m_device->CreateGraphicsPipelineState(&lines_pso_desc, winrt::guid_of<ID3D12PipelineState>(), m_lines_pso.put_void()));
 }
+
 void GraphicsResources::create_triangles_pso(winrt::com_ptr<ID3D10Blob> vertex_shader, winrt::com_ptr<ID3D10Blob> pixel_shader)
 {
 	D3D12_GRAPHICS_PIPELINE_STATE_DESC triangles_pso_desc = {};
@@ -720,19 +723,7 @@ void GraphicsResources::render()
 	m_graphics_cmdlist->SetGraphicsRootSignature(m_rootsig.get());
 	m_graphics_cmdlist->SetGraphicsRootConstantBufferView(0, m_object_cb->get_resource()->GetGPUVirtualAddress());
 
-	//if (is_using_swap_buffer)
-	//{
-	//	m_graphics_cmdlist->IASetVertexBuffers(0, 1, &m_box_geo->SwapBufferView());
-	//	m_graphics_cmdlist->IASetIndexBuffer(&m_box_geo->SwapIndexBufferView());
-	//}
-	//else
-	//{
-	//	m_graphics_cmdlist->IASetVertexBuffers(0, 1, &m_box_geo->VertexBufferView());
-	//	m_graphics_cmdlist->IASetIndexBuffer(&m_box_geo->IndexBufferView());
-	//}
-	//m_graphics_cmdlist->IASetIndexBuffer((D3D12_INDEX_BUFFER_VIEW*)&index_buffer->get_view());
 	m_graphics_cmdlist->IASetVertexBuffers(0, 1, (D3D12_VERTEX_BUFFER_VIEW*)&vertex_buffer->get_view());
-	//m_graphics_cmdlist->DrawIndexedInstanced(m_box_geo->index_count, 1, 0, 0, 0);
 	m_graphics_cmdlist->DrawInstanced(vertex_buffer->current_size(), 1, 0, 0);
 
 	m_graphics_cmdlist->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(

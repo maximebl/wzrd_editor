@@ -281,8 +281,12 @@
     <ResourceCompile Include="wzrd_editor.rc" />
   </ItemGroup>
   <ItemGroup>
-    <Text Include="readme.txt" />
     <Text Include="wzrd_editor.log" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\graphics\graphics.vcxproj">
+      <Project>{de149999-9168-4d01-ba82-f0b0d6488a95}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
