@@ -35,6 +35,9 @@ namespace interop_test_app
             graphics.shader new_shader = new graphics.shader("default_vs", shader_type.vertex);
             new_shader.is_loading = true;
             var result = await renderer.pick_and_compile_shader(new_shader.shader_name, "VS", "vs_5_0");
+
+            graphics.buffer new_buffer = new graphics.buffer();
+
         }
 
     }

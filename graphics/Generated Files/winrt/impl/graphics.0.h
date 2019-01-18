@@ -25,10 +25,10 @@ enum class buffer_type : int32_t
 enum class primitive_types : int32_t
 {
     points = 0,
-    triangles = 1,
-    lines = 2,
-    trianglestrips = 3,
-    linestrips = 4,
+    triangle_list = 1,
+    triangle_strips = 2,
+    line_lists = 3,
+    line_strips = 4,
 };
 
 enum class shader_type : int32_t
@@ -88,8 +88,8 @@ template <> struct name<graphics::shader_type>{ static constexpr auto & value{ L
 template <> struct name<graphics::compilation_result>{ static constexpr auto & value{ L"graphics.compilation_result" }; };
 template <> struct name<graphics::view>{ static constexpr auto & value{ L"graphics.view" }; };
 template <> struct guid_storage<graphics::Ibuffer>{ static constexpr guid value{ 0xC40F195C,0xDB97,0x5E9E,{ 0xAD,0x2C,0x90,0x5B,0x20,0x31,0x2D,0xFA } }; };
-template <> struct guid_storage<graphics::IbufferFactory>{ static constexpr guid value{ 0x29F09F31,0xE0E2,0x5944,{ 0x9A,0xDE,0x95,0x33,0x10,0xDA,0xAF,0x86 } }; };
-template <> struct guid_storage<graphics::Irenderer>{ static constexpr guid value{ 0x32CCF6D3,0xFDD0,0x57E2,{ 0xB6,0x51,0xAB,0x47,0x1B,0xDB,0x0E,0x38 } }; };
+template <> struct guid_storage<graphics::IbufferFactory>{ static constexpr guid value{ 0xF3D669E1,0x5F70,0x5F2C,{ 0xA1,0x52,0x82,0xF3,0x19,0x89,0xC5,0x66 } }; };
+template <> struct guid_storage<graphics::Irenderer>{ static constexpr guid value{ 0xCD38E630,0xDB6F,0x5277,{ 0x85,0x2D,0xDB,0x51,0xDC,0xF4,0x4C,0x71 } }; };
 template <> struct guid_storage<graphics::Ishader>{ static constexpr guid value{ 0xD5907D07,0x2DE4,0x537C,{ 0x92,0xD8,0xEA,0x3C,0x66,0xA0,0x35,0xC7 } }; };
 template <> struct guid_storage<graphics::IshaderFactory>{ static constexpr guid value{ 0xE76F4BFC,0x6A2E,0x5F53,{ 0xAA,0x4E,0xF0,0xA8,0x9F,0x1D,0x37,0x75 } }; };
 template <> struct guid_storage<graphics::Ivertex>{ static constexpr guid value{ 0x46A070D6,0x07F9,0x5B89,{ 0xA9,0x3E,0xCD,0x8D,0x8D,0xD0,0x43,0xC3 } }; };
@@ -125,6 +125,10 @@ template <> struct abi<graphics::Irenderer>{ struct type : IInspectable
     virtual int32_t WINRT_CALL enable_debug_layer() noexcept = 0;
     virtual int32_t WINRT_CALL initialize(void* target_swapchain) noexcept = 0;
     virtual int32_t WINRT_CALL start_render_loop() noexcept = 0;
+    virtual int32_t WINRT_CALL stop_render_loop() noexcept = 0;
+    virtual int32_t WINRT_CALL get_is_rendering(bool* value) noexcept = 0;
+    virtual int32_t WINRT_CALL get_current_topology(graphics::primitive_types* value) noexcept = 0;
+    virtual int32_t WINRT_CALL put_current_topology(graphics::primitive_types value) noexcept = 0;
     virtual int32_t WINRT_CALL pick_and_compile_shader(void* shader_name, void* entry_point, void* version, void** operation) noexcept = 0;
     virtual int32_t WINRT_CALL get_current_buffer(void** value) noexcept = 0;
     virtual int32_t WINRT_CALL put_current_buffer(void* value) noexcept = 0;
@@ -197,7 +201,7 @@ template <> struct consume<graphics::Ibuffer> { template <typename D> using type
 template <typename D>
 struct consume_graphics_IbufferFactory
 {
-    graphics::buffer CreateInstance(graphics::buffer_type const& type, param::vector<graphics::vertex> const& initial_data, int32_t max_size, int32_t resize_increment, bool is_auto_resize) const;
+    graphics::buffer CreateInstance(graphics::buffer_type const& type, Windows::Foundation::Collections::IObservableVector<graphics::vertex> const& initial_data, int32_t max_size, int32_t resize_increment, bool is_auto_resize) const;
 };
 template <> struct consume<graphics::IbufferFactory> { template <typename D> using type = consume_graphics_IbufferFactory<D>; };
 
@@ -207,6 +211,10 @@ struct consume_graphics_Irenderer
     void enable_debug_layer() const;
     void initialize(Windows::UI::Xaml::Controls::SwapChainPanel const& target_swapchain) const;
     void start_render_loop() const;
+    void stop_render_loop() const;
+    bool is_rendering() const;
+    graphics::primitive_types current_topology() const;
+    void current_topology(graphics::primitive_types const& value) const;
     Windows::Foundation::IAsyncOperation<graphics::compilation_result> pick_and_compile_shader(param::hstring const& shader_name, param::hstring const& entry_point, param::hstring const& version) const;
     graphics::buffer current_buffer() const;
     void current_buffer(graphics::buffer const& value) const;

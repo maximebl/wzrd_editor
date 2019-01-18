@@ -1,27 +1,30 @@
 ﻿#include "pch.h"
 #include "buffer.h"
+#include "renderer.h"
+#include "utilities.h"
 
 namespace winrt::graphics::implementation
 {
 	buffer::buffer(
 		graphics::buffer_type const& type,
-		Windows::Foundation::Collections::IVector<graphics::vertex> const& initial_data,
+		Windows::Foundation::Collections::IObservableVector<graphics::vertex> const& initial_data,
 		int32_t max_size,
 		int32_t resize_increment,
 		bool is_auto_resize)
 		: m_type(type), m_max_size(max_size), m_resize_increment(resize_increment), m_is_auto_resize(is_auto_resize)
 	{
+		for (auto vertex : initial_data)
+		{
+			m_vertices.push_back(vertex.as<graphics::implementation::vertex>()->m_vertex);
+		}
+
 		if (type == graphics::buffer_type::dynamic_buffer)
 		{
-			for (auto vertex : initial_data)
-			{
-				m_vertices.push_back(vertex.as<graphics::implementation::vertex>()->m_vertex);
-			}
-			//m_buffer = std::make_unique<upload_buffer<xm_vertex>>(MyClassz::g_device, m_max_size, false, m_is_auto_resize);
+			m_buffer = std::make_unique<upload_buffer<xm_vertex>>(renderer::g_device, m_max_size, false, m_is_auto_resize);
 
 			m_view.stride_in_bytes = m_buffer_element_size;
 			m_view.size_in_bytes = m_max_size * m_buffer_element_size;
-			//m_view.buffer_location = m_buffer->get_resource()->GetGPUVirtualAddress();
+			m_view.buffer_location = m_buffer->get_resource()->GetGPUVirtualAddress();
 
 			m_swap_view.stride_in_bytes = m_buffer_element_size;
 
@@ -32,6 +35,16 @@ namespace winrt::graphics::implementation
 		{
 			m_view.stride_in_bytes = m_buffer_element_size;
 			m_view.size_in_bytes = m_max_size * m_buffer_element_size;
+			m_current_size = m_vertices.size();
+
+			m_static_default_buffer = utilities::create_default_buffer(
+				renderer::g_device,
+				renderer::g_cmd_list,
+				m_vertices.data(),
+				m_view.size_in_bytes,
+				m_static_buffer_uploader);
+
+			m_view.buffer_location = m_static_default_buffer->GetGPUVirtualAddress();
 		}
 	}
 
@@ -47,7 +60,7 @@ namespace winrt::graphics::implementation
 
 	void buffer::add_to_view(graphics::vertex const& new_vertex)
 	{
-		if (!is_buffer_full())
+		if (m_type == graphics::buffer_type::dynamic_buffer && !is_buffer_full())
 		{
 			update_current_buffer();
 		}
@@ -104,9 +117,9 @@ namespace winrt::graphics::implementation
 	{
 		if (m_is_using_swap_buffer)
 		{
-			//m_buffer.reset(
-			//	new upload_buffer<xm_vertex>(MyClass::g_device, m_max_size, false, true)
-			//);
+			m_buffer.reset(
+				new upload_buffer<xm_vertex>(renderer::g_device, m_max_size, false, true)
+			);
 
 			m_view.buffer_location = m_buffer->get_resource()->GetGPUVirtualAddress();
 			m_view.stride_in_bytes = m_buffer_element_size;
@@ -115,9 +128,9 @@ namespace winrt::graphics::implementation
 			m_is_using_swap_buffer = false;
 		}
 		else {
-			//m_swap_buffer.reset(
-			//	new upload_buffer<xm_vertex>(MyClass::g_device, m_max_size, false, true)
-			//);
+			m_swap_buffer.reset(
+				new upload_buffer<xm_vertex>(renderer::g_device, m_max_size, false, true)
+			);
 
 			m_swap_view.buffer_location = m_swap_buffer->get_resource()->GetGPUVirtualAddress();
 			m_swap_view.stride_in_bytes = m_buffer_element_size;

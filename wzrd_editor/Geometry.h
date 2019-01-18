@@ -2,6 +2,7 @@
 
 #include "Geometry.g.h"
 #include "utilities.h"
+#include "winrt\graphics.h"
 
 namespace winrt::wzrd_editor::implementation
 {
@@ -9,7 +10,7 @@ namespace winrt::wzrd_editor::implementation
 	{
 		Geometry() = delete;
 		Geometry(wzrd_editor::wzrd_vec3 const& position);
-
+		
 		wzrd_editor::wzrd_vec3 Position();
 		int32_t Index();
 		void Index(int32_t value);

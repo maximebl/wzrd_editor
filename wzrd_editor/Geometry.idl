@@ -1,5 +1,6 @@
 import "Vertex.idl";
 import "wzrd_vec3.idl";
+import "vertex.idl";
 
 namespace wzrd_editor
 {

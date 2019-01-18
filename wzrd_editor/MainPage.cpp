@@ -16,7 +16,6 @@ namespace winrt::wzrd_editor::implementation
 
 		m_renderer.enable_debug_layer();
 		m_renderer.initialize(swapChainPanel());
-		//m_renderer.start_render_loop();
 
 		//swapChainPanel().PointerMoved([this](IInspectable sender, winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs args) {
 
@@ -60,7 +59,7 @@ namespace winrt::wzrd_editor::implementation
 		//m_window = Window::Current().CoreWindow().GetForCurrentThread();
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::ui_thread_work()
+	IAsyncAction MainPage::ui_thread_work()
 	{
 		co_await m_ui_thread;
 		m_windowVisible = m_window.Visible();
@@ -71,20 +70,20 @@ namespace winrt::wzrd_editor::implementation
 		return m_geometryViewModel;
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::onclick_new_index(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	IAsyncAction MainPage::onclick_new_index(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
 		auto new_index = m_geometryViewModel.Geometry().Index();
 		m_geometryViewModel.Geometry().Indices().Append(winrt::box_value(new_index));
 		co_return;
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::onclick_clear_indices(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	IAsyncAction MainPage::onclick_clear_indices(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
 		m_geometryViewModel.Geometry().Indices().Clear();
 		co_return;
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::onclick_create_vertex(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
+	IAsyncAction MainPage::onclick_create_vertex(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
 		auto pos_x = m_geometryViewModel.Geometry().Position().x();
 		auto pos_y = m_geometryViewModel.Geometry().Position().y();
@@ -100,27 +99,47 @@ namespace winrt::wzrd_editor::implementation
 		auto tex_u = 0.0f;
 		auto tex_v = 0.0f;
 
-		auto new_vertex = winrt::make<winrt::wzrd_editor::implementation::vertex2>(
+		auto new_vertex = graphics::vertex(
 			pos_x, pos_y, pos_z,
 			color_r, color_g, color_b, color_a,
 			tex_u, tex_v);
 
 		m_geometryViewModel.Geometry().Vertices().Append(new_vertex);
 
-		if (m_running)
+		if (m_renderer.is_rendering())
 		{
-			m_graphics_resources.vertex_buffer->add_to_view(new_vertex);
-			m_geometryViewModel.Geometry().BufferCapacity(m_graphics_resources.vertex_buffer->get_capacity_percentage());
+			m_renderer.current_buffer().add_to_view(new_vertex);
 
-			if (m_graphics_resources.vertex_buffer->is_buffer_full() && !m_graphics_resources.vertex_buffer->is_auto_resize())
+			m_geometryViewModel.Geometry().BufferCapacity(
+				m_renderer.current_buffer().get_capacity_percentage()
+			);
+
+			if (m_renderer.current_buffer().is_buffer_full() && !m_renderer.current_buffer().is_auto_resize())
 			{
 				VisualStateManager().GoToState(*this, L"buffer_full", false);
 			}
 		}
+		//auto new_vertex = winrt::make<winrt::wzrd_editor::implementation::vertex2>(
+		//	pos_x, pos_y, pos_z,
+		//	color_r, color_g, color_b, color_a,
+		//	tex_u, tex_v);
+
+		//m_geometryViewModel.Geometry().Vertices().Append(new_vertex);
+
+		//if (m_running)
+		//{
+		//	m_graphics_resources.vertex_buffer->add_to_view(new_vertex);
+		//	m_geometryViewModel.Geometry().BufferCapacity(m_graphics_resources.vertex_buffer->get_capacity_percentage());
+
+		//	if (m_graphics_resources.vertex_buffer->is_buffer_full() && !m_graphics_resources.vertex_buffer->is_auto_resize())
+		//	{
+		//		VisualStateManager().GoToState(*this, L"buffer_full", false);
+		//	}
+		//}
 		co_return;
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::onclick_clear_vertex(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
+	IAsyncAction MainPage::onclick_clear_vertex(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
 		m_geometryViewModel.Geometry().Vertices().Clear();
 		m_graphics_resources.vertex_buffer->clear();
@@ -129,21 +148,21 @@ namespace winrt::wzrd_editor::implementation
 		co_return;
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::menuflyout_clear_shaders_click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
+	IAsyncAction MainPage::menuflyout_clear_shaders_click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
 		m_graphics_resources.m_shaders.clear();
 		m_geometryViewModel.Shaders().Clear();
 		co_return;
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::menuflyout_clear_textures_click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
+	IAsyncAction MainPage::menuflyout_clear_textures_click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
 		m_graphics_resources.m_textures.clear();
 		m_geometryViewModel.Textures().Clear();
 		co_return;
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::onclick_texture_picker(Windows::Foundation::IInspectable const&, Windows::UI::Xaml::RoutedEventArgs const&)
+	IAsyncAction MainPage::onclick_texture_picker(Windows::Foundation::IInspectable const&, Windows::UI::Xaml::RoutedEventArgs const&)
 	{
 		auto texture_file_bytes = co_await Utilities::pick_file(winrt::hstring(L".dds"));
 
@@ -160,7 +179,7 @@ namespace winrt::wzrd_editor::implementation
 		new_texture.Loading(false);
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::show_error_dialog(hstring error_message)
+	IAsyncAction MainPage::show_error_dialog(hstring error_message)
 	{
 		auto dialog = winrt::Windows::UI::Xaml::Controls::ContentDialog();
 		hstring title = L"Shader compilation error.";
@@ -170,41 +189,25 @@ namespace winrt::wzrd_editor::implementation
 		co_await dialog.ShowAsync();
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::pick_and_compile_shader(
-		const std::string shader_name,
-		wzrd_editor::ShaderType shader_type,
-		const std::string entry_point,
-		const std::string version)
+	IAsyncAction MainPage::onclick_pixelshader_picker(IInspectable const&, RoutedEventArgs const&)
 	{
-		auto shader_file_bytes = co_await Utilities::pick_file(winrt::hstring(L".hlsl"));
-
-		wzrd_editor::Shader new_shader = winrt::make<wzrd_editor::implementation::Shader>(winrt::to_hstring(shader_name), shader_type);
-		new_shader.Loading(true);
+		//co_await pick_and_compile_shader("woodCratePS", wzrd_editor::ShaderType::pixel, "PS", "ps_5_0");
+		graphics::shader new_shader = graphics::shader(hstring(L"default_ps"), graphics::shader_type::pixel);
 		m_geometryViewModel.Shaders().Append(new_shader);
 
-		co_await winrt::resume_background();
-		auto compilation_result = Utilities::compile_shader(version, shader_file_bytes, entry_point);
+		new_shader.is_loading(true);
+		auto result = co_await m_renderer.pick_and_compile_shader(new_shader.shader_name(), hstring(L"PS"), hstring(L"ps_5_0"));
+		new_shader.is_loading(false);
 
-		if (compilation_result.is_success)
+		if (!result.is_success)
 		{
-			m_graphics_resources.m_shaders[shader_name] = compilation_result.result_blob;
-		}
-		else {
-			co_await m_ui_thread;
 			new_shader.is_error(true);
-			//show_error_dialog(compilation_result.result_blob.get()->GetBufferPointer());
+			show_error_dialog(result.error_message);
 		}
-
-		co_await m_ui_thread;
-		new_shader.Loading(false);
+		co_return;
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::onclick_pixelshader_picker(IInspectable const&, RoutedEventArgs const&)
-	{
-		co_await pick_and_compile_shader("woodCratePS", wzrd_editor::ShaderType::pixel, "PS", "ps_5_0");
-	}
-
-	Windows::Foundation::IAsyncAction MainPage::onclick_vertexshader_picker(IInspectable const&, RoutedEventArgs const&)
+	IAsyncAction MainPage::onclick_vertexshader_picker(IInspectable const&, RoutedEventArgs const&)
 	{
 		//co_await pick_and_compile_shader("woodCrateVS", wzrd_editor::ShaderType::vertex, "VS", "vs_5_0");
 		graphics::shader new_shader = graphics::shader(hstring(L"default_vs"), graphics::shader_type::vertex);
@@ -222,91 +225,97 @@ namespace winrt::wzrd_editor::implementation
 		co_return;
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::onclick_build_pointlist(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
+	IAsyncAction MainPage::onclick_build_pointlist(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
-		m_graphics_resources.m_current_rendering_mode = GraphicsResources::rendering_mode::points;
+		m_renderer.current_topology(graphics::primitive_types::points);
 		co_return;
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::onclick_build_trianglelist(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
+	IAsyncAction MainPage::onclick_build_trianglelist(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
-		m_graphics_resources.m_current_rendering_mode = GraphicsResources::rendering_mode::triangles;
+		m_renderer.current_topology(graphics::primitive_types::triangle_list);
 		co_return;
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::onclick_build_lineslist(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
+	IAsyncAction MainPage::onclick_build_lineslist(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
-		m_graphics_resources.m_current_rendering_mode = GraphicsResources::rendering_mode::lines;
+		m_renderer.current_topology(graphics::primitive_types::line_lists);
 		co_return;
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::onclick_build_linestrips(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
+	IAsyncAction MainPage::onclick_build_linestrips(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
-		m_graphics_resources.m_current_rendering_mode = GraphicsResources::rendering_mode::linestrips;
+		m_renderer.current_topology(graphics::primitive_types::line_strips);
 		co_return;
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::onclick_build_trianglestrips(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
+	IAsyncAction MainPage::onclick_build_trianglestrips(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
-		m_graphics_resources.m_current_rendering_mode = GraphicsResources::rendering_mode::trianglestrips;
+		m_renderer.current_topology(graphics::primitive_types::triangle_strips);
 		co_return;
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::onclick_render_as_static(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	IAsyncAction MainPage::onclick_render_as_static(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		m_graphics_resources.vertex_buffer = winrt::make_self<winrt::wzrd_editor::implementation::vertex_buffer>(
-			wzrd_editor::buffer_type::static_buffer,
-			m_geometryViewModel.Geometry().Vertices(),
+		IObservableVector<graphics::vertex> tmp_vec{ winrt::single_threaded_observable_vector<graphics::vertex>() };
+
+		for (auto iinspectable_item : m_geometryViewModel.Geometry().Vertices())
+		{
+			tmp_vec.Append(iinspectable_item.as<graphics::vertex>());
+		}
+
+		auto new_buffer = winrt::graphics::buffer(
+			graphics::buffer_type::static_buffer,
+			tmp_vec,
 			m_geometryViewModel.Geometry().Vertices().Size(),
 			0,
-			false
-			);
+			false);
+
+		m_renderer.current_buffer(new_buffer);
 		VisualStateManager().GoToState(*this, L"static_buffer_selected", false);
 
-		start_render_loop();
+		m_renderer.start_render_loop();
 		co_return;
 	}
 
-	Windows::Foundation::IAsyncAction MainPage::onclick_render_as_dynamic(Windows::Foundation::IInspectable const &, Windows::UI::Xaml::RoutedEventArgs const &)
+	IAsyncAction MainPage::onclick_render_as_dynamic(Windows::Foundation::IInspectable const &, Windows::UI::Xaml::RoutedEventArgs const &)
 	{
 		auto dialog = winrt::make<wzrd_editor::implementation::buffer_size_select_dialog>(m_geometryViewModel.Geometry().Vertices().Size());
 		auto dialog_result = co_await dialog.ShowAsync();
 
-		auto new_vert = graphics::vertex(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f);
-		IVector<graphics::vertex> my_vec{ winrt::single_threaded_vector<graphics::vertex>() };
-		my_vec.Append(new_vert);
+		IObservableVector<graphics::vertex> tmp_vec{ winrt::single_threaded_observable_vector<graphics::vertex>() };
 
-		m_graphics_resources.buffer = winrt::graphics::buffer(
-			graphics::buffer_type::dynamic_buffer,
-			my_vec,
-			dialog.buffer_size(),
-			dialog.buffer_increment_size(),
-			dialog.is_auto_resizeable());
+		for (auto iinspectable_item : m_geometryViewModel.Geometry().Vertices())
+		{
+			tmp_vec.Append(iinspectable_item.as<graphics::vertex>());
+		}
 
 		switch (dialog_result)
 		{
-		case winrt::Windows::UI::Xaml::Controls::ContentDialogResult::None:
+		case Windows::UI::Xaml::Controls::ContentDialogResult::None:
 			co_return;
 
-		case winrt::Windows::UI::Xaml::Controls::ContentDialogResult::Primary:
+		case Windows::UI::Xaml::Controls::ContentDialogResult::Primary:
+			m_renderer.current_buffer(
+				winrt::graphics::buffer(
+					graphics::buffer_type::dynamic_buffer,
+					tmp_vec,
+					dialog.buffer_size(),
+					dialog.buffer_increment_size(),
+					dialog.is_auto_resizeable())
+			);
 
-			m_graphics_resources.vertex_buffer = winrt::make_self<winrt::wzrd_editor::implementation::vertex_buffer>(
-				wzrd_editor::buffer_type::dynamic_buffer,
-				m_geometryViewModel.Geometry().Vertices(),
-				dialog.buffer_size(),
-				dialog.buffer_increment_size(),
-				dialog.is_auto_resizeable());
 			VisualStateManager().GoToState(*this, L"dynamic_buffer_selected", false);
-			m_geometryViewModel.Geometry().BufferCapacity(m_graphics_resources.vertex_buffer->get_capacity_percentage());
-
-			start_render_loop();
-			co_return;
-		default:
+			m_geometryViewModel.Geometry().BufferCapacity(m_renderer.current_buffer().get_capacity_percentage());
+			m_renderer.start_render_loop();
 			break;
+
+		default:
+			co_return;
 		}
 	}
 
-	winrt::Windows::Foundation::IAsyncAction MainPage::start_render_loop()
+	IAsyncAction MainPage::start_render_loop()
 	{
 		if (!m_running)
 		{

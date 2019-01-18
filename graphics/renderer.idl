@@ -6,10 +6,10 @@ namespace graphics
 	enum primitive_types
 	{
 		points = 0,
-		triangles = 1,
-		lines = 2,
-		trianglestrips = 3,
-		linestrips = 4
+		triangle_list = 1,
+		triangle_strips = 2,
+		line_lists = 3,
+		line_strips = 4
 	};
 
 	struct compilation_result
@@ -26,7 +26,10 @@ namespace graphics
 		void enable_debug_layer();
 		void initialize(Windows.UI.Xaml.Controls.SwapChainPanel target_swapchain);
 		void start_render_loop();
+		void stop_render_loop();
 
+		Boolean is_rendering{ get; };
+		primitive_types current_topology{ get; set; };
 		Windows.Foundation.IAsyncOperation<compilation_result> pick_and_compile_shader(String shader_name, String entry_point, String version);
 		buffer current_buffer{ get; set; };
     }

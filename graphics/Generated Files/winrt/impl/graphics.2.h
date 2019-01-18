@@ -53,7 +53,7 @@ struct WINRT_EBO buffer :
 {
     buffer(std::nullptr_t) noexcept {}
     buffer();
-    buffer(graphics::buffer_type const& type, param::vector<graphics::vertex> const& initial_data, int32_t max_size, int32_t resize_increment, bool is_auto_resize);
+    buffer(graphics::buffer_type const& type, Windows::Foundation::Collections::IObservableVector<graphics::vertex> const& initial_data, int32_t max_size, int32_t resize_increment, bool is_auto_resize);
 };
 
 struct WINRT_EBO renderer :

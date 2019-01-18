@@ -20,7 +20,7 @@ namespace graphics
 	runtimeclass buffer
 	{
 		buffer();
-		buffer(buffer_type type, Windows.Foundation.Collections.IVector<vertex> initial_data, Int32 max_size, Int32 resize_increment, Boolean is_auto_resize);
+		buffer(buffer_type type, Windows.Foundation.Collections.IObservableVector<vertex> initial_data, Int32 max_size, Int32 resize_increment, Boolean is_auto_resize);
 		view get_view();
 		Int32 get_capacity_percentage();
 		void add_to_view(vertex new_vertex);

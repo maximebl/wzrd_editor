@@ -63,7 +63,7 @@
             </StackPanel>
         </DataTemplate>
 
-        <DataTemplate x:Key="vertices_list_template" x:DataType="local:vertex2">
+        <DataTemplate x:Key="vertices_list_template" x:DataType="graphics:vertex">
             <ListViewItem HorizontalContentAlignment="Stretch" >
                 <Grid HorizontalAlignment="Stretch">
                     <Grid.ColumnDefinitions>
@@ -143,7 +143,6 @@
                         <Setter Target="slider_z.IsEnabled" Value="False"/>
                         <Setter Target="position_z_value.IsEnabled" Value="False"/>
                         <Setter Target="color_picker.IsEnabled" Value="False"/>
-                        <Setter Target="main_cmd_bar.IsEnabled" Value="False"/>
                         <Setter Target="index_count.IsEnabled" Value="False"/>
                         <Setter Target="vertices_list.IsEnabled" Value="False"/>
                         <Setter Target="new_vertex_button.IsEnabled" Value="False"/>
@@ -156,7 +155,7 @@
         <StackPanel HorizontalAlignment="Left" Orientation="Vertical">
             <CommandBar x:Name="main_cmd_bar" Background="Transparent" IsOpen="False" DefaultLabelPosition="Right">
 
-                <AppBarButton Icon="OpenFile" Label="Texture">
+                <AppBarButton Icon="OpenFile" Label="Texture" IsEnabled="True">
                     <AppBarButton.Flyout>
                         <MenuFlyout>
                             <MenuFlyoutItem x:Name="texturePicker" Click="onclick_texture_picker">
@@ -171,7 +170,7 @@
 
                             <MenuFlyoutSeparator/>
 
-                            <MenuFlyoutItem x:Name="menuflyout_clear_textures" Click="menuflyout_clear_textures_click" IsEnabled="True">
+                            <MenuFlyoutItem x:Name="menuflyout_clear_textures" Click="menuflyout_clear_textures_click" >
                                 <MenuFlyoutItem.Icon>
                                     <FontIcon Glyph="&#xE75C;"/>
                                 </MenuFlyoutItem.Icon>

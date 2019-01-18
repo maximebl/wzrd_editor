@@ -88,7 +88,7 @@ template <typename D> bool consume_graphics_Ibuffer<D>::is_buffer_full() const
     return value;
 }
 
-template <typename D> graphics::buffer consume_graphics_IbufferFactory<D>::CreateInstance(graphics::buffer_type const& type, param::vector<graphics::vertex> const& initial_data, int32_t max_size, int32_t resize_increment, bool is_auto_resize) const
+template <typename D> graphics::buffer consume_graphics_IbufferFactory<D>::CreateInstance(graphics::buffer_type const& type, Windows::Foundation::Collections::IObservableVector<graphics::vertex> const& initial_data, int32_t max_size, int32_t resize_increment, bool is_auto_resize) const
 {
     graphics::buffer value{ nullptr };
     check_hresult(WINRT_SHIM(graphics::IbufferFactory)->CreateInstance(get_abi(type), get_abi(initial_data), max_size, resize_increment, is_auto_resize, put_abi(value)));
@@ -108,6 +108,30 @@ template <typename D> void consume_graphics_Irenderer<D>::initialize(Windows::UI
 template <typename D> void consume_graphics_Irenderer<D>::start_render_loop() const
 {
     check_hresult(WINRT_SHIM(graphics::Irenderer)->start_render_loop());
+}
+
+template <typename D> void consume_graphics_Irenderer<D>::stop_render_loop() const
+{
+    check_hresult(WINRT_SHIM(graphics::Irenderer)->stop_render_loop());
+}
+
+template <typename D> bool consume_graphics_Irenderer<D>::is_rendering() const
+{
+    bool value{};
+    check_hresult(WINRT_SHIM(graphics::Irenderer)->get_is_rendering(&value));
+    return value;
+}
+
+template <typename D> graphics::primitive_types consume_graphics_Irenderer<D>::current_topology() const
+{
+    graphics::primitive_types value{};
+    check_hresult(WINRT_SHIM(graphics::Irenderer)->get_current_topology(put_abi(value)));
+    return value;
+}
+
+template <typename D> void consume_graphics_Irenderer<D>::current_topology(graphics::primitive_types const& value) const
+{
+    check_hresult(WINRT_SHIM(graphics::Irenderer)->put_current_topology(get_abi(value)));
 }
 
 template <typename D> Windows::Foundation::IAsyncOperation<graphics::compilation_result> consume_graphics_Irenderer<D>::pick_and_compile_shader(param::hstring const& shader_name, param::hstring const& entry_point, param::hstring const& version) const
@@ -468,8 +492,8 @@ struct produce<D, graphics::IbufferFactory> : produce_base<D, graphics::IbufferF
         {
             *value = nullptr;
             typename D::abi_guard guard(this->shim());
-            WINRT_ASSERT_DECLARATION(CreateInstance, WINRT_WRAP(graphics::buffer), graphics::buffer_type const&, Windows::Foundation::Collections::IVector<graphics::vertex> const&, int32_t, int32_t, bool);
-            *value = detach_from<graphics::buffer>(this->shim().CreateInstance(*reinterpret_cast<graphics::buffer_type const*>(&type), *reinterpret_cast<Windows::Foundation::Collections::IVector<graphics::vertex> const*>(&initial_data), max_size, resize_increment, is_auto_resize));
+            WINRT_ASSERT_DECLARATION(CreateInstance, WINRT_WRAP(graphics::buffer), graphics::buffer_type const&, Windows::Foundation::Collections::IObservableVector<graphics::vertex> const&, int32_t, int32_t, bool);
+            *value = detach_from<graphics::buffer>(this->shim().CreateInstance(*reinterpret_cast<graphics::buffer_type const*>(&type), *reinterpret_cast<Windows::Foundation::Collections::IObservableVector<graphics::vertex> const*>(&initial_data), max_size, resize_increment, is_auto_resize));
             return 0;
         }
         catch (...) { return to_hresult(); }
@@ -510,6 +534,54 @@ struct produce<D, graphics::Irenderer> : produce_base<D, graphics::Irenderer>
             typename D::abi_guard guard(this->shim());
             WINRT_ASSERT_DECLARATION(start_render_loop, WINRT_WRAP(void));
             this->shim().start_render_loop();
+            return 0;
+        }
+        catch (...) { return to_hresult(); }
+    }
+
+    int32_t WINRT_CALL stop_render_loop() noexcept final
+    {
+        try
+        {
+            typename D::abi_guard guard(this->shim());
+            WINRT_ASSERT_DECLARATION(stop_render_loop, WINRT_WRAP(void));
+            this->shim().stop_render_loop();
+            return 0;
+        }
+        catch (...) { return to_hresult(); }
+    }
+
+    int32_t WINRT_CALL get_is_rendering(bool* value) noexcept final
+    {
+        try
+        {
+            typename D::abi_guard guard(this->shim());
+            WINRT_ASSERT_DECLARATION(is_rendering, WINRT_WRAP(bool));
+            *value = detach_from<bool>(this->shim().is_rendering());
+            return 0;
+        }
+        catch (...) { return to_hresult(); }
+    }
+
+    int32_t WINRT_CALL get_current_topology(graphics::primitive_types* value) noexcept final
+    {
+        try
+        {
+            typename D::abi_guard guard(this->shim());
+            WINRT_ASSERT_DECLARATION(current_topology, WINRT_WRAP(graphics::primitive_types));
+            *value = detach_from<graphics::primitive_types>(this->shim().current_topology());
+            return 0;
+        }
+        catch (...) { return to_hresult(); }
+    }
+
+    int32_t WINRT_CALL put_current_topology(graphics::primitive_types value) noexcept final
+    {
+        try
+        {
+            typename D::abi_guard guard(this->shim());
+            WINRT_ASSERT_DECLARATION(current_topology, WINRT_WRAP(void), graphics::primitive_types const&);
+            this->shim().current_topology(*reinterpret_cast<graphics::primitive_types const*>(&value));
             return 0;
         }
         catch (...) { return to_hresult(); }
@@ -942,7 +1014,7 @@ inline buffer::buffer() :
     buffer(impl::call_factory<buffer>([](auto&& f) { return f.template ActivateInstance<buffer>(); }))
 {}
 
-inline buffer::buffer(graphics::buffer_type const& type, param::vector<graphics::vertex> const& initial_data, int32_t max_size, int32_t resize_increment, bool is_auto_resize) :
+inline buffer::buffer(graphics::buffer_type const& type, Windows::Foundation::Collections::IObservableVector<graphics::vertex> const& initial_data, int32_t max_size, int32_t resize_increment, bool is_auto_resize) :
     buffer(impl::call_factory<buffer, graphics::IbufferFactory>([&](auto&& f) { return f.CreateInstance(type, initial_data, max_size, resize_increment, is_auto_resize); }))
 {}
 
@@ -1106,8 +1178,50 @@ struct property_graphics_Irenderer
                 target.current_buffer(std::forward<Value>(value));
             }
         };
+    };
+    struct current_topology
+    {
+        struct name { static constexpr std::wstring_view value{ L"current_topology"sv }; };
+        using property_type = winrt::graphics::primitive_types;
+        using target_type = winrt::graphics::Irenderer;
+
+        using is_readable = std::true_type;
+        using is_writable = std::true_type;
+        using is_static = std::false_type;
+        struct getter
+        {
+            auto operator()(target_type const& target) const
+            {
+                return target.current_topology();
+            }
+        };
+        struct setter
+        {
+            template <typename Value>
+            void operator()(target_type const& target, Value&& value) const
+            {
+                target.current_topology(std::forward<Value>(value));
+            }
+        };
+    };
+    struct is_rendering
+    {
+        struct name { static constexpr std::wstring_view value{ L"is_rendering"sv }; };
+        using property_type = bool;
+        using target_type = winrt::graphics::Irenderer;
+
+        using is_readable = std::true_type;
+        using is_writable = std::false_type;
+        using is_static = std::false_type;
+        struct getter
+        {
+            auto operator()(target_type const& target) const
+            {
+                return target.is_rendering();
+            }
+        };
     };};
-    struct list { using type = impl::typelist<named::current_buffer>; };
+    struct list { using type = impl::typelist<named::current_buffer, named::current_topology, named::is_rendering>; };
 };
 
 struct property_graphics_Ishader
@@ -1586,6 +1700,31 @@ struct property_graphics_buffer
 
 struct property_graphics_renderer
 { struct named {
+    struct current_topology
+    {
+        struct name { static constexpr std::wstring_view value{ L"current_topology"sv }; };
+        using property_type = winrt::graphics::primitive_types;
+        using target_type = winrt::graphics::renderer;
+
+        using is_readable = std::true_type;
+        using is_writable = std::true_type;
+        using is_static = std::false_type;
+        struct getter
+        {
+            auto operator()(target_type const& target) const
+            {
+                return target.current_topology();
+            }
+        };
+        struct setter
+        {
+            template <typename Value>
+            void operator()(target_type const& target, Value&& value) const
+            {
+                target.current_topology(std::forward<Value>(value));
+            }
+        };
+    };
     struct current_buffer
     {
         struct name { static constexpr std::wstring_view value{ L"current_buffer"sv }; };
@@ -1610,8 +1749,25 @@ struct property_graphics_renderer
                 target.current_buffer(std::forward<Value>(value));
             }
         };
+    };
+    struct is_rendering
+    {
+        struct name { static constexpr std::wstring_view value{ L"is_rendering"sv }; };
+        using property_type = bool;
+        using target_type = winrt::graphics::renderer;
+
+        using is_readable = std::true_type;
+        using is_writable = std::false_type;
+        using is_static = std::false_type;
+        struct getter
+        {
+            auto operator()(target_type const& target) const
+            {
+                return target.is_rendering();
+            }
+        };
     };};
-    struct list { using type = impl::typelist<named::current_buffer>; };
+    struct list { using type = impl::typelist<named::current_topology, named::current_buffer, named::is_rendering>; };
 };
 
 struct property_graphics_shader
@@ -2009,19 +2165,19 @@ template <> struct get_enumerator_names<graphics::primitive_types>
 {
     static constexpr std::array<std::wstring_view, 5> value{{ 
         {L"points", 6},
-        {L"triangles", 9},
-        {L"lines", 5},
-        {L"trianglestrips", 14},
-        {L"linestrips", 10}, }};
+        {L"triangle_list", 13},
+        {L"triangle_strips", 15},
+        {L"line_lists", 10},
+        {L"line_strips", 11}, }};
 };
 template <> struct get_enumerator_values<graphics::primitive_types>
 {
     static constexpr std::array<graphics::primitive_types, 5> value{{ 
         graphics::primitive_types::points,
-        graphics::primitive_types::triangles,
-        graphics::primitive_types::lines,
-        graphics::primitive_types::trianglestrips,
-        graphics::primitive_types::linestrips, }};
+        graphics::primitive_types::triangle_list,
+        graphics::primitive_types::triangle_strips,
+        graphics::primitive_types::line_lists,
+        graphics::primitive_types::line_strips, }};
 };
 template <> struct get_enumerator_names<graphics::shader_type>
 {

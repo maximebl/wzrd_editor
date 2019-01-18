@@ -13,7 +13,11 @@ namespace winrt::graphics::implementation
 	struct buffer : bufferT<buffer>
 	{
 		buffer() = default;
-		buffer(graphics::buffer_type const& type, Windows::Foundation::Collections::IVector<graphics::vertex> const& initial_data, int32_t max_size, int32_t resize_increment, bool is_auto_resize);
+		buffer(graphics::buffer_type const& type, 
+			Windows::Foundation::Collections::IObservableVector<graphics::vertex> const& initial_data, 
+			int32_t max_size, 
+			int32_t resize_increment, 
+			bool is_auto_resize);
 
 		graphics::view get_view();
 		int32_t get_capacity_percentage();
@@ -48,10 +52,8 @@ namespace winrt::graphics::implementation
 
 		std::vector<xm_vertex> m_vertices;
 
-		winrt::com_ptr<ID3D12Resource> static_buffer_uploader = nullptr;
-
-		ID3D12Device* m_device = nullptr;
-		ID3D12GraphicsCommandList* m_cmd_list = nullptr;
+		winrt::com_ptr<ID3D12Resource> m_static_default_buffer = nullptr;
+		winrt::com_ptr<ID3D12Resource> m_static_buffer_uploader = nullptr;
 	};
 }
 

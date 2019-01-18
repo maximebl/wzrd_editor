@@ -109,6 +109,7 @@
       <SubType>Code</SubType>
     </ClInclude>
     <ClInclude Include="upload_buffer.h" />
+    <ClInclude Include="utilities.h" />
     <ClInclude Include="vertex.h">
       <DependentUpon>vertex.idl</DependentUpon>
       <SubType>Code</SubType>
@@ -131,6 +132,7 @@
       <DependentUpon>shader.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
+    <ClCompile Include="utilities.cpp" />
     <ClCompile Include="vertex.cpp">
       <DependentUpon>vertex.idl</DependentUpon>
       <SubType>Code</SubType>

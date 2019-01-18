@@ -56,7 +56,7 @@ struct WINRT_EBO bufferT : implements<D, Windows::Foundation::IActivationFactory
         return make<T>();
     }
 
-    graphics::buffer CreateInstance(graphics::buffer_type const& type, Windows::Foundation::Collections::IVector<graphics::vertex> const& initial_data, int32_t max_size, int32_t resize_increment, bool is_auto_resize)
+    graphics::buffer CreateInstance(graphics::buffer_type const& type, Windows::Foundation::Collections::IObservableVector<graphics::vertex> const& initial_data, int32_t max_size, int32_t resize_increment, bool is_auto_resize)
     {
         return make<T>(type, initial_data, max_size, resize_increment, is_auto_resize);
     }
