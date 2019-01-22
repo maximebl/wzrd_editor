@@ -60,18 +60,18 @@ namespace winrt::graphics::implementation
 
 	void buffer::add_to_view(graphics::vertex const& new_vertex)
 	{
+
 		if (m_type == graphics::buffer_type::dynamic_buffer && !is_buffer_full())
 		{
+			m_vertices.push_back(new_vertex.as<graphics::implementation::vertex>()->m_vertex);
 			update_current_buffer();
 		}
-		else
+		else if (m_type == graphics::buffer_type::dynamic_buffer && m_is_auto_resize)
 		{
-			if (m_type == graphics::buffer_type::dynamic_buffer && m_is_auto_resize)
-			{
-				m_max_size += m_resize_increment;
-				swap_upload_buffer();
-				update_current_buffer();
-			}
+			m_max_size += m_resize_increment;
+			m_vertices.push_back(new_vertex.as<graphics::implementation::vertex>()->m_vertex);
+			swap_upload_buffer();
+			update_current_buffer();
 		}
 		return;
 	}
@@ -81,6 +81,7 @@ namespace winrt::graphics::implementation
 		m_vertices.clear();
 		update_current_buffer();
 	}
+
 	void buffer::update_current_buffer()
 	{
 		if (m_is_using_swap_buffer)
@@ -100,7 +101,7 @@ namespace winrt::graphics::implementation
 		if (m_current_size == 0)
 		{
 			view.size_in_bytes = 0;
-			buffer->clear_data();
+			//buffer->clear_data();
 		}
 		else
 		{

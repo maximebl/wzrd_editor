@@ -143,7 +143,6 @@
                         <Setter Target="slider_z.IsEnabled" Value="False"/>
                         <Setter Target="position_z_value.IsEnabled" Value="False"/>
                         <Setter Target="color_picker.IsEnabled" Value="False"/>
-                        <Setter Target="index_count.IsEnabled" Value="False"/>
                         <Setter Target="vertices_list.IsEnabled" Value="False"/>
                         <Setter Target="new_vertex_button.IsEnabled" Value="False"/>
                         <Setter Target="clear_vertices_button.IsEnabled" Value="False"/>
@@ -350,9 +349,6 @@
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
                         <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*"></ColumnDefinition>
@@ -360,6 +356,7 @@
                         <ColumnDefinition Width="*"></ColumnDefinition>
                         <ColumnDefinition Width="*"></ColumnDefinition>
                     </Grid.ColumnDefinitions>
+
                     <Button x:Name="new_vertex_button" 
                             Content="New vertex" 
                             Click="onclick_create_vertex" 
@@ -375,37 +372,11 @@
                             HorizontalAlignment="Stretch" 
                             VerticalAlignment="Stretch"/>
 
-                    <RelativePanel Grid.Row="2" Grid.ColumnSpan="4">
-                        <TextBlock x:Name="index_count_label" 
-                           Text="Index count" 
-                           HorizontalAlignment="Left"/>
-                        <TextBox x:Name="index_count"
-                         Text="{x:Bind Mode=TwoWay, Path=GeometryViewModel.Geometry.Index}"
-                         HorizontalAlignment="Right"
-                         Width="68"
-                         RelativePanel.RightOf="index_count_label"
-                         RelativePanel.AlignRightWithPanel="True"/>
-                    </RelativePanel>
-
-                    <Button 
-                        Grid.Row="3"
-                        Grid.ColumnSpan="4"
-                        HorizontalAlignment="Stretch"
-                        Click="onclick_new_index"
-                        Content="New index"/>
-
-                    <Button 
-                        Grid.Row="4"
-                        Grid.ColumnSpan="4"
-                        HorizontalAlignment="Stretch"
-                        Click="onclick_clear_indices"
-                        Content="Clear indices"/>
-
                     <Button x:Name="render_as_static" 
                           Content="Static buffer" 
                           Grid.Column="0" 
                           Click="onclick_render_as_static" 
-                          Grid.Row="5"
+                          Grid.Row="2"
                           Grid.ColumnSpan="2"
                           HorizontalAlignment="Stretch" 
                           VerticalAlignment="Stretch"/>
@@ -413,12 +384,12 @@
                     <Button x:Name="render_as_dynamic" 
                           Content="Dynamic buffer" 
                           Grid.Column="2" Click="onclick_render_as_dynamic" 
-                          Grid.Row="5"
+                          Grid.Row="2"
                           Grid.ColumnSpan="2"
                           HorizontalAlignment="Stretch" 
                           VerticalAlignment="Stretch"/>
 
-                    <RelativePanel x:Name="buffer_capacity" Visibility="Collapsed" Grid.Row="6" Grid.ColumnSpan="4">
+                    <RelativePanel x:Name="buffer_capacity" Visibility="Collapsed" Grid.Row="3" Grid.ColumnSpan="4">
                         <TextBlock
                             x:Name="buffer_capacity_label"
                             HorizontalAlignment="Left"

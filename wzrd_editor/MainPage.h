@@ -59,8 +59,6 @@ namespace winrt::wzrd_editor::implementation
 
 		IAsyncAction onclick_render_as_static(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 		IAsyncAction onclick_render_as_dynamic(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
-		IAsyncAction onclick_new_index(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
-		IAsyncAction onclick_clear_indices(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 
 		//IAsyncAction pick_and_compile_shader(const std::string shader_name, wzrd_editor::ShaderType shader_type, const std::string entry_point, const std::string version);
 		IAsyncAction show_error_dialog(hstring error_message);

@@ -7,20 +7,53 @@ ID3D12GraphicsCommandList* winrt::graphics::implementation::renderer::g_cmd_list
 namespace winrt::graphics::implementation
 {
 	Windows::Foundation::IAsyncOperation<graphics::compilation_result> renderer::pick_and_compile_shader(
-		hstring const shader_name, 
-		hstring const entry_point, 
+		hstring const shader_name,
+		hstring const entry_point,
 		hstring const version)
 	{
+		graphics::compilation_result result;
+
 		auto shader_file_bytes = co_await pick_file(winrt::hstring(L".hlsl"));
 
-		co_await winrt::resume_background();
-		auto[compilation_result, result_blob] = compile_shader(version, shader_file_bytes, entry_point);
-
-		if (compilation_result.is_success)
+		if (shader_file_bytes.size() == 0)
 		{
-			m_shaders[to_string(shader_name)] = result_blob;
+			result.status = graphics::compilation_status::cancelled;
+			return result;
 		}
-		return compilation_result;
+
+		co_await winrt::resume_background();
+		//auto[compilation_result, result_blob] = compile_shader(version, shader_file_bytes, entry_point);
+
+		UINT compile_flags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+		com_ptr<ID3DBlob> byte_code = nullptr;
+		com_ptr<ID3DBlob> errors = nullptr;
+
+		D3DCompile(
+			&shader_file_bytes.front(),
+			shader_file_bytes.size(),
+			nullptr,
+			nullptr,
+			D3D_COMPILE_STANDARD_FILE_INCLUDE,
+			to_string(entry_point).c_str(),
+			to_string(version).c_str(),
+			compile_flags,
+			0,
+			byte_code.put(),
+			errors.put()
+		);
+
+		if (errors != nullptr)
+		{
+			auto error_msg_ptr = static_cast<const char*>(errors->GetBufferPointer());
+			hstring message = to_hstring(error_msg_ptr);
+
+			result.status = graphics::compilation_status::error;
+			result.error_message = message;
+		}
+
+		result.status = graphics::compilation_status::success;
+		m_shaders[to_string(shader_name)] = byte_code;
+		return result;
 	}
 
 	graphics::primitive_types renderer::current_topology()
@@ -33,42 +66,42 @@ namespace winrt::graphics::implementation
 		m_current_topology = value;
 	}
 
-	std::pair<graphics::compilation_result, com_ptr<ID3D10Blob>> renderer::compile_shader(
-		hstring const& version,
-		const std::vector<unsigned char>& file_bytes,
-		hstring const& entry_point)
-	{
-		UINT compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-		com_ptr<ID3DBlob> byte_code = nullptr;
-		com_ptr<ID3DBlob> errors = nullptr;
-		graphics::compilation_result result;
+	//std::pair<graphics::compilation_result, com_ptr<ID3D10Blob>> renderer::compile_shader(
+	//	hstring const& version,
+	//	const std::vector<unsigned char>& file_bytes,
+	//	hstring const& entry_point)
+	//{
+	//	UINT compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+	//	com_ptr<ID3DBlob> byte_code = nullptr;
+	//	com_ptr<ID3DBlob> errors = nullptr;
+	//	graphics::compilation_result result;
 
-		D3DCompile(
-			&file_bytes.front(),
-			file_bytes.size(),
-			nullptr,
-			nullptr,
-			D3D_COMPILE_STANDARD_FILE_INCLUDE,
-			to_string(entry_point).c_str(),
-			to_string(version).c_str(),
-			compileFlags,
-			0,
-			byte_code.put(),
-			errors.put()
-		);
+	//	D3DCompile(
+	//		&file_bytes.front(),
+	//		file_bytes.size(),
+	//		nullptr,
+	//		nullptr,
+	//		D3D_COMPILE_STANDARD_FILE_INCLUDE,
+	//		to_string(entry_point).c_str(),
+	//		to_string(version).c_str(),
+	//		compileFlags,
+	//		0,
+	//		byte_code.put(),
+	//		errors.put()
+	//	);
 
-		if (errors != nullptr)
-		{
-			auto error_msg_ptr = static_cast<const char*>(errors->GetBufferPointer());
-			hstring message = to_hstring(error_msg_ptr);
+	//	if (errors != nullptr)
+	//	{
+	//		auto error_msg_ptr = static_cast<const char*>(errors->GetBufferPointer());
+	//		hstring message = to_hstring(error_msg_ptr);
 
-			result.is_success = false;
-			result.error_message = message;
-			return std::make_pair(result, errors);
-		}
-		result.is_success = true;
-		return std::make_pair(result, byte_code);
-	}
+	//		result.is_success = false;
+	//		result.error_message = message;
+	//		return std::make_pair(result, errors);
+	//	}
+	//	result.is_success = true;
+	//	return std::make_pair(result, byte_code);
+	//}
 
 	renderer::renderer()
 	{
@@ -159,7 +192,7 @@ namespace winrt::graphics::implementation
 		m_graphics_cmdlist->SetGraphicsRootSignature(m_rootsig.get());
 		m_graphics_cmdlist->SetGraphicsRootConstantBufferView(0, m_object_cb->get_resource()->GetGPUVirtualAddress());
 
-		auto res =  m_current_buffer->get_view();
+		auto res = m_current_buffer->get_view();
 		auto res2 = (D3D12_VERTEX_BUFFER_VIEW*)&res;
 
 		m_graphics_cmdlist->IASetVertexBuffers(0, 1, (D3D12_VERTEX_BUFFER_VIEW*)& m_current_buffer->get_view());
@@ -231,6 +264,11 @@ namespace winrt::graphics::implementation
 	void renderer::stop_render_loop()
 	{
 		m_is_rendering = false;
+	}
+
+	void renderer::clear_shaders()
+	{
+		m_shaders.clear();
 	}
 
 	bool renderer::is_rendering()

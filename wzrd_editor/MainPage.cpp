@@ -16,47 +16,6 @@ namespace winrt::wzrd_editor::implementation
 
 		m_renderer.enable_debug_layer();
 		m_renderer.initialize(swapChainPanel());
-
-		//swapChainPanel().PointerMoved([this](IInspectable sender, winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs args) {
-
-		//	auto current_point = args.GetCurrentPoint(sender.try_as<winrt::Windows::UI::Xaml::Controls::SwapChainPanel>());
-
-		//	if (current_point.Properties().IsLeftButtonPressed())
-		//	{
-		//		auto point = current_point.Position();
-		//		m_graphics_resources.last_mouse_position = m_graphics_resources.current_mouse_position;
-		//		m_graphics_resources.current_mouse_position = point;
-		//	}
-		//	else
-		//	{
-		//		m_graphics_resources.last_mouse_position = { 0.0f, 0.0f };
-		//		m_graphics_resources.current_mouse_position = { 0.0f, 0.0f };
-		//	}
-		//});
-
-		//swapChainPanel().PointerReleased([this](IInspectable sender, winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs args) {
-		//	m_graphics_resources.last_mouse_position = { 0.0f, 0.0f };
-		//	m_graphics_resources.current_mouse_position = { 0.0f, 0.0f };
-		//});
-
-		//swapChainPanel().PointerExited([this](IInspectable sender, winrt::Windows::UI::Xaml::Input::PointerRoutedEventArgs args) {
-		//	m_graphics_resources.last_mouse_position = { 0.0f, 0.0f };
-		//	m_graphics_resources.current_mouse_position = { 0.0f, 0.0f };
-		//});
-
-		//m_graphics_resources.enable_debug_layer();
-		//m_graphics_resources.create_factory();
-		//m_graphics_resources.create_device();
-		//m_graphics_resources.create_fence();
-		//m_graphics_resources.create_cmd_objects();
-		//m_graphics_resources.create_descriptor_heaps();
-		//m_graphics_resources.create_depthstencil_buffer();
-		//m_graphics_resources.create_swapchain_xamlpanel(swapChainPanel());
-		//m_graphics_resources.create_render_targets();
-		//m_graphics_resources.create_constant_buffers();
-		//m_graphics_resources.create_rootsignature();
-
-		//m_window = Window::Current().CoreWindow().GetForCurrentThread();
 	}
 
 	IAsyncAction MainPage::ui_thread_work()
@@ -68,19 +27,6 @@ namespace winrt::wzrd_editor::implementation
 	wzrd_editor::GeometryViewModel MainPage::GeometryViewModel()
 	{
 		return m_geometryViewModel;
-	}
-
-	IAsyncAction MainPage::onclick_new_index(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
-	{
-		auto new_index = m_geometryViewModel.Geometry().Index();
-		m_geometryViewModel.Geometry().Indices().Append(winrt::box_value(new_index));
-		co_return;
-	}
-
-	IAsyncAction MainPage::onclick_clear_indices(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
-	{
-		m_geometryViewModel.Geometry().Indices().Clear();
-		co_return;
 	}
 
 	IAsyncAction MainPage::onclick_create_vertex(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
@@ -114,43 +60,29 @@ namespace winrt::wzrd_editor::implementation
 				m_renderer.current_buffer().get_capacity_percentage()
 			);
 
+			//bool is_buffer_resizeable = m_renderer.current_buffer().is_buffer_full() && !m_renderer.current_buffer().is_auto_resize();
+
 			if (m_renderer.current_buffer().is_buffer_full() && !m_renderer.current_buffer().is_auto_resize())
 			{
 				VisualStateManager().GoToState(*this, L"buffer_full", false);
 			}
 		}
-		//auto new_vertex = winrt::make<winrt::wzrd_editor::implementation::vertex2>(
-		//	pos_x, pos_y, pos_z,
-		//	color_r, color_g, color_b, color_a,
-		//	tex_u, tex_v);
-
-		//m_geometryViewModel.Geometry().Vertices().Append(new_vertex);
-
-		//if (m_running)
-		//{
-		//	m_graphics_resources.vertex_buffer->add_to_view(new_vertex);
-		//	m_geometryViewModel.Geometry().BufferCapacity(m_graphics_resources.vertex_buffer->get_capacity_percentage());
-
-		//	if (m_graphics_resources.vertex_buffer->is_buffer_full() && !m_graphics_resources.vertex_buffer->is_auto_resize())
-		//	{
-		//		VisualStateManager().GoToState(*this, L"buffer_full", false);
-		//	}
-		//}
 		co_return;
 	}
 
 	IAsyncAction MainPage::onclick_clear_vertex(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
 		m_geometryViewModel.Geometry().Vertices().Clear();
-		m_graphics_resources.vertex_buffer->clear();
-		m_geometryViewModel.Geometry().BufferCapacity(m_graphics_resources.vertex_buffer->get_capacity_percentage());
+		m_renderer.current_buffer().clear();
+		m_geometryViewModel.Geometry().BufferCapacity(m_renderer.current_buffer().get_capacity_percentage());
 		VisualStateManager().GoToState(*this, L"dynamic_buffer_selected", false);
 		co_return;
 	}
 
 	IAsyncAction MainPage::menuflyout_clear_shaders_click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
-		m_graphics_resources.m_shaders.clear();
+		//m_graphics_resources.m_shaders.clear();
+		m_renderer.clear_shaders();
 		m_geometryViewModel.Shaders().Clear();
 		co_return;
 	}
@@ -199,11 +131,20 @@ namespace winrt::wzrd_editor::implementation
 		auto result = co_await m_renderer.pick_and_compile_shader(new_shader.shader_name(), hstring(L"PS"), hstring(L"ps_5_0"));
 		new_shader.is_loading(false);
 
-		if (!result.is_success)
+		switch (result.status)
 		{
+		case graphics::compilation_status::error:
 			new_shader.is_error(true);
 			show_error_dialog(result.error_message);
+			break;
+
+		case graphics::compilation_status::cancelled:
+			m_geometryViewModel.Shaders().RemoveAtEnd();
+
+		default:
+			break;
 		}
+
 		co_return;
 	}
 
@@ -217,11 +158,20 @@ namespace winrt::wzrd_editor::implementation
 		auto result = co_await m_renderer.pick_and_compile_shader(new_shader.shader_name(), hstring(L"VS"), hstring(L"vs_5_0"));
 		new_shader.is_loading(false);
 
-		if (!result.is_success)
+		switch (result.status)
 		{
+		case graphics::compilation_status::error:
 			new_shader.is_error(true);
 			show_error_dialog(result.error_message);
+			break;
+
+		case graphics::compilation_status::cancelled:
+			m_geometryViewModel.Shaders().RemoveAtEnd();
+
+		default:
+			break;
 		}
+
 		co_return;
 	}
 

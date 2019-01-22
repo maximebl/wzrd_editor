@@ -12,19 +12,27 @@ namespace graphics
 		line_strips = 4
 	};
 
+	enum compilation_status
+	{
+		success = 0,
+		error = 1,
+		cancelled = 2
+	};
+
 	struct compilation_result
 	{
-		Boolean is_success;
+		compilation_status status;
 		String error_message;
 	};
 
-    [default_interface]
-    runtimeclass renderer 
-    {
-        renderer();
+	[default_interface]
+	runtimeclass renderer
+	{
+		renderer();
 
 		void enable_debug_layer();
 		void initialize(Windows.UI.Xaml.Controls.SwapChainPanel target_swapchain);
+		void clear_shaders();
 		void start_render_loop();
 		void stop_render_loop();
 
@@ -32,5 +40,5 @@ namespace graphics
 		primitive_types current_topology{ get; set; };
 		Windows.Foundation.IAsyncOperation<compilation_result> pick_and_compile_shader(String shader_name, String entry_point, String version);
 		buffer current_buffer{ get; set; };
-    }
+	}
 }

@@ -1,16 +1,20 @@
 ﻿#include "pch.h"
 #include "os_utilities.h"
 
-concurrency::task<std::vector<unsigned char>> read_file_bytes(winrt::Windows::Storage::Streams::IBuffer fileBuffer)
+concurrency::task<std::vector<unsigned char>> read_file_bytes(winrt::Windows::Storage::Streams::IBuffer file_buffer)
 {
-	auto dataReader = winrt::Windows::Storage::Streams::DataReader::FromBuffer(fileBuffer);
 
-	return concurrency::create_task([fileBuffer, dataReader]() -> std::vector<unsigned char>
+	return concurrency::create_task([file_buffer]() -> std::vector<unsigned char>
 	{
-		std::vector<unsigned char> file_bytes;
-		int fileSize = fileBuffer.Length();
-		file_bytes.assign(fileSize, 0);
-		dataReader.ReadBytes(file_bytes);
+		std::vector<unsigned char> file_bytes = {};
+
+		if (file_buffer)
+		{
+			int file_size = file_buffer.Length();
+			file_bytes.assign(file_size, 0);
+			auto data_reader = winrt::Windows::Storage::Streams::DataReader::FromBuffer(file_buffer);
+			data_reader.ReadBytes(file_bytes);
+		}
 		return file_bytes;
 	});
 }
@@ -39,6 +43,7 @@ winrt::Windows::Foundation::IAsyncOperation<winrt::Windows::Storage::Streams::IB
 	}
 	break;
 	}
+	co_return nullptr;
 }
 
 concurrency::task<std::vector<unsigned char>> pick_file(winrt::hstring file_extension)
