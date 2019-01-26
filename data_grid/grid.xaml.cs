@@ -12,37 +12,20 @@ using Windows.UI.Xaml.Data;
 using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml.Navigation;
-using graphics;
-using System.Threading.Tasks;
 
-namespace interop_test_app
+namespace data_grid
 {
-    public sealed partial class MainPage : Page
+    public sealed partial class grid : UserControl
     {
-        //public List<Customer> tester;
-        public MainPage()
+        private IList<Customer> tester;
+        public grid()
         {
             this.InitializeComponent();
-            //renderer.enable_debug_layer();
-            //renderer.initialize(swapChainPanel);
-            //renderer.start_render_loop();
-            test_abi_calls();
-        }
-
-        async Task test_abi_calls()
-        {
-            //tester = Customer.Customers();
-            //graphics.renderer renderer = new graphics.renderer();
-
-            //graphics.shader new_shader = new graphics.shader("default_vs", shader_type.vertex);
-            //new_shader.is_loading = true;
-            //var result = await renderer.pick_and_compile_shader(new_shader.shader_name, "VS", "vs_5_0");
-
-            //graphics.buffer new_buffer = new graphics.buffer();
+            tester = Customer.Customers();
         }
     }
 
-    public class Customer
+    public sealed class Customer
     {
         public String FirstName { get; set; }
         public String LastName { get; set; }
@@ -58,7 +41,7 @@ namespace interop_test_app
             this.IsNew = isNew;
         }
 
-        public static List<Customer> Customers()
+        public static IList<Customer> Customers()
         {
             return new List<Customer>(new Customer[4] {
             new Customer("A.", "Zero",

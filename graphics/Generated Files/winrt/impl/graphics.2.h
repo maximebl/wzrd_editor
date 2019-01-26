@@ -9,13 +9,13 @@ WINRT_EXPORT namespace winrt::graphics {
 
 struct compilation_result
 {
-    bool is_success;
+    graphics::compilation_status status;
     hstring error_message;
 };
 
 inline bool operator==(compilation_result const& left, compilation_result const& right) noexcept
 {
-    return left.is_success == right.is_success && left.error_message == right.error_message;
+    return left.status == right.status && left.error_message == right.error_message;
 }
 
 inline bool operator!=(compilation_result const& left, compilation_result const& right) noexcept

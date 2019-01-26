@@ -10,6 +10,7 @@ namespace winrt::graphics::implementation
 
         void enable_debug_layer();
         void initialize(Windows::UI::Xaml::Controls::SwapChainPanel const& target_swapchain);
+        void clear_shaders();
         void start_render_loop();
         void stop_render_loop();
         bool is_rendering();

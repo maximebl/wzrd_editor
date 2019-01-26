@@ -22,6 +22,13 @@ enum class buffer_type : int32_t
     static_buffer = 1,
 };
 
+enum class compilation_status : int32_t
+{
+    success = 0,
+    error = 1,
+    cancelled = 2,
+};
+
 enum class primitive_types : int32_t
 {
     points = 0,
@@ -67,9 +74,10 @@ template <> struct category<graphics::renderer>{ using type = class_category; };
 template <> struct category<graphics::shader>{ using type = class_category; };
 template <> struct category<graphics::vertex>{ using type = class_category; };
 template <> struct category<graphics::buffer_type>{ using type = enum_category; };
+template <> struct category<graphics::compilation_status>{ using type = enum_category; };
 template <> struct category<graphics::primitive_types>{ using type = enum_category; };
 template <> struct category<graphics::shader_type>{ using type = enum_category; };
-template <> struct category<graphics::compilation_result>{ using type = struct_category<bool,hstring>; };
+template <> struct category<graphics::compilation_result>{ using type = struct_category<graphics::compilation_status,hstring>; };
 template <> struct category<graphics::view>{ using type = struct_category<uint64_t,uint32_t,uint32_t>; };
 template <> struct name<graphics::Ibuffer>{ static constexpr auto & value{ L"graphics.Ibuffer" }; };
 template <> struct name<graphics::IbufferFactory>{ static constexpr auto & value{ L"graphics.IbufferFactory" }; };
@@ -83,13 +91,14 @@ template <> struct name<graphics::renderer>{ static constexpr auto & value{ L"gr
 template <> struct name<graphics::shader>{ static constexpr auto & value{ L"graphics.shader" }; };
 template <> struct name<graphics::vertex>{ static constexpr auto & value{ L"graphics.vertex" }; };
 template <> struct name<graphics::buffer_type>{ static constexpr auto & value{ L"graphics.buffer_type" }; };
+template <> struct name<graphics::compilation_status>{ static constexpr auto & value{ L"graphics.compilation_status" }; };
 template <> struct name<graphics::primitive_types>{ static constexpr auto & value{ L"graphics.primitive_types" }; };
 template <> struct name<graphics::shader_type>{ static constexpr auto & value{ L"graphics.shader_type" }; };
 template <> struct name<graphics::compilation_result>{ static constexpr auto & value{ L"graphics.compilation_result" }; };
 template <> struct name<graphics::view>{ static constexpr auto & value{ L"graphics.view" }; };
 template <> struct guid_storage<graphics::Ibuffer>{ static constexpr guid value{ 0xC40F195C,0xDB97,0x5E9E,{ 0xAD,0x2C,0x90,0x5B,0x20,0x31,0x2D,0xFA } }; };
 template <> struct guid_storage<graphics::IbufferFactory>{ static constexpr guid value{ 0xF3D669E1,0x5F70,0x5F2C,{ 0xA1,0x52,0x82,0xF3,0x19,0x89,0xC5,0x66 } }; };
-template <> struct guid_storage<graphics::Irenderer>{ static constexpr guid value{ 0xCD38E630,0xDB6F,0x5277,{ 0x85,0x2D,0xDB,0x51,0xDC,0xF4,0x4C,0x71 } }; };
+template <> struct guid_storage<graphics::Irenderer>{ static constexpr guid value{ 0x0F583F30,0xCC7C,0x5EC5,{ 0xA2,0xC7,0x42,0x18,0x54,0x83,0xA4,0xB2 } }; };
 template <> struct guid_storage<graphics::Ishader>{ static constexpr guid value{ 0xD5907D07,0x2DE4,0x537C,{ 0x92,0xD8,0xEA,0x3C,0x66,0xA0,0x35,0xC7 } }; };
 template <> struct guid_storage<graphics::IshaderFactory>{ static constexpr guid value{ 0xE76F4BFC,0x6A2E,0x5F53,{ 0xAA,0x4E,0xF0,0xA8,0x9F,0x1D,0x37,0x75 } }; };
 template <> struct guid_storage<graphics::Ivertex>{ static constexpr guid value{ 0x46A070D6,0x07F9,0x5B89,{ 0xA9,0x3E,0xCD,0x8D,0x8D,0xD0,0x43,0xC3 } }; };
@@ -124,6 +133,7 @@ template <> struct abi<graphics::Irenderer>{ struct type : IInspectable
 {
     virtual int32_t WINRT_CALL enable_debug_layer() noexcept = 0;
     virtual int32_t WINRT_CALL initialize(void* target_swapchain) noexcept = 0;
+    virtual int32_t WINRT_CALL clear_shaders() noexcept = 0;
     virtual int32_t WINRT_CALL start_render_loop() noexcept = 0;
     virtual int32_t WINRT_CALL stop_render_loop() noexcept = 0;
     virtual int32_t WINRT_CALL get_is_rendering(bool* value) noexcept = 0;
@@ -210,6 +220,7 @@ struct consume_graphics_Irenderer
 {
     void enable_debug_layer() const;
     void initialize(Windows::UI::Xaml::Controls::SwapChainPanel const& target_swapchain) const;
+    void clear_shaders() const;
     void start_render_loop() const;
     void stop_render_loop() const;
     bool is_rendering() const;
@@ -277,7 +288,7 @@ template <> struct consume<graphics::IvertexFactory> { template <typename D> usi
 
 struct struct_graphics_compilation_result
 {
-    bool is_success;
+    graphics::compilation_status status;
     void* error_message;
 };
 template <> struct abi<graphics::compilation_result>{ using type = struct_graphics_compilation_result; };

@@ -225,6 +225,7 @@ namespace winrt::wzrd_editor::implementation
 		VisualStateManager().GoToState(*this, L"static_buffer_selected", false);
 
 		m_renderer.start_render_loop();
+		split_pane().IsPaneOpen(true);
 		co_return;
 	}
 
@@ -258,6 +259,7 @@ namespace winrt::wzrd_editor::implementation
 			VisualStateManager().GoToState(*this, L"dynamic_buffer_selected", false);
 			m_geometryViewModel.Geometry().BufferCapacity(m_renderer.current_buffer().get_capacity_percentage());
 			m_renderer.start_render_loop();
+			split_pane().IsPaneOpen(true);
 			break;
 
 		default:

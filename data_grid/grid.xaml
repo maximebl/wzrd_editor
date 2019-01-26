@@ -1,17 +1,15 @@
-﻿<Page
-    x:Class="interop_test_app.MainPage"
+﻿<UserControl
+    x:Class="data_grid.grid"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:interop_test_app"
+    xmlns:local="using:data_grid"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:controls="using:Microsoft.Toolkit.Uwp.UI.Controls"
-    xmlns:custom="using:data_grid"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-
-    <custom:grid></custom:grid>
-
+    d:DesignHeight="300"
+    d:DesignWidth="400">
+    <Button Content="aaaaaaaaaa"></Button>
     <!--<controls:DataGrid
         x:Name="data_grid"
         Height="600" Margin="12"
@@ -19,7 +17,5 @@
         ItemsSource="{x:Bind tester}"
         >
     </controls:DataGrid>-->
-    <!--<Grid>
-        <SwapChainPanel x:Name="swapChainPanel" HorizontalAlignment="Left" Width="700" Height="700" VerticalAlignment="Center" Margin="0,0,0,0" />
-    </Grid>-->
-</Page>
+
+</UserControl>

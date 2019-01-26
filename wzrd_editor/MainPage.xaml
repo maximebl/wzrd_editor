@@ -13,7 +13,6 @@
     VerticalAlignment="Stretch">
 
     <Page.Resources>
-
         <converters:int_to_visibility x:Key="int_to_visibility_converter"/>
 
         <DataTemplate x:Key="textures_list_header">
@@ -86,12 +85,6 @@
             </ListViewItem>
         </DataTemplate>
 
-        <DataTemplate x:Key="indices_list_template" x:DataType="x:Int32">
-            <ListViewItem HorizontalContentAlignment="Stretch">
-                <TextBox Text="{x:Bind}" />
-            </ListViewItem>
-        </DataTemplate>
-
         <DataTemplate x:Key="shaders_list_template" x:DataType="graphics:shader">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="8,8,0,0">
                 <SymbolIcon Margin="0,0,13,0" x:Name="shader_type_icon" Symbol="{x:Bind type_glyph}"></SymbolIcon>
@@ -110,7 +103,9 @@
         </DataTemplate>
     </Page.Resources>
 
-    <StackPanel x:Name="outer_stackpanel" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Height="829" Width="auto">
+
+    <SplitView x:Name="split_pane" IsPaneOpen="False" DisplayMode="Inline" OpenPaneLength="800">
+
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup>
 
@@ -151,127 +146,142 @@
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
 
-        <StackPanel HorizontalAlignment="Left" Orientation="Vertical">
-            <CommandBar x:Name="main_cmd_bar" Background="Transparent" IsOpen="False" DefaultLabelPosition="Right">
+        <SplitView.Pane>
+            <SwapChainPanel x:Name="swapChainPanel" Width="700" Height="700" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </SplitView.Pane>
 
-                <AppBarButton Icon="OpenFile" Label="Texture" IsEnabled="True">
-                    <AppBarButton.Flyout>
-                        <MenuFlyout>
-                            <MenuFlyoutItem x:Name="texturePicker" Click="onclick_texture_picker">
-                                <MenuFlyoutItem.Icon>
-                                    <SymbolIcon Symbol="Page2"></SymbolIcon>
-                                </MenuFlyoutItem.Icon>
-                                <MenuFlyoutItem.Text>Texture</MenuFlyoutItem.Text>
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="T" Modifiers="Shift"/>
-                                </MenuFlyoutItem.KeyboardAccelerators>
-                            </MenuFlyoutItem>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
 
-                            <MenuFlyoutSeparator/>
+            <StackPanel x:Name="outer_stackpanel" Orientation="Horizontal" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Height="auto" Width="auto">
+                <StackPanel HorizontalAlignment="Left" Orientation="Vertical">
 
-                            <MenuFlyoutItem x:Name="menuflyout_clear_textures" Click="menuflyout_clear_textures_click" >
-                                <MenuFlyoutItem.Icon>
-                                    <FontIcon Glyph="&#xE75C;"/>
-                                </MenuFlyoutItem.Icon>
-                                <MenuFlyoutItem.Text>Clear textures</MenuFlyoutItem.Text>
-                            </MenuFlyoutItem>
-                        </MenuFlyout>
-                    </AppBarButton.Flyout>
+                    <CommandBar x:Name="main_cmd_bar" Background="Transparent" IsOpen="False" DefaultLabelPosition="Right">
 
-                </AppBarButton>
+                        <AppBarButton Icon="OpenFile" Label="Texture" IsEnabled="True">
+                            <AppBarButton.Flyout>
+                                <MenuFlyout>
+                                    <MenuFlyoutItem x:Name="texturePicker" Click="onclick_texture_picker">
+                                        <MenuFlyoutItem.Icon>
+                                            <SymbolIcon Symbol="Page2"></SymbolIcon>
+                                        </MenuFlyoutItem.Icon>
+                                        <MenuFlyoutItem.Text>Texture</MenuFlyoutItem.Text>
+                                        <MenuFlyoutItem.KeyboardAccelerators>
+                                            <KeyboardAccelerator Key="T" Modifiers="Shift"/>
+                                        </MenuFlyoutItem.KeyboardAccelerators>
+                                    </MenuFlyoutItem>
 
-                <AppBarButton x:Name="shaderPicker" Icon="OpenFile" Label="Shaders" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <AppBarButton.Flyout>
-                        <MenuFlyout>
-                            <MenuFlyoutItem x:Name="pixelShaderPicker" Click="onclick_pixelshader_picker">
-                                <MenuFlyoutItem.Icon>
-                                    <SymbolIcon Symbol="SelectAll"></SymbolIcon>
-                                </MenuFlyoutItem.Icon>
-                                <MenuFlyoutItem.Text>Pixel</MenuFlyoutItem.Text>
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="P" Modifiers="Shift"/>
-                                </MenuFlyoutItem.KeyboardAccelerators>
-                            </MenuFlyoutItem>
-                            <MenuFlyoutItem x:Name="vertexShaderPicker" Click="onclick_vertexshader_picker">
-                                <MenuFlyoutItem.Icon>
-                                    <SymbolIcon Symbol="Play"></SymbolIcon>
-                                </MenuFlyoutItem.Icon>
-                                <MenuFlyoutItem.Text>Vertex</MenuFlyoutItem.Text>
-                                <MenuFlyoutItem.KeyboardAccelerators>
-                                    <KeyboardAccelerator Key="V" Modifiers="Shift"/>
-                                </MenuFlyoutItem.KeyboardAccelerators>
-                            </MenuFlyoutItem>
-                            <MenuFlyoutSeparator/>
-                            <MenuFlyoutItem x:Name="menuflyout_clear_shaders" Click="menuflyout_clear_shaders_click" IsEnabled="True">
-                                <MenuFlyoutItem.Icon>
-                                    <FontIcon Glyph="&#xE75C;"/>
-                                </MenuFlyoutItem.Icon>
-                                <MenuFlyoutItem.Text>Clear shaders</MenuFlyoutItem.Text>
-                            </MenuFlyoutItem>
-                        </MenuFlyout>
-                    </AppBarButton.Flyout>
-                </AppBarButton>
+                                    <MenuFlyoutSeparator/>
 
-                <AppBarButton x:Name="render" Icon="Calculator" Label="render" HorizontalAlignment="Center" VerticalAlignment="Center">
-                    <AppBarButton.Flyout>
-                        <MenuFlyout>
-                            <MenuFlyoutItem x:Name="render_triangles" Click="onclick_build_trianglelist" Text="Triangles list"></MenuFlyoutItem>
-                            <MenuFlyoutItem x:Name="render_points" Click="onclick_build_pointlist" Text="Points list" ></MenuFlyoutItem>
-                            <MenuFlyoutItem x:Name="render_lines" Click="onclick_build_lineslist" Text="Lines list" ></MenuFlyoutItem>
-                            <MenuFlyoutItem x:Name="render_linestrips" Click="onclick_build_linestrips" Text="Line strips" ></MenuFlyoutItem>
-                            <MenuFlyoutItem x:Name="render_trianglestrips" Click="onclick_build_trianglestrips" Text="Triangle strips" ></MenuFlyoutItem>
-                        </MenuFlyout>
-                    </AppBarButton.Flyout>
-                </AppBarButton>
-            </CommandBar>
+                                    <MenuFlyoutItem x:Name="menuflyout_clear_textures" Click="menuflyout_clear_textures_click" >
+                                        <MenuFlyoutItem.Icon>
+                                            <FontIcon Glyph="&#xE75C;"/>
+                                        </MenuFlyoutItem.Icon>
+                                        <MenuFlyoutItem.Text>Clear textures</MenuFlyoutItem.Text>
+                                    </MenuFlyoutItem>
+                                </MenuFlyout>
+                            </AppBarButton.Flyout>
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
-                <ListView x:Name="shaders_list" HorizontalAlignment="Stretch" Width="auto" Height="auto" VerticalAlignment="Top"
+                        </AppBarButton>
+
+                        <AppBarButton x:Name="shaderPicker" Icon="OpenFile" Label="Shaders" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <AppBarButton.Flyout>
+                                <MenuFlyout>
+                                    <MenuFlyoutItem x:Name="pixelShaderPicker" Click="onclick_pixelshader_picker">
+                                        <MenuFlyoutItem.Icon>
+                                            <SymbolIcon Symbol="SelectAll"></SymbolIcon>
+                                        </MenuFlyoutItem.Icon>
+                                        <MenuFlyoutItem.Text>Pixel</MenuFlyoutItem.Text>
+                                        <MenuFlyoutItem.KeyboardAccelerators>
+                                            <KeyboardAccelerator Key="P" Modifiers="Shift"/>
+                                        </MenuFlyoutItem.KeyboardAccelerators>
+                                    </MenuFlyoutItem>
+                                    <MenuFlyoutItem x:Name="vertexShaderPicker" Click="onclick_vertexshader_picker">
+                                        <MenuFlyoutItem.Icon>
+                                            <SymbolIcon Symbol="Play"></SymbolIcon>
+                                        </MenuFlyoutItem.Icon>
+                                        <MenuFlyoutItem.Text>Vertex</MenuFlyoutItem.Text>
+                                        <MenuFlyoutItem.KeyboardAccelerators>
+                                            <KeyboardAccelerator Key="V" Modifiers="Shift"/>
+                                        </MenuFlyoutItem.KeyboardAccelerators>
+                                    </MenuFlyoutItem>
+                                    <MenuFlyoutSeparator/>
+                                    <MenuFlyoutItem x:Name="menuflyout_clear_shaders" Click="menuflyout_clear_shaders_click" IsEnabled="True">
+                                        <MenuFlyoutItem.Icon>
+                                            <FontIcon Glyph="&#xE75C;"/>
+                                        </MenuFlyoutItem.Icon>
+                                        <MenuFlyoutItem.Text>Clear shaders</MenuFlyoutItem.Text>
+                                    </MenuFlyoutItem>
+                                </MenuFlyout>
+                            </AppBarButton.Flyout>
+                        </AppBarButton>
+
+                        <AppBarButton x:Name="render" Icon="Calculator" Label="render" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <AppBarButton.Flyout>
+                                <MenuFlyout>
+                                    <MenuFlyoutItem x:Name="render_triangles" Click="onclick_build_trianglelist" Text="Triangles list"></MenuFlyoutItem>
+                                    <MenuFlyoutItem x:Name="render_points" Click="onclick_build_pointlist" Text="Points list" ></MenuFlyoutItem>
+                                    <MenuFlyoutItem x:Name="render_lines" Click="onclick_build_lineslist" Text="Lines list" ></MenuFlyoutItem>
+                                    <MenuFlyoutItem x:Name="render_linestrips" Click="onclick_build_linestrips" Text="Line strips" ></MenuFlyoutItem>
+                                    <MenuFlyoutItem x:Name="render_trianglestrips" Click="onclick_build_trianglestrips" Text="Triangle strips" ></MenuFlyoutItem>
+                                </MenuFlyout>
+                            </AppBarButton.Flyout>
+                        </AppBarButton>
+                    </CommandBar>
+
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
+                        <ListView x:Name="shaders_list" HorizontalAlignment="Stretch" Width="auto" Height="auto" VerticalAlignment="Top"
                       HeaderTemplate="{StaticResource shaders_list_header}" 
                       Visibility="{x:Bind Path=GeometryViewModel.Shaders.Size, Converter={StaticResource int_to_visibility_converter}, Mode=OneWay}"
                       ItemsSource="{x:Bind GeometryViewModel.Shaders}" 
                       ItemTemplate="{StaticResource shaders_list_template}">
-                </ListView>
+                        </ListView>
 
-                <ListView x:Name="textures_list" HorizontalAlignment="Stretch" Width="auto" Height="auto" VerticalAlignment="Top"
+                        <ListView x:Name="textures_list" HorizontalAlignment="Stretch" Width="auto" Height="auto" VerticalAlignment="Top"
                       HeaderTemplate="{StaticResource textures_list_header}" 
                       Visibility="{x:Bind GeometryViewModel.Textures.Size, Converter={StaticResource int_to_visibility_converter}, Mode=OneWay}"
                       ItemsSource="{x:Bind GeometryViewModel.Textures}" 
                       ItemTemplate="{StaticResource texture_list_template}">
-                </ListView>
-            </StackPanel>
+                        </ListView>
+                    </StackPanel>
 
-            <ColorPicker x:Name="color_picker"
+                    <ColorPicker x:Name="color_picker"
                      HorizontalAlignment="Center" 
                      VerticalAlignment="Top" 
                      Margin="0,0,0,0" 
                      IsAlphaSliderVisible="True" 
                      ColorSpectrumComponents="HueSaturation" 
                      ColorSpectrumShape="Ring"/>
-        </StackPanel>
+                </StackPanel>
 
-        <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Top" Height="650" Width="400">
-            <Grid xmlns:src="using:wzrd_editor" 
+                <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Top" Height="650" Width="400">
+
+
+
+                    <Grid xmlns:src="using:wzrd_editor" 
          Margin="0,50,0,0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                </Grid.RowDefinitions>
-            </Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                    </Grid>
 
-            <RelativePanel>
-                <TextBlock x:Name="position_x_label"
+                    <RelativePanel>
+                        <TextBlock x:Name="position_x_label"
                            Text="X"
                            HorizontalAlignment="Left"/>
 
-                <TextBox x:Name="position_x_value" 
+                        <TextBox x:Name="position_x_value" 
                     Text="{x:Bind Mode=TwoWay, Path=GeometryViewModel.Geometry.Position.x}"  
                     HorizontalAlignment="Right" 
                     Width="68"
                     RelativePanel.RightOf="position_x_label"
                     RelativePanel.AlignRightWithPanel="True"/>
 
-                <Slider x:Name="slider_x" 
+                        <Slider x:Name="slider_x" 
                         Minimum="-2" 
                         Maximum="2" 
                         TickPlacement="Inline"
@@ -284,20 +294,20 @@
                         RelativePanel.AlignRightWith="position_x_value"
                         RelativePanel.AlignRightWithPanel="True"
                         />
-            </RelativePanel>
-            <RelativePanel>
-                <TextBlock x:Name="position_y_label"
+                    </RelativePanel>
+                    <RelativePanel>
+                        <TextBlock x:Name="position_y_label"
                            Text="Y"
                            HorizontalAlignment="Left"/>
 
-                <TextBox x:Name="position_y_value"
+                        <TextBox x:Name="position_y_value"
                          Text="{x:Bind Mode=TwoWay, Path=GeometryViewModel.Geometry.Position.y}"
                          HorizontalAlignment="Right"
                          Width="68"
                          RelativePanel.RightOf="position_y_label"
                          RelativePanel.AlignRightWithPanel="True" />
 
-                <Slider x:Name="slider_y" 
+                        <Slider x:Name="slider_y" 
                         Minimum="-2" 
                         Maximum="2" 
                         TickPlacement="Inline"
@@ -309,21 +319,21 @@
                         RelativePanel.AlignRightWith="position_y_value"
                         RelativePanel.AlignRightWithPanel="True"
                         Value="{x:Bind Mode=TwoWay, Path=GeometryViewModel.Geometry.Position.y}"/>
-            </RelativePanel>
-            <RelativePanel>
+                    </RelativePanel>
+                    <RelativePanel>
 
-                <TextBlock x:Name="position_z_label"
+                        <TextBlock x:Name="position_z_label"
                            Text="Z" 
                            HorizontalAlignment="Left"/>
 
-                <TextBox x:Name="position_z_value" 
+                        <TextBox x:Name="position_z_value" 
                          Text="{x:Bind Mode=TwoWay, Path=GeometryViewModel.Geometry.Position.z}"
                          HorizontalAlignment="Right"
                          Width="68"
                          RelativePanel.RightOf="position_z_label"
                          RelativePanel.AlignRightWithPanel="True"/>
 
-                <Slider x:Name="slider_z" 
+                        <Slider x:Name="slider_z" 
                         Minimum="-2" 
                         Maximum="2" 
                         SnapsTo="Ticks"
@@ -335,36 +345,39 @@
                         RelativePanel.AlignLeftWith="position_z_label"
                         RelativePanel.AlignRightWith="position_z_value"
                         RelativePanel.AlignRightWithPanel="True"/>
-            </RelativePanel>
+                    </RelativePanel>
 
-            <StackPanel>
-                <StackPanel.Resources>
-                    <Style TargetType="Button">
-                        <Setter Property="Margin" Value="0,0,0,0"/>
-                    </Style>
-                </StackPanel.Resources>
-                <Grid HorizontalAlignment="Stretch" ColumnSpacing="1" RowSpacing="1">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*"></ColumnDefinition>
-                        <ColumnDefinition Width="*"></ColumnDefinition>
-                        <ColumnDefinition Width="*"></ColumnDefinition>
-                        <ColumnDefinition Width="*"></ColumnDefinition>
-                    </Grid.ColumnDefinitions>
+                    <StackPanel>
 
-                    <Button x:Name="new_vertex_button" 
+                        <StackPanel.Resources>
+                            <Style TargetType="Button">
+                                <Setter Property="Margin" Value="0,0,0,0"/>
+                            </Style>
+                        </StackPanel.Resources>
+                        <Grid HorizontalAlignment="Stretch" ColumnSpacing="1" RowSpacing="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                                <ColumnDefinition Width="*"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+
+
+
+                            <Button x:Name="new_vertex_button" 
                             Content="New vertex" 
                             Click="onclick_create_vertex" 
                             Grid.Row="0"
                             Grid.ColumnSpan="4"
                             HorizontalAlignment="Stretch" 
                             VerticalAlignment="Stretch"/>
-                    <Button x:Name="clear_vertices_button" 
+                            <Button x:Name="clear_vertices_button" 
                             Content="Clear vertices" 
                             Click="onclick_clear_vertex" 
                             Grid.Row="1"
@@ -372,7 +385,7 @@
                             HorizontalAlignment="Stretch" 
                             VerticalAlignment="Stretch"/>
 
-                    <Button x:Name="render_as_static" 
+                            <Button x:Name="render_as_static" 
                           Content="Static buffer" 
                           Grid.Column="0" 
                           Click="onclick_render_as_static" 
@@ -381,7 +394,7 @@
                           HorizontalAlignment="Stretch" 
                           VerticalAlignment="Stretch"/>
 
-                    <Button x:Name="render_as_dynamic" 
+                            <Button x:Name="render_as_dynamic" 
                           Content="Dynamic buffer" 
                           Grid.Column="2" Click="onclick_render_as_dynamic" 
                           Grid.Row="2"
@@ -389,13 +402,13 @@
                           HorizontalAlignment="Stretch" 
                           VerticalAlignment="Stretch"/>
 
-                    <RelativePanel x:Name="buffer_capacity" Visibility="Collapsed" Grid.Row="3" Grid.ColumnSpan="4">
-                        <TextBlock
+                            <RelativePanel x:Name="buffer_capacity" Visibility="Collapsed" Grid.Row="3" Grid.ColumnSpan="4">
+                                <TextBlock
                             x:Name="buffer_capacity_label"
                             HorizontalAlignment="Left"
                             Text="Buffer capacity"                            
                             />
-                        <ProgressBar
+                                <ProgressBar
                             x:Name="buffer_capacity_progressbar"
                             Value="{x:Bind Path=GeometryViewModel.Geometry.BufferCapacity, Mode=TwoWay}"
                             RelativePanel.Below="buffer_capacity_label"
@@ -403,23 +416,23 @@
                             RelativePanel.AlignLeftWith="buffer_capacity_label"
                             RelativePanel.AlignRightWithPanel="True"
                             />
-                    </RelativePanel>
-                </Grid>
-            </StackPanel>
+                            </RelativePanel>
+                        </Grid>
+                    </StackPanel>
 
-            <ListView x:Name="vertices_list" HorizontalAlignment="Stretch" Width="auto" Height="auto" Margin="-2,3" VerticalAlignment="Center"
+                    <ListView x:Name="vertices_list" HorizontalAlignment="Stretch" Width="auto" Height="auto" Margin="-2,3" VerticalAlignment="Center"
                       Visibility="{x:Bind Path=GeometryViewModel.Geometry.Vertices.Size, Converter={StaticResource int_to_visibility_converter}, Mode=OneWay}"
                       Background="{StaticResource ContentDialogDimmingThemeBrush}"
                       ItemsSource="{x:Bind Path=GeometryViewModel.Geometry.Vertices}" 
                       HeaderTemplate="{StaticResource vertices_list_header}" 
                       ItemTemplate="{StaticResource vertices_list_template}"/>
 
-            <ListView x:Name="indices_list" HorizontalAlignment="Stretch" Width="auto" Height="auto" Margin="-2,3" VerticalAlignment="Center"
-                      Visibility="Visible"
-                      Background="{StaticResource ContentDialogDimmingThemeBrush}"
-                      ItemsSource="{x:Bind Path=GeometryViewModel.Geometry.Indices}" 
-                      ItemTemplate="{StaticResource indices_list_template}"/>
-        </StackPanel>
-        <SwapChainPanel x:Name="swapChainPanel" HorizontalAlignment="Left" Width="700" Height="700" VerticalAlignment="Center" Margin="0,0,0,0" />
-    </StackPanel>
+
+                </StackPanel>
+            </StackPanel>
+
+        </Grid>
+    </SplitView>
+
+
 </Page>

@@ -76,7 +76,6 @@ namespace winrt::graphics::implementation
 		com_ptr<ID3D12PipelineState> m_triangles_pso = nullptr;
 		com_ptr<ID3D12PipelineState> m_lines_pso = nullptr;
 
-		std::unique_ptr<upload_buffer<object_constants>> m_object_cb;
 		std::vector<D3D12_INPUT_ELEMENT_DESC> m_basic_input_layout;
 
 		void create_factory();
@@ -87,7 +86,6 @@ namespace winrt::graphics::implementation
 		void create_depthstencil_buffer();
 		void create_swapchain_xaml(Windows::UI::Xaml::Controls::SwapChainPanel target_swapchain);
 		void create_render_targets();
-		void create_constant_buffers();
 		void create_rootsignature();
 		std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> get_static_samplers();
 		void init_psos();

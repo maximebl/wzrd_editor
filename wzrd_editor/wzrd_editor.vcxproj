@@ -112,6 +112,10 @@
       <DependentUpon>int_to_visibility.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
+    <ClInclude Include="main_page.h">
+      <DependentUpon>main_page.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="MathHelper.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="App.h">
@@ -153,6 +157,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="MainPage.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="main_page.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
@@ -202,6 +209,10 @@
     <ClCompile Include="GraphicsResources.cpp" />
     <ClCompile Include="int_to_visibility.cpp">
       <DependentUpon>int_to_visibility.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
+    <ClCompile Include="main_page.cpp">
+      <DependentUpon>main_page.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
     <ClCompile Include="MathHelper.cpp">
@@ -259,6 +270,10 @@
     </Midl>
     <Midl Include="MainPage.idl">
       <DependentUpon>MainPage.xaml</DependentUpon>
+    </Midl>
+    <Midl Include="main_page.idl">
+      <DependentUpon>main_page.xaml</DependentUpon>
+      <SubType>Code</SubType>
     </Midl>
     <Midl Include="Shader.idl">
       <SubType>Designer</SubType>

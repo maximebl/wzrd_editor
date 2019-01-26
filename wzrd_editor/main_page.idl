@@ -1,0 +1,8 @@
+namespace wzrd_editor
+{
+    [default_interface]
+    runtimeclass main_page : Windows.UI.Xaml.Controls.Page
+    {
+        main_page();
+    }
+}

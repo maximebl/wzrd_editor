@@ -19,7 +19,6 @@
 #include "int_to_visibility.h"
 #include "vertex_buffer.h"
 #include "vertex2.h"
-#include "winrt\graphics.h"
 
 namespace winrt::wzrd_editor::implementation
 {

@@ -127,7 +127,6 @@ namespace winrt::graphics::implementation
 		create_depthstencil_buffer();
 		create_swapchain_xaml(target_swapchain);
 		create_render_targets();
-		create_constant_buffers();
 		create_rootsignature();
 	}
 
@@ -190,7 +189,7 @@ namespace winrt::graphics::implementation
 		m_graphics_cmdlist->OMSetRenderTargets(1, &current_backbuffer_view(), true, &m_dsv_heap->GetCPUDescriptorHandleForHeapStart());
 
 		m_graphics_cmdlist->SetGraphicsRootSignature(m_rootsig.get());
-		m_graphics_cmdlist->SetGraphicsRootConstantBufferView(0, m_object_cb->get_resource()->GetGPUVirtualAddress());
+		//m_graphics_cmdlist->SetGraphicsRootConstantBufferView(0, m_object_cb->get_resource()->GetGPUVirtualAddress());
 
 		auto res = m_current_buffer->get_view();
 		auto res2 = (D3D12_VERTEX_BUFFER_VIEW*)&res;
@@ -216,38 +215,38 @@ namespace winrt::graphics::implementation
 
 	void renderer::update()
 	{
-		using namespace DirectX;
+		//using namespace DirectX;
 
-		XMMATRIX perspective_projection = XMMatrixPerspectiveFovLH(
-			0.25f * XM_PI,
-			static_cast<float>(m_output_width) / m_output_height,
-			1.0f,
-			1000.0f);
+		//XMMATRIX perspective_projection = XMMatrixPerspectiveFovLH(
+		//	0.25f * XM_PI,
+		//	static_cast<float>(m_output_width) / m_output_height,
+		//	1.0f,
+		//	1000.0f);
 
-		XMStoreFloat4x4(&m_proj, perspective_projection);
+		//XMStoreFloat4x4(&m_proj, perspective_projection);
 
-		float x = m_radius * sinf(m_phi) * cosf(m_theta);
-		float z = m_radius * sinf(m_phi) * sinf(m_theta);
-		float y = m_radius * cosf(m_phi);
+		//float x = m_radius * sinf(m_phi) * cosf(m_theta);
+		//float z = m_radius * sinf(m_phi) * sinf(m_theta);
+		//float y = m_radius * cosf(m_phi);
 
-		XMVECTOR pos = XMVectorSet(x, y, z, 1.0f);
-		XMVECTOR target = XMVectorZero();
-		XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-		XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
-		XMStoreFloat4x4(&m_view, view);
+		//XMVECTOR pos = XMVectorSet(x, y, z, 1.0f);
+		//XMVECTOR target = XMVectorZero();
+		//XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+		//XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
+		//XMStoreFloat4x4(&m_view, view);
 
-		XMMATRIX world = XMLoadFloat4x4(&m_world);
-		XMMATRIX proj = XMLoadFloat4x4(&m_proj);
-		XMMATRIX world_view_proj = world * view * proj;
+		//XMMATRIX world = XMLoadFloat4x4(&m_world);
+		//XMMATRIX proj = XMLoadFloat4x4(&m_proj);
+		//XMMATRIX world_view_proj = world * view * proj;
 
-		XMFLOAT4X4 tex_transform_floats = MathHelper::Identity4x4();
-		XMMATRIX tex_transforms = XMLoadFloat4x4(&tex_transform_floats);
+		//XMFLOAT4X4 tex_transform_floats = MathHelper::Identity4x4();
+		//XMMATRIX tex_transforms = XMLoadFloat4x4(&tex_transform_floats);
 
-		object_constants object_constants;
-		XMStoreFloat4x4(&object_constants.texture_transform, XMMatrixTranspose(tex_transforms));
-		XMStoreFloat4x4(&object_constants.world, XMMatrixTranspose(world_view_proj));
+		//object_constants object_constants;
+		//XMStoreFloat4x4(&object_constants.texture_transform, XMMatrixTranspose(tex_transforms));
+		//XMStoreFloat4x4(&object_constants.world, XMMatrixTranspose(world_view_proj));
 
-		m_object_cb->copy_data(0, object_constants);
+		//m_object_cb->copy_data(0, object_constants);
 	}
 
 	void renderer::start_render_loop()
@@ -468,21 +467,13 @@ namespace winrt::graphics::implementation
 		}
 	}
 
-	void renderer::create_constant_buffers()
-	{
-		m_object_cb = std::make_unique<upload_buffer<object_constants>>(m_device.get(), 1, true, false);
-	}
-
 	void renderer::create_rootsignature()
 	{
-		CD3DX12_ROOT_PARAMETER root_parameters[1];
-		root_parameters[0].InitAsConstantBufferView(0);
-
 		auto samplers = get_static_samplers();
 
 		CD3DX12_ROOT_SIGNATURE_DESC rootsig_desc(
-			1,
-			root_parameters,
+			0,
+			nullptr,
 			(UINT)samplers.size(),
 			samplers.data(),
 			D3D12_ROOT_SIGNATURE_FLAGS::D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);

@@ -13,6 +13,11 @@ namespace winrt::graphics::implementation
         throw hresult_not_implemented();
     }
 
+    void renderer::clear_shaders()
+    {
+        throw hresult_not_implemented();
+    }
+
     void renderer::start_render_loop()
     {
         throw hresult_not_implemented();

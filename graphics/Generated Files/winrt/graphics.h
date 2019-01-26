@@ -105,6 +105,11 @@ template <typename D> void consume_graphics_Irenderer<D>::initialize(Windows::UI
     check_hresult(WINRT_SHIM(graphics::Irenderer)->initialize(get_abi(target_swapchain)));
 }
 
+template <typename D> void consume_graphics_Irenderer<D>::clear_shaders() const
+{
+    check_hresult(WINRT_SHIM(graphics::Irenderer)->clear_shaders());
+}
+
 template <typename D> void consume_graphics_Irenderer<D>::start_render_loop() const
 {
     check_hresult(WINRT_SHIM(graphics::Irenderer)->start_render_loop());
@@ -522,6 +527,18 @@ struct produce<D, graphics::Irenderer> : produce_base<D, graphics::Irenderer>
             typename D::abi_guard guard(this->shim());
             WINRT_ASSERT_DECLARATION(initialize, WINRT_WRAP(void), Windows::UI::Xaml::Controls::SwapChainPanel const&);
             this->shim().initialize(*reinterpret_cast<Windows::UI::Xaml::Controls::SwapChainPanel const*>(&target_swapchain));
+            return 0;
+        }
+        catch (...) { return to_hresult(); }
+    }
+
+    int32_t WINRT_CALL clear_shaders() noexcept final
+    {
+        try
+        {
+            typename D::abi_guard guard(this->shim());
+            WINRT_ASSERT_DECLARATION(clear_shaders, WINRT_WRAP(void));
+            this->shim().clear_shaders();
             return 0;
         }
         catch (...) { return to_hresult(); }
@@ -2160,6 +2177,20 @@ template <> struct get_enumerator_values<graphics::buffer_type>
     static constexpr std::array<graphics::buffer_type, 2> value{{ 
         graphics::buffer_type::dynamic_buffer,
         graphics::buffer_type::static_buffer, }};
+};
+template <> struct get_enumerator_names<graphics::compilation_status>
+{
+    static constexpr std::array<std::wstring_view, 3> value{{ 
+        {L"success", 7},
+        {L"error", 5},
+        {L"cancelled", 9}, }};
+};
+template <> struct get_enumerator_values<graphics::compilation_status>
+{
+    static constexpr std::array<graphics::compilation_status, 3> value{{ 
+        graphics::compilation_status::success,
+        graphics::compilation_status::error,
+        graphics::compilation_status::cancelled, }};
 };
 template <> struct get_enumerator_names<graphics::primitive_types>
 {

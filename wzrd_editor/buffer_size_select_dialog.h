@@ -28,7 +28,7 @@ namespace winrt::wzrd_editor::implementation
 		bool m_is_auto_resizeable = false;
 		int32_t m_buffer_size = 0;
 		int32_t m_buffer_increment_size = 0;
-		int32_t m_minimum_buffer_size = 0;
+		int32_t m_minimum_buffer_size = 1;
 	};
 }
 
