@@ -213,42 +213,6 @@ namespace winrt::graphics::implementation
 		m_current_backbuffer = (m_current_backbuffer + 1) % m_swapchain_buffer_count;
 	}
 
-	void renderer::update()
-	{
-		//using namespace DirectX;
-
-		//XMMATRIX perspective_projection = XMMatrixPerspectiveFovLH(
-		//	0.25f * XM_PI,
-		//	static_cast<float>(m_output_width) / m_output_height,
-		//	1.0f,
-		//	1000.0f);
-
-		//XMStoreFloat4x4(&m_proj, perspective_projection);
-
-		//float x = m_radius * sinf(m_phi) * cosf(m_theta);
-		//float z = m_radius * sinf(m_phi) * sinf(m_theta);
-		//float y = m_radius * cosf(m_phi);
-
-		//XMVECTOR pos = XMVectorSet(x, y, z, 1.0f);
-		//XMVECTOR target = XMVectorZero();
-		//XMVECTOR up = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-		//XMMATRIX view = XMMatrixLookAtLH(pos, target, up);
-		//XMStoreFloat4x4(&m_view, view);
-
-		//XMMATRIX world = XMLoadFloat4x4(&m_world);
-		//XMMATRIX proj = XMLoadFloat4x4(&m_proj);
-		//XMMATRIX world_view_proj = world * view * proj;
-
-		//XMFLOAT4X4 tex_transform_floats = MathHelper::Identity4x4();
-		//XMMATRIX tex_transforms = XMLoadFloat4x4(&tex_transform_floats);
-
-		//object_constants object_constants;
-		//XMStoreFloat4x4(&object_constants.texture_transform, XMMatrixTranspose(tex_transforms));
-		//XMStoreFloat4x4(&object_constants.world, XMMatrixTranspose(world_view_proj));
-
-		//m_object_cb->copy_data(0, object_constants);
-	}
-
 	void renderer::start_render_loop()
 	{
 		bool is_ready_to_render = !m_is_rendering && m_shaders.size() > 0;

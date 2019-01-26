@@ -105,7 +105,6 @@ namespace winrt::graphics::implementation
 		void flush_cmd_queue();
 
 		void render();
-		void update();
 
 		//std::pair<graphics::compilation_result, com_ptr<ID3D10Blob>> compile_shader(hstring const& version, const std::vector<unsigned char>& file_bytes, hstring const& entry_point);
 		std::unordered_map<std::string, com_ptr<ID3DBlob>> m_shaders;
