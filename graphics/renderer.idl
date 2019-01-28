@@ -31,7 +31,8 @@ namespace graphics
 		renderer();
 
 		void enable_debug_layer();
-		void initialize(Windows.UI.Xaml.Controls.SwapChainPanel target_swapchain);
+		void initialize_buffers_showcase(Windows.UI.Xaml.Controls.SwapChainPanel target_swapchain);
+		void initialize_textures_showcase(Windows.UI.Xaml.Controls.SwapChainPanel target_swapchain);
 		void clear_shaders();
 		void start_render_loop();
 		void stop_render_loop();

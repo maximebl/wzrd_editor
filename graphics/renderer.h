@@ -17,7 +17,8 @@ namespace winrt::graphics::implementation
 		renderer();
 
 		void enable_debug_layer();
-		void initialize(Windows::UI::Xaml::Controls::SwapChainPanel const& target_swapchain);
+		void initialize_buffers_showcase(Windows::UI::Xaml::Controls::SwapChainPanel const& target_swapchain);
+		void initialize_textures_showcase(Windows::UI::Xaml::Controls::SwapChainPanel const& target_swapchain);
 		void start_render_loop();
 		void stop_render_loop();
 		void clear_shaders();
@@ -82,12 +83,14 @@ namespace winrt::graphics::implementation
 		void create_device();
 		void create_fence();
 		void create_cmd_objects();
-		void create_descriptor_heaps();
+		void create_dsv_heap();
+		void create_rtv_heap();
+		void create_srv_heap();
 		void create_depthstencil_buffer();
 		void create_swapchain_xaml(Windows::UI::Xaml::Controls::SwapChainPanel target_swapchain);
 		void create_render_targets();
-		void create_rootsignature();
-		std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> get_static_samplers();
+		void create_rootsignature(std::vector<D3D12_ROOT_PARAMETER> root_params, std::vector<CD3DX12_STATIC_SAMPLER_DESC> samplers);
+		std::vector<CD3DX12_STATIC_SAMPLER_DESC> get_static_samplers();
 		void init_psos();
 		void execute_cmd_list();
 		void create_basic_input_layout();
@@ -104,7 +107,8 @@ namespace winrt::graphics::implementation
 		UINT64 m_cpu_fence = 0;
 		void flush_cmd_queue();
 
-		void render();
+		void render_1();
+		void render_2();
 
 		//std::pair<graphics::compilation_result, com_ptr<ID3D10Blob>> compile_shader(hstring const& version, const std::vector<unsigned char>& file_bytes, hstring const& entry_point);
 		std::unordered_map<std::string, com_ptr<ID3DBlob>> m_shaders;

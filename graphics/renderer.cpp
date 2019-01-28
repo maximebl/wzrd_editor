@@ -66,43 +66,6 @@ namespace winrt::graphics::implementation
 		m_current_topology = value;
 	}
 
-	//std::pair<graphics::compilation_result, com_ptr<ID3D10Blob>> renderer::compile_shader(
-	//	hstring const& version,
-	//	const std::vector<unsigned char>& file_bytes,
-	//	hstring const& entry_point)
-	//{
-	//	UINT compileFlags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-	//	com_ptr<ID3DBlob> byte_code = nullptr;
-	//	com_ptr<ID3DBlob> errors = nullptr;
-	//	graphics::compilation_result result;
-
-	//	D3DCompile(
-	//		&file_bytes.front(),
-	//		file_bytes.size(),
-	//		nullptr,
-	//		nullptr,
-	//		D3D_COMPILE_STANDARD_FILE_INCLUDE,
-	//		to_string(entry_point).c_str(),
-	//		to_string(version).c_str(),
-	//		compileFlags,
-	//		0,
-	//		byte_code.put(),
-	//		errors.put()
-	//	);
-
-	//	if (errors != nullptr)
-	//	{
-	//		auto error_msg_ptr = static_cast<const char*>(errors->GetBufferPointer());
-	//		hstring message = to_hstring(error_msg_ptr);
-
-	//		result.is_success = false;
-	//		result.error_message = message;
-	//		return std::make_pair(result, errors);
-	//	}
-	//	result.is_success = true;
-	//	return std::make_pair(result, byte_code);
-	//}
-
 	renderer::renderer()
 	{
 	}
@@ -117,13 +80,30 @@ namespace winrt::graphics::implementation
 		debug_controller->SetEnableGPUBasedValidation(true);
 	}
 
-	void renderer::initialize(Windows::UI::Xaml::Controls::SwapChainPanel const& target_swapchain)
+	void renderer::initialize_buffers_showcase(Windows::UI::Xaml::Controls::SwapChainPanel const& target_swapchain)
 	{
 		create_factory();
 		create_device();
 		create_fence();
 		create_cmd_objects();
+		create_dsv_heap();
+		create_rtv_heap();
 		create_descriptor_heaps();
+		create_depthstencil_buffer();
+		create_swapchain_xaml(target_swapchain);
+		create_render_targets();
+		create_rootsignature(std::vector{}, get_static_samplers());
+	}
+
+	void renderer::initialize_textures_showcase(Windows::UI::Xaml::Controls::SwapChainPanel const& target_swapchain)
+	{
+		create_factory();
+		create_device();
+		create_fence();
+		create_cmd_objects();
+		create_dsv_heap();
+		create_rtv_heap();
+		create_srv_heap();
 		create_depthstencil_buffer();
 		create_swapchain_xaml(target_swapchain);
 		create_render_targets();
@@ -136,7 +116,7 @@ namespace winrt::graphics::implementation
 
 		while (m_is_rendering)
 		{
-			render();
+			render_1();
 		}
 	}
 
@@ -157,7 +137,7 @@ namespace winrt::graphics::implementation
 		}
 	}
 
-	void renderer::render()
+	void renderer::render_1()
 	{
 		check_hresult(m_cmd_allocator->Reset());
 		check_hresult(m_graphics_cmdlist->Reset(m_cmd_allocator.get(), m_points_pso.get()));
@@ -191,9 +171,6 @@ namespace winrt::graphics::implementation
 		m_graphics_cmdlist->SetGraphicsRootSignature(m_rootsig.get());
 		//m_graphics_cmdlist->SetGraphicsRootConstantBufferView(0, m_object_cb->get_resource()->GetGPUVirtualAddress());
 
-		auto res = m_current_buffer->get_view();
-		auto res2 = (D3D12_VERTEX_BUFFER_VIEW*)&res;
-
 		m_graphics_cmdlist->IASetVertexBuffers(0, 1, (D3D12_VERTEX_BUFFER_VIEW*)& m_current_buffer->get_view());
 		m_graphics_cmdlist->DrawInstanced(m_current_buffer->current_size(), 1, 0, 0);
 
@@ -213,6 +190,11 @@ namespace winrt::graphics::implementation
 		m_current_backbuffer = (m_current_backbuffer + 1) % m_swapchain_buffer_count;
 	}
 
+	void renderer::render_2()
+	{
+
+	}
+
 	void renderer::start_render_loop()
 	{
 		bool is_ready_to_render = !m_is_rendering && m_shaders.size() > 0;
@@ -220,6 +202,7 @@ namespace winrt::graphics::implementation
 		{
 			m_is_rendering = true;
 			init_psos();
+			execute_cmd_list();
 			main_loop();
 		}
 	}
@@ -314,18 +297,8 @@ namespace winrt::graphics::implementation
 		g_cmd_list = m_graphics_cmdlist.get();
 	}
 
-	void renderer::create_descriptor_heaps()
+	void renderer::create_dsv_heap()
 	{
-		D3D12_DESCRIPTOR_HEAP_DESC rtv_heap_desc = {};
-		rtv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAGS::D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-		rtv_heap_desc.NodeMask = 0;
-		rtv_heap_desc.NumDescriptors = m_swapchain_buffer_count;
-		rtv_heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-
-		check_hresult(
-			m_device->CreateDescriptorHeap(&rtv_heap_desc, __uuidof(ID3D12DescriptorHeap), m_rtv_heap.put_void())
-		);
-
 		D3D12_DESCRIPTOR_HEAP_DESC dsv_heap_desc = {};
 		dsv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAGS::D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 		dsv_heap_desc.NodeMask = 0;
@@ -335,6 +308,34 @@ namespace winrt::graphics::implementation
 		check_hresult(
 			m_device->CreateDescriptorHeap(&dsv_heap_desc, __uuidof(ID3D12DescriptorHeap), m_dsv_heap.put_void())
 		);
+	}
+
+	void renderer::create_rtv_heap()
+	{
+
+		D3D12_DESCRIPTOR_HEAP_DESC rtv_heap_desc = {};
+		rtv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAGS::D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+		rtv_heap_desc.NodeMask = 0;
+		rtv_heap_desc.NumDescriptors = m_swapchain_buffer_count;
+		rtv_heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+
+		check_hresult(
+			m_device->CreateDescriptorHeap(&rtv_heap_desc, __uuidof(ID3D12DescriptorHeap), m_rtv_heap.put_void())
+		);
+	}
+
+	void renderer::create_srv_heap()
+	{
+		D3D12_DESCRIPTOR_HEAP_DESC srv_heap_desc = {};
+		srv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAGS::D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+		srv_heap_desc.NodeMask = 0;
+		srv_heap_desc.NumDescriptors = 1;
+		srv_heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+
+		check_hresult(
+			m_device->CreateDescriptorHeap(&srv_heap_desc, __uuidof(ID3D12DescriptorHeap), m_srv_heap.put_void())
+		);
+		return;
 	}
 
 	void renderer::create_depthstencil_buffer()
@@ -431,9 +432,10 @@ namespace winrt::graphics::implementation
 		}
 	}
 
-	void renderer::create_rootsignature()
+	void renderer::create_rootsignature(std::vector<D3D12_ROOT_PARAMETER> root_params, std::vector<CD3DX12_STATIC_SAMPLER_DESC> samplers)
 	{
-		auto samplers = get_static_samplers();
+		//auto samplers = get_static_samplers();
+//std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6>
 
 		CD3DX12_ROOT_SIGNATURE_DESC rootsig_desc(
 			0,
@@ -454,7 +456,7 @@ namespace winrt::graphics::implementation
 			m_rootsig.put_void());
 	}
 
-	std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6> renderer::get_static_samplers()
+	std::vector<CD3DX12_STATIC_SAMPLER_DESC> renderer::get_static_samplers()
 	{
 		const CD3DX12_STATIC_SAMPLER_DESC point_wrap(
 			0, // shaderRegister
@@ -517,7 +519,6 @@ namespace winrt::graphics::implementation
 		create_pso(m_shaders[vs], m_shaders[ps], D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT, m_points_pso);
 		create_pso(m_shaders[vs], m_shaders[ps], D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, m_triangles_pso);
 		create_pso(m_shaders[vs], m_shaders[ps], D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE, m_lines_pso);
-		execute_cmd_list();
 	}
 
 	void renderer::execute_cmd_list()

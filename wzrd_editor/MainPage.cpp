@@ -15,7 +15,7 @@ namespace winrt::wzrd_editor::implementation
 		m_ui_thread = winrt::apartment_context();
 
 		m_renderer.enable_debug_layer();
-		m_renderer.initialize(swapChainPanel());
+		m_renderer.initialize_buffers_showcase(swapChainPanel());
 	}
 
 	IAsyncAction MainPage::ui_thread_work()
