@@ -233,6 +233,12 @@ void GraphicsResources::create_rootsignature()
 	winrt::com_ptr<ID3DBlob> error_blob = nullptr;
 	D3D12SerializeRootSignature(&rootsig_desc, D3D_ROOT_SIGNATURE_VERSION_1, serialized_rootsig.put(), error_blob.put());
 
+	if (error_blob != nullptr)
+	{
+		auto error_msg_ptr = static_cast<const char*>(error_blob->GetBufferPointer());
+		winrt::hstring message = winrt::to_hstring(error_msg_ptr);
+	}
+
 	m_device->CreateRootSignature(
 		0,
 		serialized_rootsig->GetBufferPointer(),

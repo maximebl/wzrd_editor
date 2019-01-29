@@ -72,6 +72,8 @@ namespace winrt::graphics::implementation
 		com_ptr<ID3D12Device> m_device = nullptr;
 		com_ptr<IDXGIFactory4> m_dxgi_factory = nullptr;
 
+		com_ptr<ID3D12Resource> m_triangle_buffer = nullptr;
+
 		// pipeline states
 		com_ptr<ID3D12PipelineState> m_points_pso = nullptr;
 		com_ptr<ID3D12PipelineState> m_triangles_pso = nullptr;
@@ -89,7 +91,9 @@ namespace winrt::graphics::implementation
 		void create_depthstencil_buffer();
 		void create_swapchain_xaml(Windows::UI::Xaml::Controls::SwapChainPanel target_swapchain);
 		void create_render_targets();
-		void create_rootsignature(std::vector<D3D12_ROOT_PARAMETER> root_params, std::vector<CD3DX12_STATIC_SAMPLER_DESC> samplers);
+		void create_empty_rootsignature(std::vector<CD3DX12_STATIC_SAMPLER_DESC> samplers);
+		void create_texture_rootsignature(std::vector<CD3DX12_STATIC_SAMPLER_DESC> samplers);
+		void create_simple_triangle();
 		std::vector<CD3DX12_STATIC_SAMPLER_DESC> get_static_samplers();
 		void init_psos();
 		void execute_cmd_list();

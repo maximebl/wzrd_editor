@@ -88,11 +88,10 @@ namespace winrt::graphics::implementation
 		create_cmd_objects();
 		create_dsv_heap();
 		create_rtv_heap();
-		create_descriptor_heaps();
 		create_depthstencil_buffer();
 		create_swapchain_xaml(target_swapchain);
 		create_render_targets();
-		create_rootsignature(std::vector{}, get_static_samplers());
+		create_empty_rootsignature(get_static_samplers());
 	}
 
 	void renderer::initialize_textures_showcase(Windows::UI::Xaml::Controls::SwapChainPanel const& target_swapchain)
@@ -107,7 +106,8 @@ namespace winrt::graphics::implementation
 		create_depthstencil_buffer();
 		create_swapchain_xaml(target_swapchain);
 		create_render_targets();
-		create_rootsignature();
+		create_texture_rootsignature(get_static_samplers());
+		create_simple_triangle();
 	}
 
 	Windows::Foundation::IAsyncAction renderer::main_loop()
@@ -116,7 +116,7 @@ namespace winrt::graphics::implementation
 
 		while (m_is_rendering)
 		{
-			render_1();
+			render_2();
 		}
 	}
 
@@ -192,7 +192,60 @@ namespace winrt::graphics::implementation
 
 	void renderer::render_2()
 	{
+		check_hresult(m_cmd_allocator->Reset());
+		check_hresult(m_graphics_cmdlist->Reset(m_cmd_allocator.get(), m_triangles_pso.get()));
 
+		m_screen_viewport.TopLeftX = 0;
+		m_screen_viewport.TopLeftY = 0;
+		m_screen_viewport.Width = static_cast<float>(m_output_width);
+		m_screen_viewport.Height = static_cast<float>(m_output_height);
+		m_screen_viewport.MinDepth = 0.0f;
+		m_screen_viewport.MaxDepth = 1.0f;
+		m_scissor_rect = { 0, 0, m_output_width, m_output_height };
+
+		m_graphics_cmdlist->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(
+			m_swapchain_buffer[m_current_backbuffer].get(),
+			D3D12_RESOURCE_STATE_PRESENT,
+			D3D12_RESOURCE_STATE_RENDER_TARGET));
+		m_graphics_cmdlist->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(
+			m_depthstencil_buffer.get(),
+			D3D12_RESOURCE_STATE_COMMON,
+			D3D12_RESOURCE_STATE_DEPTH_WRITE));
+
+		m_graphics_cmdlist->RSSetViewports(1, &m_screen_viewport);
+		m_graphics_cmdlist->RSSetScissorRects(1, &m_scissor_rect);
+		m_graphics_cmdlist->ClearRenderTargetView(current_backbuffer_view(), DirectX::Colors::Beige, 0, nullptr);
+		m_graphics_cmdlist->ClearDepthStencilView(m_dsv_heap->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+
+		m_graphics_cmdlist->OMSetRenderTargets(1, &current_backbuffer_view(), true, &m_dsv_heap->GetCPUDescriptorHandleForHeapStart());
+
+		m_graphics_cmdlist->SetPipelineState(m_triangles_pso.get());
+		m_graphics_cmdlist->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+
+		m_graphics_cmdlist->SetGraphicsRootSignature(m_rootsig.get());
+
+		ID3D12DescriptorHeap* heaps[] = { m_srv_heap.get() };
+		m_graphics_cmdlist->SetDescriptorHeaps(_countof(heaps), heaps);
+		m_graphics_cmdlist->SetGraphicsRootDescriptorTable(0, m_srv_heap->GetGPUDescriptorHandleForHeapStart());
+		//m_graphics_cmdlist->SetGraphicsRootConstantBufferView(0, m_object_cb->get_resource()->GetGPUVirtualAddress());
+
+		//m_graphics_cmdlist->IASetVertexBuffers(0, 1, (D3D12_VERTEX_BUFFER_VIEW*)& m_current_buffer->get_view());
+		m_graphics_cmdlist->DrawInstanced(m_current_buffer->current_size(), 1, 0, 0);
+
+		m_graphics_cmdlist->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(
+			m_swapchain_buffer[m_current_backbuffer].get(),
+			D3D12_RESOURCE_STATE_RENDER_TARGET,
+			D3D12_RESOURCE_STATE_PRESENT));
+		m_graphics_cmdlist->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(
+			m_depthstencil_buffer.get(),
+			D3D12_RESOURCE_STATE_DEPTH_WRITE,
+			D3D12_RESOURCE_STATE_COMMON));
+
+		execute_cmd_list();
+		flush_cmd_queue();
+
+		check_hresult(m_swapchain->Present(0, 0));
+		m_current_backbuffer = (m_current_backbuffer + 1) % m_swapchain_buffer_count;
 	}
 
 	void renderer::start_render_loop()
@@ -312,7 +365,6 @@ namespace winrt::graphics::implementation
 
 	void renderer::create_rtv_heap()
 	{
-
 		D3D12_DESCRIPTOR_HEAP_DESC rtv_heap_desc = {};
 		rtv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAGS::D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
 		rtv_heap_desc.NodeMask = 0;
@@ -335,7 +387,6 @@ namespace winrt::graphics::implementation
 		check_hresult(
 			m_device->CreateDescriptorHeap(&srv_heap_desc, __uuidof(ID3D12DescriptorHeap), m_srv_heap.put_void())
 		);
-		return;
 	}
 
 	void renderer::create_depthstencil_buffer()
@@ -432,21 +483,94 @@ namespace winrt::graphics::implementation
 		}
 	}
 
-	void renderer::create_rootsignature(std::vector<D3D12_ROOT_PARAMETER> root_params, std::vector<CD3DX12_STATIC_SAMPLER_DESC> samplers)
+	void renderer::create_texture_rootsignature(std::vector<CD3DX12_STATIC_SAMPLER_DESC> samplers)
 	{
-		//auto samplers = get_static_samplers();
-//std::array<const CD3DX12_STATIC_SAMPLER_DESC, 6>
+		CD3DX12_DESCRIPTOR_RANGE range = {};
+		range.Init(D3D12_DESCRIPTOR_RANGE_TYPE::D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
+
+		CD3DX12_ROOT_PARAMETER root_parameter = {};
+		root_parameter.InitAsDescriptorTable(1, &range, D3D12_SHADER_VISIBILITY::D3D12_SHADER_VISIBILITY_PIXEL);
 
 		CD3DX12_ROOT_SIGNATURE_DESC rootsig_desc(
-			0,
-			nullptr,
+			1,
+			&root_parameter,
 			(UINT)samplers.size(),
-			samplers.data(),
+			&samplers[0],
 			D3D12_ROOT_SIGNATURE_FLAGS::D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
 		com_ptr<ID3DBlob> serialized_rootsig = nullptr;
 		com_ptr<ID3DBlob> error_blob = nullptr;
 		D3D12SerializeRootSignature(&rootsig_desc, D3D_ROOT_SIGNATURE_VERSION::D3D_ROOT_SIGNATURE_VERSION_1, serialized_rootsig.put(), error_blob.put());
+
+		if (error_blob != nullptr)
+		{
+			auto error_msg_ptr = static_cast<const char*>(error_blob->GetBufferPointer());
+			winrt::hstring message = winrt::to_hstring(error_msg_ptr);
+		}
+
+		m_device->CreateRootSignature(
+			0,
+			serialized_rootsig->GetBufferPointer(),
+			serialized_rootsig->GetBufferSize(),
+			__uuidof(ID3D12RootSignature),
+			m_rootsig.put_void());
+	}
+
+	void renderer::create_simple_triangle()
+	{
+		//{ { 0.0f, 0.25f * m_aspectRatio, 0.0f }, { 0.5f, 0.0f } },
+		//{ { 0.25f, -0.25f * m_aspectRatio, 0.0f }, { 1.0f, 1.0f } },
+		//{ { -0.25f, -0.25f * m_aspectRatio, 0.0f }, { 0.0f, 1.0f } }
+		auto new_vertex1 = graphics::vertex(
+			0.0f, 0.25f, 0.0f,
+			0.0f, 0.0f, 0.0f, 0.0f,
+			0.5f, 0.0f
+		);
+
+		auto new_vertex2 = graphics::vertex(
+			0.25f, -0.25f, 0.0f,
+			0.0f, 0.0f, 0.0f, 0.0f,
+			1.0f, 1.0f
+		);
+
+		auto new_vertex3 = graphics::vertex(
+			-0.25f, -0.25f, 0.0f,
+			0.0f, 0.0f, 0.0f, 0.0f,
+			0.0f, 1.0f
+		);
+
+		Windows::Foundation::Collections::IObservableVector<graphics::vertex> tmp_vec{ winrt::single_threaded_observable_vector<graphics::vertex>() };
+		tmp_vec.Append(new_vertex1);
+		tmp_vec.Append(new_vertex2);
+		tmp_vec.Append(new_vertex3);
+
+		m_triangle_buffer = graphics::buffer(
+			graphics::buffer_type::static_buffer,
+			tmp_vec,
+			tmp_vec.Size(),
+			0,
+			false
+		);
+	}
+
+	void renderer::create_empty_rootsignature(std::vector<CD3DX12_STATIC_SAMPLER_DESC> samplers)
+	{
+		CD3DX12_ROOT_SIGNATURE_DESC rootsig_desc(
+			0,
+			nullptr,
+			(UINT)samplers.size(),
+			&samplers[0],
+			D3D12_ROOT_SIGNATURE_FLAGS::D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+
+		com_ptr<ID3DBlob> serialized_rootsig = nullptr;
+		com_ptr<ID3DBlob> error_blob = nullptr;
+		D3D12SerializeRootSignature(&rootsig_desc, D3D_ROOT_SIGNATURE_VERSION::D3D_ROOT_SIGNATURE_VERSION_1, serialized_rootsig.put(), error_blob.put());
+
+		if (error_blob != nullptr)
+		{
+			auto error_msg_ptr = static_cast<const char*>(error_blob->GetBufferPointer());
+			winrt::hstring message = winrt::to_hstring(error_msg_ptr);
+		}
 
 		m_device->CreateRootSignature(
 			0,

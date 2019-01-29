@@ -123,7 +123,6 @@ namespace winrt::wzrd_editor::implementation
 
 	IAsyncAction MainPage::onclick_pixelshader_picker(IInspectable const&, RoutedEventArgs const&)
 	{
-		//co_await pick_and_compile_shader("woodCratePS", wzrd_editor::ShaderType::pixel, "PS", "ps_5_0");
 		graphics::shader new_shader = graphics::shader(hstring(L"default_ps"), graphics::shader_type::pixel);
 		m_geometryViewModel.Shaders().Append(new_shader);
 
@@ -150,7 +149,6 @@ namespace winrt::wzrd_editor::implementation
 
 	IAsyncAction MainPage::onclick_vertexshader_picker(IInspectable const&, RoutedEventArgs const&)
 	{
-		//co_await pick_and_compile_shader("woodCrateVS", wzrd_editor::ShaderType::vertex, "VS", "vs_5_0");
 		graphics::shader new_shader = graphics::shader(hstring(L"default_vs"), graphics::shader_type::vertex);
 		m_geometryViewModel.Shaders().Append(new_shader);
 

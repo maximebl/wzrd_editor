@@ -20,7 +20,7 @@
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
 
-            <NavigationViewItem Tag="wzrd_editor.texturing_showcase" Content="Texturing" IsEnabled="False">
+            <NavigationViewItem Tag="wzrd_editor.texture_showcase_page" Content="Texturing" IsEnabled="True">
                 <NavigationViewItem.Icon>
                     <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE809;"/>
                 </NavigationViewItem.Icon>

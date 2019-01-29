@@ -1,0 +1,54 @@
+﻿<Page
+    x:Class="wzrd_editor.texture_showcase_page"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:wzrd_editor"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <SplitView x:Name="split_pane" IsPaneOpen="False" DisplayMode="Inline" OpenPaneLength="800">
+        <StackPanel>
+
+            <CommandBar x:Name="main_cmd_bar" Background="Transparent" IsOpen="False" DefaultLabelPosition="Right">
+                <AppBarButton x:Name="shaderPicker" Icon="OpenFile" Label="Shaders" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <AppBarButton.Flyout>
+                        <MenuFlyout>
+                            <MenuFlyoutItem x:Name="pixelShaderPicker" Click="onclick_pixelshader_picker">
+                                <MenuFlyoutItem.Icon>
+                                    <SymbolIcon Symbol="SelectAll"></SymbolIcon>
+                                </MenuFlyoutItem.Icon>
+                                <MenuFlyoutItem.Text>Pixel</MenuFlyoutItem.Text>
+                                <MenuFlyoutItem.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="P" Modifiers="Shift"/>
+                                </MenuFlyoutItem.KeyboardAccelerators>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutItem x:Name="vertexShaderPicker" Click="onclick_vertexshader_picker">
+                                <MenuFlyoutItem.Icon>
+                                    <SymbolIcon Symbol="Play"></SymbolIcon>
+                                </MenuFlyoutItem.Icon>
+                                <MenuFlyoutItem.Text>Vertex</MenuFlyoutItem.Text>
+                                <MenuFlyoutItem.KeyboardAccelerators>
+                                    <KeyboardAccelerator Key="V" Modifiers="Shift"/>
+                                </MenuFlyoutItem.KeyboardAccelerators>
+                            </MenuFlyoutItem>
+                            <MenuFlyoutSeparator/>
+                            <MenuFlyoutItem x:Name="menuflyout_clear_shaders" Click="menuflyout_clear_shaders_click" IsEnabled="True">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xE75C;"/>
+                                </MenuFlyoutItem.Icon>
+                                <MenuFlyoutItem.Text>Clear shaders</MenuFlyoutItem.Text>
+                            </MenuFlyoutItem>
+                        </MenuFlyout>
+                    </AppBarButton.Flyout>
+                </AppBarButton>
+            </CommandBar>
+
+            <Button x:Name="start_render" Click="render_onclick" Content="render"></Button>
+        </StackPanel>
+        <SplitView.Pane>
+            <SwapChainPanel x:Name="swapchain_panel" Width="700" Height="700" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </SplitView.Pane>
+
+    </SplitView>
+</Page>
