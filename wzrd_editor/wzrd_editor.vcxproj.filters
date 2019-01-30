@@ -10,6 +10,9 @@
     <Page Include="main_page.xaml">
       <Filter>views</Filter>
     </Page>
+    <Page Include="texture_showcase_page.xaml">
+      <Filter>views</Filter>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="App.idl" />
@@ -42,6 +45,7 @@
     <Midl Include="vertex2.idl">
       <Filter>ViewModels</Filter>
     </Midl>
+    <Midl Include="main_page.idl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -76,6 +80,7 @@
     <ClCompile Include="int_to_visibility.cpp" />
     <ClCompile Include="vertex_buffer.cpp" />
     <ClCompile Include="vertex2.cpp" />
+    <ClCompile Include="main_page.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -107,6 +112,7 @@
     <ClInclude Include="int_to_visibility.h" />
     <ClInclude Include="vertex_buffer.h" />
     <ClInclude Include="vertex2.h" />
+    <ClInclude Include="main_page.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Wide310x150Logo.scale-200.png">

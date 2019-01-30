@@ -133,6 +133,10 @@
       <DependentUpon>Texture.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
+    <ClInclude Include="texture_showcase_page.h">
+      <DependentUpon>texture_showcase_page.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="utilities.h" />
     <ClInclude Include="Vertex.h">
       <DependentUpon>Vertex.idl</DependentUpon>
@@ -160,6 +164,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="main_page.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="texture_showcase_page.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
@@ -239,6 +246,10 @@
       <DependentUpon>Texture.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
+    <ClCompile Include="texture_showcase_page.cpp">
+      <DependentUpon>texture_showcase_page.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="utilities.cpp" />
     <ClCompile Include="Vertex.cpp">
       <DependentUpon>Vertex.idl</DependentUpon>
@@ -280,6 +291,10 @@
     </Midl>
     <Midl Include="Texture.idl">
       <SubType>Designer</SubType>
+    </Midl>
+    <Midl Include="texture_showcase_page.idl">
+      <DependentUpon>texture_showcase_page.xaml</DependentUpon>
+      <SubType>Code</SubType>
     </Midl>
     <Midl Include="Vertex.idl">
       <SubType>Designer</SubType>

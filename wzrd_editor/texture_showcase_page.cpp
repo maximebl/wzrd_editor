@@ -37,6 +37,7 @@ namespace winrt::wzrd_editor::implementation
 	IAsyncAction texture_showcase_page::render_onclick(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
 		m_renderer.start_render_loop();
+		split_pane().IsPaneOpen(true);
 		co_return;
 	}
 }

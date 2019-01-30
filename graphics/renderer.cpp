@@ -108,6 +108,7 @@ namespace winrt::graphics::implementation
 		create_render_targets();
 		create_texture_rootsignature(get_static_samplers());
 		create_simple_triangle();
+		create_texture_srv();
 	}
 
 	Windows::Foundation::IAsyncAction renderer::main_loop()
@@ -214,7 +215,7 @@ namespace winrt::graphics::implementation
 
 		m_graphics_cmdlist->RSSetViewports(1, &m_screen_viewport);
 		m_graphics_cmdlist->RSSetScissorRects(1, &m_scissor_rect);
-		m_graphics_cmdlist->ClearRenderTargetView(current_backbuffer_view(), DirectX::Colors::Beige, 0, nullptr);
+		m_graphics_cmdlist->ClearRenderTargetView(current_backbuffer_view(), DirectX::Colors::Brown, 0, nullptr);
 		m_graphics_cmdlist->ClearDepthStencilView(m_dsv_heap->GetCPUDescriptorHandleForHeapStart(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 		m_graphics_cmdlist->OMSetRenderTargets(1, &current_backbuffer_view(), true, &m_dsv_heap->GetCPUDescriptorHandleForHeapStart());
@@ -229,7 +230,7 @@ namespace winrt::graphics::implementation
 		m_graphics_cmdlist->SetGraphicsRootDescriptorTable(0, m_srv_heap->GetGPUDescriptorHandleForHeapStart());
 		//m_graphics_cmdlist->SetGraphicsRootConstantBufferView(0, m_object_cb->get_resource()->GetGPUVirtualAddress());
 
-		//m_graphics_cmdlist->IASetVertexBuffers(0, 1, (D3D12_VERTEX_BUFFER_VIEW*)& m_current_buffer->get_view());
+		m_graphics_cmdlist->IASetVertexBuffers(0, 1, (D3D12_VERTEX_BUFFER_VIEW*)& m_current_buffer->get_view());
 		m_graphics_cmdlist->DrawInstanced(m_current_buffer->current_size(), 1, 0, 0);
 
 		m_graphics_cmdlist->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(
@@ -491,11 +492,28 @@ namespace winrt::graphics::implementation
 		CD3DX12_ROOT_PARAMETER root_parameter = {};
 		root_parameter.InitAsDescriptorTable(1, &range, D3D12_SHADER_VISIBILITY::D3D12_SHADER_VISIBILITY_PIXEL);
 
+		D3D12_STATIC_SAMPLER_DESC sampler = {};
+		sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
+		sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+		sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+		sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+		sampler.MipLODBias = 0;
+		sampler.MaxAnisotropy = 0;
+		sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+		sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+		sampler.MinLOD = 0.0f;
+		sampler.MaxLOD = D3D12_FLOAT32_MAX;
+		sampler.ShaderRegister = 0;
+		sampler.RegisterSpace = 0;
+		sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
 		CD3DX12_ROOT_SIGNATURE_DESC rootsig_desc(
 			1,
 			&root_parameter,
-			(UINT)samplers.size(),
-			&samplers[0],
+			//(UINT)samplers.size(),
+			//&samplers[0],
+			1,
+			&sampler,
 			D3D12_ROOT_SIGNATURE_FLAGS::D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
 		com_ptr<ID3DBlob> serialized_rootsig = nullptr;
@@ -518,9 +536,6 @@ namespace winrt::graphics::implementation
 
 	void renderer::create_simple_triangle()
 	{
-		//{ { 0.0f, 0.25f * m_aspectRatio, 0.0f }, { 0.5f, 0.0f } },
-		//{ { 0.25f, -0.25f * m_aspectRatio, 0.0f }, { 1.0f, 1.0f } },
-		//{ { -0.25f, -0.25f * m_aspectRatio, 0.0f }, { 0.0f, 1.0f } }
 		auto new_vertex1 = graphics::vertex(
 			0.0f, 0.25f, 0.0f,
 			0.0f, 0.0f, 0.0f, 0.0f,
@@ -540,17 +555,85 @@ namespace winrt::graphics::implementation
 		);
 
 		Windows::Foundation::Collections::IObservableVector<graphics::vertex> tmp_vec{ winrt::single_threaded_observable_vector<graphics::vertex>() };
+
 		tmp_vec.Append(new_vertex1);
 		tmp_vec.Append(new_vertex2);
 		tmp_vec.Append(new_vertex3);
 
-		m_triangle_buffer = graphics::buffer(
-			graphics::buffer_type::static_buffer,
-			tmp_vec,
-			tmp_vec.Size(),
-			0,
-			false
-		);
+		current_buffer(
+			graphics::buffer(
+				graphics::buffer_type::static_buffer,
+				tmp_vec,
+				tmp_vec.Size(),
+				0,
+				false
+			));
+	}
+
+	void renderer::create_texture_srv()
+	{
+		UINT texture_width = 256;
+		UINT texture_height = 256;
+		UINT texture_pixel_size = 4;
+
+		D3D12_RESOURCE_DESC texture_desc = {};
+		texture_desc.MipLevels = 1;
+		texture_desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+		texture_desc.Width = texture_width;
+		texture_desc.Height = texture_height;
+		texture_desc.Flags = D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_NONE;
+		texture_desc.DepthOrArraySize = 1;
+		texture_desc.SampleDesc.Count = 1;
+		texture_desc.SampleDesc.Quality = 0;
+		texture_desc.Dimension = D3D12_RESOURCE_DIMENSION::D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+
+		D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = {};
+		srv_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		srv_desc.ViewDimension = D3D12_SRV_DIMENSION::D3D12_SRV_DIMENSION_TEXTURE2D;
+		srv_desc.Texture2D.MipLevels = 1;
+		srv_desc.Format = texture_desc.Format;
+
+		std::vector<UINT8> texture_data = generate_texture_data(texture_width, texture_height, texture_pixel_size);
+
+		m_checkerboard_texture = utilities::create_static_texture(renderer::g_device, renderer::g_cmd_list, texture_desc, texture_data.data(), texture_width, texture_height, texture_pixel_size, m_texture_upload_buffer);
+
+		m_device->CreateShaderResourceView(m_checkerboard_texture.get(), &srv_desc, m_srv_heap->GetCPUDescriptorHandleForHeapStart());
+	}
+
+	std::vector<UINT8> renderer::generate_texture_data(UINT texture_width, UINT texture_height, UINT texture_pixel_size)
+	{
+		const UINT rowPitch = texture_width * texture_pixel_size;
+		const UINT cellPitch = rowPitch >> 3;		// The width of a cell in the checkboard texture.
+		const UINT cellHeight = texture_width >> 3;	// The height of a cell in the checkerboard texture.
+		const UINT textureSize = rowPitch * texture_height;
+
+		std::vector<UINT8> data(textureSize);
+		UINT8* pData = &data[0];
+
+		for (UINT n = 0; n < textureSize; n += texture_pixel_size)
+		{
+			UINT x = n % rowPitch;
+			UINT y = n / rowPitch;
+			UINT i = x / cellPitch;
+			UINT j = y / cellHeight;
+
+			if (i % 2 == j % 2)
+			{
+				pData[n] = 0x00;		// R
+				pData[n + 1] = 0x00;	// G
+				pData[n + 2] = 0x00;	// B
+				pData[n + 3] = 0xff;	// A
+			}
+			else
+			{
+				pData[n] = 0xff;		// R
+				pData[n + 1] = 0xff;	// G
+				pData[n + 2] = 0xff;	// B
+				pData[n + 3] = 0xff;	// A
+			}
+		}
+
+		return data;
 	}
 
 	void renderer::create_empty_rootsignature(std::vector<CD3DX12_STATIC_SAMPLER_DESC> samplers)
@@ -658,7 +741,7 @@ namespace winrt::graphics::implementation
 		{
 			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
 			{ "COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 24, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 28, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
 		};
 	}
 

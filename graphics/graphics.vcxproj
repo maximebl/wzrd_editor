@@ -108,6 +108,10 @@
       <DependentUpon>shader.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
+    <ClInclude Include="texture.h">
+      <DependentUpon>texture.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="upload_buffer.h" />
     <ClInclude Include="utilities.h" />
     <ClInclude Include="vertex.h">
@@ -132,6 +136,10 @@
       <DependentUpon>shader.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
+    <ClCompile Include="texture.cpp">
+      <DependentUpon>texture.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="utilities.cpp" />
     <ClCompile Include="vertex.cpp">
       <DependentUpon>vertex.idl</DependentUpon>
@@ -151,6 +159,9 @@
       <SubType>Designer</SubType>
     </Midl>
     <Midl Include="shader.idl">
+      <SubType>Designer</SubType>
+    </Midl>
+    <Midl Include="texture.idl">
       <SubType>Designer</SubType>
     </Midl>
     <Midl Include="vertex.idl">

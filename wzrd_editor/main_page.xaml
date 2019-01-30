@@ -7,8 +7,6 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d">
 
-
-
     <NavigationView x:Name="navigation_view" IsPaneOpen="False" ItemInvoked="navigation_view_invoked" PaneDisplayMode="LeftCompact" IsBackButtonVisible="Collapsed" IsBackEnabled="False">
 
         <NavigationView.MenuItems>

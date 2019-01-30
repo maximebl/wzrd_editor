@@ -17,6 +17,7 @@ namespace winrt::graphics::implementation
 		{
 			m_vertices.push_back(vertex.as<graphics::implementation::vertex>()->m_vertex);
 		}
+		auto* test = m_vertices.data();
 
 		if (type == graphics::buffer_type::dynamic_buffer)
 		{
@@ -37,7 +38,7 @@ namespace winrt::graphics::implementation
 			m_view.size_in_bytes = m_max_size * m_buffer_element_size;
 			m_current_size = m_vertices.size();
 
-			m_static_default_buffer = utilities::create_default_buffer(
+			m_static_default_buffer = utilities::create_static_buffer(
 				renderer::g_device,
 				renderer::g_cmd_list,
 				m_vertices.data(),

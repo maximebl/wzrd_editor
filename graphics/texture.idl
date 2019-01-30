@@ -1,0 +1,9 @@
+namespace graphics
+{
+    [bindable]
+    [default_interface]
+    runtimeclass texture 
+    {
+        texture();
+    }
+}

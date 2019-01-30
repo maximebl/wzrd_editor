@@ -3,6 +3,7 @@
 #include "renderer.g.h"
 #include "upload_buffer.h"
 #include "buffer.h"
+#include "utilities.h"
 
 namespace winrt::graphics::implementation
 {
@@ -68,16 +69,17 @@ namespace winrt::graphics::implementation
 		com_ptr<ID3D12DescriptorHeap> m_srv_heap = nullptr;
 		com_ptr<ID3D12Resource> m_swapchain_buffer[m_swapchain_buffer_count];
 		com_ptr<ID3D12Resource> m_depthstencil_buffer;
+		com_ptr<ID3D12Resource> m_checkerboard_texture = nullptr;
 		com_ptr<ID3D12RootSignature> m_rootsig = nullptr;
 		com_ptr<ID3D12Device> m_device = nullptr;
 		com_ptr<IDXGIFactory4> m_dxgi_factory = nullptr;
-
-		com_ptr<ID3D12Resource> m_triangle_buffer = nullptr;
 
 		// pipeline states
 		com_ptr<ID3D12PipelineState> m_points_pso = nullptr;
 		com_ptr<ID3D12PipelineState> m_triangles_pso = nullptr;
 		com_ptr<ID3D12PipelineState> m_lines_pso = nullptr;
+
+		com_ptr<ID3D12Resource> m_texture_upload_buffer = nullptr;
 
 		std::vector<D3D12_INPUT_ELEMENT_DESC> m_basic_input_layout;
 
@@ -94,6 +96,8 @@ namespace winrt::graphics::implementation
 		void create_empty_rootsignature(std::vector<CD3DX12_STATIC_SAMPLER_DESC> samplers);
 		void create_texture_rootsignature(std::vector<CD3DX12_STATIC_SAMPLER_DESC> samplers);
 		void create_simple_triangle();
+		void create_texture_srv();
+		std::vector<UINT8> generate_texture_data(UINT texture_width, UINT texture_height, UINT texture_pixel_size);
 		std::vector<CD3DX12_STATIC_SAMPLER_DESC> get_static_samplers();
 		void init_psos();
 		void execute_cmd_list();
