@@ -4,6 +4,7 @@
 #include "upload_buffer.h"
 #include "buffer.h"
 #include "utilities.h"
+#include "../wzrd_editor/DDSTextureLoader.h"
 
 namespace winrt::graphics::implementation
 {
@@ -31,6 +32,7 @@ namespace winrt::graphics::implementation
 			hstring const entry_point, 
 			hstring const version);		
 
+		Windows::Foundation::IAsyncAction pick_texture();
 		graphics::primitive_types current_topology();
 		void current_topology(graphics::primitive_types const& value);
 
@@ -70,6 +72,7 @@ namespace winrt::graphics::implementation
 		com_ptr<ID3D12Resource> m_swapchain_buffer[m_swapchain_buffer_count];
 		com_ptr<ID3D12Resource> m_depthstencil_buffer;
 		com_ptr<ID3D12Resource> m_checkerboard_texture = nullptr;
+		com_ptr<ID3D12Resource> m_crate_texture = nullptr;
 		com_ptr<ID3D12RootSignature> m_rootsig = nullptr;
 		com_ptr<ID3D12Device> m_device = nullptr;
 		com_ptr<IDXGIFactory4> m_dxgi_factory = nullptr;
@@ -108,6 +111,7 @@ namespace winrt::graphics::implementation
 			D3D12_PRIMITIVE_TOPOLOGY_TYPE topolgy_type,
 			com_ptr<ID3D12PipelineState>& m_pso);
 		D3D12_CPU_DESCRIPTOR_HANDLE current_backbuffer_view() const;
+		void create_crate_texture(std::vector<unsigned char> bytes, int file_size, hstring texture_name);
 		Windows::Foundation::IAsyncAction main_loop();
 
 		// synchronization

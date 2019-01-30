@@ -27,6 +27,12 @@ namespace winrt::wzrd_editor::implementation
 		co_return;
 	}
 
+	IAsyncAction texture_showcase_page::onclick_menuflyout_pick_texture(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		co_await m_renderer.pick_texture();
+		co_return;
+	}
+
 	IAsyncAction texture_showcase_page::onclick_vertexshader_picker(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
 		graphics::shader new_shader = graphics::shader(hstring(L"default_vs"), graphics::shader_type::vertex);

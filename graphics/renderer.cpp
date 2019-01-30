@@ -108,7 +108,7 @@ namespace winrt::graphics::implementation
 		create_render_targets();
 		create_texture_rootsignature(get_static_samplers());
 		create_simple_triangle();
-		create_texture_srv();
+		//create_texture_srv();
 	}
 
 	Windows::Foundation::IAsyncAction renderer::main_loop()
@@ -293,6 +293,69 @@ namespace winrt::graphics::implementation
 	void renderer::current_buffer(graphics::buffer const& value)
 	{
 		m_current_buffer = value.as<graphics::implementation::buffer>();
+	}
+
+	Windows::Foundation::IAsyncAction renderer::pick_texture()
+	{
+		auto texture_file_bytes = co_await pick_file(winrt::hstring(L".dds"));
+		create_crate_texture(texture_file_bytes, texture_file_bytes.size(), hstring(L"default_texture"));
+		co_return;
+	}
+
+	void renderer::create_crate_texture(std::vector<unsigned char> bytes, int file_size, hstring texture_name)
+	{
+		D3D12_RESOURCE_DESC texture_desc = {};
+		texture_desc.Alignment = 0;
+		texture_desc.DepthOrArraySize = 1;
+		texture_desc.Dimension = D3D12_RESOURCE_DIMENSION::D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+		texture_desc.Flags = D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_NONE;
+		texture_desc.Format = DXGI_FORMAT::DXGI_FORMAT_BC3_UNORM;
+		texture_desc.Height = 512;
+		texture_desc.Width = 512;
+		texture_desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+		texture_desc.MipLevels = 10;
+		texture_desc.SampleDesc.Count = 1;
+		texture_desc.SampleDesc.Quality = 0;
+
+		m_crate_texture = utilities::create_static_texture(
+			renderer::g_device,
+			renderer::g_cmd_list,
+			texture_desc,
+			bytes.data(),
+			512,
+			512,
+			4,
+			m_texture_upload_buffer
+		);
+
+		D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = {};
+		srv_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+		srv_desc.ViewDimension = D3D12_SRV_DIMENSION::D3D12_SRV_DIMENSION_TEXTURE2D;
+		srv_desc.Texture2D.MipLevels = texture_desc.MipLevels;
+		srv_desc.Format = texture_desc.Format;
+
+		m_device->CreateShaderResourceView(m_crate_texture.get(), &srv_desc, m_srv_heap->GetCPUDescriptorHandleForHeapStart());
+		//auto woodcrate_texture = std::make_unique<winrt::wzrd_editor::data::Texture>();
+		//woodcrate_texture->Name = texture_name;
+
+		//Microsoft::WRL::ComPtr<ID3D12Resource> tmpResource = nullptr;
+		//Microsoft::WRL::ComPtr<ID3D12Resource> tmpUploadHeap = nullptr;
+
+		//winrt::check_hresult(
+		//	DirectX::CreateDDSTextureFromMemory12(
+		//		m_device.get(),
+		//		m_graphics_cmdlist.get(),
+		//		&bytes.front(),
+		//		file_size,
+		//		tmpResource,
+		//		tmpUploadHeap
+		//	)
+		//);
+
+		//woodcrate_texture->Resource.copy_from(tmpResource.Get());
+		//woodcrate_texture->UploadHeap.copy_from(tmpUploadHeap.Get());
+
+		//return woodcrate_texture;
 	}
 
 	void renderer::create_factory()
@@ -510,10 +573,10 @@ namespace winrt::graphics::implementation
 		CD3DX12_ROOT_SIGNATURE_DESC rootsig_desc(
 			1,
 			&root_parameter,
-			//(UINT)samplers.size(),
-			//&samplers[0],
-			1,
-			&sampler,
+			(UINT)samplers.size(),
+			&samplers[0],
+			//1,
+			//&sampler,
 			D3D12_ROOT_SIGNATURE_FLAGS::D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
 		com_ptr<ID3DBlob> serialized_rootsig = nullptr;
@@ -587,15 +650,23 @@ namespace winrt::graphics::implementation
 		texture_desc.SampleDesc.Quality = 0;
 		texture_desc.Dimension = D3D12_RESOURCE_DIMENSION::D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 
+		std::vector<UINT8> texture_data = generate_texture_data(texture_width, texture_height, texture_pixel_size);
+
+		m_checkerboard_texture = utilities::create_static_texture(
+			renderer::g_device,
+			renderer::g_cmd_list,
+			texture_desc,
+			texture_data.data(),
+			texture_width,
+			texture_height,
+			texture_pixel_size,
+			m_texture_upload_buffer);
+
 		D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = {};
 		srv_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 		srv_desc.ViewDimension = D3D12_SRV_DIMENSION::D3D12_SRV_DIMENSION_TEXTURE2D;
 		srv_desc.Texture2D.MipLevels = 1;
 		srv_desc.Format = texture_desc.Format;
-
-		std::vector<UINT8> texture_data = generate_texture_data(texture_width, texture_height, texture_pixel_size);
-
-		m_checkerboard_texture = utilities::create_static_texture(renderer::g_device, renderer::g_cmd_list, texture_desc, texture_data.data(), texture_width, texture_height, texture_pixel_size, m_texture_upload_buffer);
 
 		m_device->CreateShaderResourceView(m_checkerboard_texture.get(), &srv_desc, m_srv_heap->GetCPUDescriptorHandleForHeapStart());
 	}

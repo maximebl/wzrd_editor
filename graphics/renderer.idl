@@ -40,6 +40,7 @@ namespace graphics
 		Boolean is_rendering{ get; };
 		primitive_types current_topology{ get; set; };
 		Windows.Foundation.IAsyncOperation<compilation_result> pick_and_compile_shader(String shader_name, String entry_point, String version);
+		Windows.Foundation.IAsyncAction pick_texture();
 		buffer current_buffer{ get; set; };
 	}
 }

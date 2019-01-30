@@ -39,6 +39,12 @@
                                 </MenuFlyoutItem.Icon>
                                 <MenuFlyoutItem.Text>Clear shaders</MenuFlyoutItem.Text>
                             </MenuFlyoutItem>
+                            <MenuFlyoutItem x:Name="menuflyout_texture_picker" Click="onclick_menuflyout_pick_texture" IsEnabled="True">
+                                <MenuFlyoutItem.Icon>
+                                    <FontIcon Glyph="&#xE75C;"/>
+                                </MenuFlyoutItem.Icon>
+                                <MenuFlyoutItem.Text>Texture</MenuFlyoutItem.Text>
+                            </MenuFlyoutItem>
                         </MenuFlyout>
                     </AppBarButton.Flyout>
                 </AppBarButton>
