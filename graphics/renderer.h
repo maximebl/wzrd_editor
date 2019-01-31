@@ -32,7 +32,7 @@ namespace winrt::graphics::implementation
 			hstring const entry_point, 
 			hstring const version);		
 
-		Windows::Foundation::IAsyncAction pick_texture();
+		Windows::Foundation::IAsyncOperation<Windows::Graphics::Imaging::SoftwareBitmap> pick_texture();
 		graphics::primitive_types current_topology();
 		void current_topology(graphics::primitive_types const& value);
 
@@ -122,7 +122,6 @@ namespace winrt::graphics::implementation
 		void render_1();
 		void render_2();
 
-		//std::pair<graphics::compilation_result, com_ptr<ID3D10Blob>> compile_shader(hstring const& version, const std::vector<unsigned char>& file_bytes, hstring const& entry_point);
 		std::unordered_map<std::string, com_ptr<ID3DBlob>> m_shaders;
 	};
 }

@@ -37,7 +37,11 @@ namespace winrt::wzrd_editor::implementation
 
 	IAsyncAction texture_showcase_page::onclick_menuflyout_pick_texture(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		co_await m_renderer.pick_texture();
+		auto new_texture_bitmap = co_await m_renderer.pick_texture();
+		Windows::UI::Xaml::Media::Imaging::SoftwareBitmapSource bitmap_source;
+		co_await bitmap_source.SetBitmapAsync(new_texture_bitmap);
+		test_image().Source(bitmap_source);
+		test_image2().Source(bitmap_source);
 		co_return;
 	}
 

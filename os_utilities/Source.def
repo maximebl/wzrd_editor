@@ -1,4 +1,6 @@
 LIBRARY
 EXPORTS
 	pick_file
+	pick_file_buffer
+	read_file_bytes
 	wait_duration

@@ -295,11 +295,27 @@ namespace winrt::graphics::implementation
 		m_current_buffer = value.as<graphics::implementation::buffer>();
 	}
 
-	Windows::Foundation::IAsyncAction renderer::pick_texture()
+	Windows::Foundation::IAsyncOperation<Windows::Graphics::Imaging::SoftwareBitmap> renderer::pick_texture()
 	{
-		auto texture_file_bytes = co_await pick_file(winrt::hstring(L".dds"));
+		//auto texture_file_bytes = co_await pick_file(winrt::hstring(L".dds"));
+		using namespace Windows::Graphics::Imaging;
+
+		Windows::Storage::Pickers::FileOpenPicker picker;
+		picker.FileTypeFilter().Append(hstring(L".dds"));
+
+		auto file = co_await picker.PickSingleFileAsync();
+		auto texture_file_buffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
+
+		auto texture_file_bytes = co_await read_file_bytes(texture_file_buffer);
 		create_crate_texture(texture_file_bytes, texture_file_bytes.size(), hstring(L"default_texture"));
-		co_return;
+
+		Windows::Storage::Streams::IRandomAccessStream stream;
+		stream = co_await file.OpenAsync(Windows::Storage::FileAccessMode::Read);
+		auto decoder = co_await BitmapDecoder::CreateAsync(stream);
+		auto new_software_bitmap = co_await decoder.GetSoftwareBitmapAsync();
+		new_software_bitmap = SoftwareBitmap::Convert(new_software_bitmap, BitmapPixelFormat::Bgra8, BitmapAlphaMode::Premultiplied);
+
+		co_return new_software_bitmap;
 	}
 
 	void renderer::create_crate_texture(std::vector<unsigned char> bytes, int file_size, hstring texture_name)

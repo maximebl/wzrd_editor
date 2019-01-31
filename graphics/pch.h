@@ -19,3 +19,4 @@
 #include <ppltasks.h>
 // pplawait.h allows the use of co_await on concurrency::task types
 #include <pplawait.h>
+#include "winrt/Windows.Graphics.Imaging.h"
