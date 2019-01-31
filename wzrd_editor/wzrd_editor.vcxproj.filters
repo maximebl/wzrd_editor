@@ -46,6 +46,7 @@
       <Filter>ViewModels</Filter>
     </Midl>
     <Midl Include="main_page.idl" />
+    <Midl Include="texture_showcase_page.idl" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -81,6 +82,7 @@
     <ClCompile Include="vertex_buffer.cpp" />
     <ClCompile Include="vertex2.cpp" />
     <ClCompile Include="main_page.cpp" />
+    <ClCompile Include="texture_showcase_page.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -113,6 +115,7 @@
     <ClInclude Include="vertex_buffer.h" />
     <ClInclude Include="vertex2.h" />
     <ClInclude Include="main_page.h" />
+    <ClInclude Include="texture_showcase_page.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Wide310x150Logo.scale-200.png">
@@ -134,6 +137,9 @@
       <Filter>Assets</Filter>
     </Image>
     <Image Include="Assets\LockScreenLogo.scale-200.png">
+      <Filter>Assets</Filter>
+    </Image>
+    <Image Include="Assets\test_img.jpg">
       <Filter>Assets</Filter>
     </Image>
   </ItemGroup>

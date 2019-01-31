@@ -9,6 +9,14 @@ namespace winrt::wzrd_editor::implementation
 	texture_showcase_page::texture_showcase_page()
 	{
 		InitializeComponent();
+		//Image img = sender as Image;
+		//BitmapImage bitmapImage = new BitmapImage();
+		//img.Width = bitmapImage.DecodePixelWidth = 80;
+		//bitmapImage.UriSource = new Uri(img.BaseUri, "Assets/StoreLogo.png");
+		//img.Source = bitmapImage;
+
+		Windows::UI::Xaml::Media::Imaging::BitmapImage new_image;
+		test_image().Source(new_image);
 
 		m_renderer.enable_debug_layer();
 		m_renderer.initialize_textures_showcase(swapchain_panel());

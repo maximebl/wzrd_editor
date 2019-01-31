@@ -313,7 +313,7 @@ namespace winrt::graphics::implementation
 		texture_desc.Height = 512;
 		texture_desc.Width = 512;
 		texture_desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-		texture_desc.MipLevels = 10;
+		texture_desc.MipLevels = 1;
 		texture_desc.SampleDesc.Count = 1;
 		texture_desc.SampleDesc.Quality = 0;
 

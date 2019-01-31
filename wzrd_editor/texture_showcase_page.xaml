@@ -51,6 +51,42 @@
             </CommandBar>
 
             <Button x:Name="start_render" Click="render_onclick" Content="render"></Button>
+
+            <ListView x:Name="textures_list" HorizontalAlignment="Stretch" Width="auto" Height="auto" VerticalAlignment="Top"
+                      Header="Textures"
+                      Visibility="Visible">
+                <ListViewItem>
+                    <Image  x:Name="test_image" Stretch="UniformToFill"  Width="200" Height="200"></Image>
+                </ListViewItem>
+                <ListViewItem>
+                    <Button Content="second item"></Button>
+                </ListViewItem>
+                <ListViewItem>
+                    <Button Content="second item"></Button>
+                </ListViewItem>
+                <ListViewItem>
+                    <Button Content="second item"></Button>
+                </ListViewItem>
+                <ListViewItem>
+                    <Button Content="second item"></Button>
+                </ListViewItem>
+                <ListViewItem>
+                    <Button Content="second item"></Button>
+                </ListViewItem>
+                <ListViewItem>
+                    <Button Content="second item"></Button>
+                </ListViewItem>
+                <ListViewItem>
+                    <Button Content="second item"></Button>
+                </ListViewItem>
+                <ListViewItem>
+                    <Button Content="second item"></Button>
+                </ListViewItem>
+                <ListViewItem>
+                    <Button Content="second item"></Button>
+                </ListViewItem>
+            </ListView>
+
         </StackPanel>
         <SplitView.Pane>
             <SwapChainPanel x:Name="swapchain_panel" Width="700" Height="700" HorizontalAlignment="Center" VerticalAlignment="Center" />
