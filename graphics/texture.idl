@@ -5,5 +5,8 @@ namespace graphics
     runtimeclass texture 
     {
         texture();
+		String texture_name;
+		Boolean is_loading;
+		Boolean is_error;
     }
 }

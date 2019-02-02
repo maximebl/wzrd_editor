@@ -9,14 +9,11 @@ namespace winrt::wzrd_editor::implementation
 	texture_showcase_page::texture_showcase_page()
 	{
 		InitializeComponent();
-		//Image img = sender as Image;
-		//BitmapImage bitmapImage = new BitmapImage();
-		//img.Width = bitmapImage.DecodePixelWidth = 80;
-		//bitmapImage.UriSource = new Uri(img.BaseUri, "Assets/StoreLogo.png");
-		//img.Source = bitmapImage;
-
-		Windows::UI::Xaml::Media::Imaging::BitmapImage new_image;
-		test_image().Source(new_image);
+		m_spring_animation = Window::Current().Compositor().CreateSpringVector3Animation();
+		m_spring_animation.DampingRatio(0.65f);
+		m_spring_animation.Period(std::chrono::milliseconds{ 50 });
+		//m_spring_animation.StopBehavior(Windows::UI::Composition::AnimationStopBehavior::SetToFinalValue);
+		m_spring_animation.Target(hstring{ L"Scale" });
 
 		m_renderer.enable_debug_layer();
 		m_renderer.initialize_textures_showcase(swapchain_panel());
@@ -35,14 +32,54 @@ namespace winrt::wzrd_editor::implementation
 		co_return;
 	}
 
+	IAsyncAction texture_showcase_page::menuflyout_clear_textures_click(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		return IAsyncAction();
+	}
+
 	IAsyncAction texture_showcase_page::onclick_menuflyout_pick_texture(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
 		auto new_texture_bitmap = co_await m_renderer.pick_texture();
-		Windows::UI::Xaml::Media::Imaging::SoftwareBitmapSource bitmap_source;
-		co_await bitmap_source.SetBitmapAsync(new_texture_bitmap);
-		test_image().Source(bitmap_source);
-		test_image2().Source(bitmap_source);
+		if (new_texture_bitmap != nullptr)
+		{
+			Windows::UI::Xaml::Media::Imaging::SoftwareBitmapSource bitmap_source;
+			co_await bitmap_source.SetBitmapAsync(new_texture_bitmap);
+			test_image().Source(bitmap_source);
+			test_image1().Source(bitmap_source);
+			test_image2().Source(bitmap_source);
+		}
 		co_return;
+	}
+
+	void texture_showcase_page::play_spring_animation(float target_value, IInspectable const & sender)
+	{
+		auto current_ui_element = sender.as<Windows::UI::Xaml::UIElement>();
+
+		m_spring_animation.FinalValue(Numerics::float3{ target_value, target_value, 1.0f });
+		auto child_item = Windows::UI::Xaml::Media::VisualTreeHelper::GetChild(current_ui_element, 0);
+		auto image_item = Windows::UI::Xaml::Media::VisualTreeHelper::GetChild(child_item, 0);
+
+		auto visual = Windows::UI::Xaml::Hosting::ElementCompositionPreview::GetElementVisual(unbox_value<Windows::UI::Xaml::UIElement>(image_item));
+		visual.StartAnimation(hstring{ L"Scale" }, m_spring_animation);
+	}
+
+	IAsyncAction texture_showcase_page::onmouseenter_textures_list(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		sender.as<Windows::UI::Xaml::FrameworkElement>().Height(200);
+		play_spring_animation(2.0f, sender);
+		co_return;
+	}
+
+	IAsyncAction texture_showcase_page::onmouseexit_textures_list(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		sender.as<Windows::UI::Xaml::FrameworkElement>().Height(100);
+		play_spring_animation(1.0f, sender);
+		co_return;
+	}
+
+	IAsyncAction texture_showcase_page::onclick_textures_list(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		return IAsyncAction();
 	}
 
 	IAsyncAction texture_showcase_page::onclick_vertexshader_picker(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)

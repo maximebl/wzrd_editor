@@ -22,7 +22,6 @@ namespace winrt::graphics::implementation
 		}
 
 		co_await winrt::resume_background();
-		//auto[compilation_result, result_blob] = compile_shader(version, shader_file_bytes, entry_point);
 
 		UINT compile_flags = D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 		com_ptr<ID3DBlob> byte_code = nullptr;
@@ -170,7 +169,6 @@ namespace winrt::graphics::implementation
 		m_graphics_cmdlist->OMSetRenderTargets(1, &current_backbuffer_view(), true, &m_dsv_heap->GetCPUDescriptorHandleForHeapStart());
 
 		m_graphics_cmdlist->SetGraphicsRootSignature(m_rootsig.get());
-		//m_graphics_cmdlist->SetGraphicsRootConstantBufferView(0, m_object_cb->get_resource()->GetGPUVirtualAddress());
 
 		m_graphics_cmdlist->IASetVertexBuffers(0, 1, (D3D12_VERTEX_BUFFER_VIEW*)& m_current_buffer->get_view());
 		m_graphics_cmdlist->DrawInstanced(m_current_buffer->current_size(), 1, 0, 0);
@@ -228,7 +226,6 @@ namespace winrt::graphics::implementation
 		ID3D12DescriptorHeap* heaps[] = { m_srv_heap.get() };
 		m_graphics_cmdlist->SetDescriptorHeaps(_countof(heaps), heaps);
 		m_graphics_cmdlist->SetGraphicsRootDescriptorTable(0, m_srv_heap->GetGPUDescriptorHandleForHeapStart());
-		//m_graphics_cmdlist->SetGraphicsRootConstantBufferView(0, m_object_cb->get_resource()->GetGPUVirtualAddress());
 
 		m_graphics_cmdlist->IASetVertexBuffers(0, 1, (D3D12_VERTEX_BUFFER_VIEW*)& m_current_buffer->get_view());
 		m_graphics_cmdlist->DrawInstanced(m_current_buffer->current_size(), 1, 0, 0);
@@ -297,13 +294,19 @@ namespace winrt::graphics::implementation
 
 	Windows::Foundation::IAsyncOperation<Windows::Graphics::Imaging::SoftwareBitmap> renderer::pick_texture()
 	{
-		//auto texture_file_bytes = co_await pick_file(winrt::hstring(L".dds"));
 		using namespace Windows::Graphics::Imaging;
 
+		SoftwareBitmap new_software_bitmap = nullptr;
 		Windows::Storage::Pickers::FileOpenPicker picker;
 		picker.FileTypeFilter().Append(hstring(L".dds"));
 
 		auto file = co_await picker.PickSingleFileAsync();
+
+		if (file == nullptr)
+		{
+			return new_software_bitmap;
+		}
+
 		auto texture_file_buffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
 
 		auto texture_file_bytes = co_await read_file_bytes(texture_file_buffer);
@@ -312,7 +315,7 @@ namespace winrt::graphics::implementation
 		Windows::Storage::Streams::IRandomAccessStream stream;
 		stream = co_await file.OpenAsync(Windows::Storage::FileAccessMode::Read);
 		auto decoder = co_await BitmapDecoder::CreateAsync(stream);
-		auto new_software_bitmap = co_await decoder.GetSoftwareBitmapAsync();
+		new_software_bitmap = co_await decoder.GetSoftwareBitmapAsync();
 		new_software_bitmap = SoftwareBitmap::Convert(new_software_bitmap, BitmapPixelFormat::Bgra8, BitmapAlphaMode::Premultiplied);
 
 		co_return new_software_bitmap;
