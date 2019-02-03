@@ -47,6 +47,9 @@
     </Midl>
     <Midl Include="main_page.idl" />
     <Midl Include="texture_showcase_page.idl" />
+    <Midl Include="texture_showcase_vm.idl">
+      <Filter>ViewModels</Filter>
+    </Midl>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

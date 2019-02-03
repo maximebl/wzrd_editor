@@ -11,7 +11,7 @@ public:
 		UINT64 byteSize,
 		winrt::com_ptr<ID3D12Resource>& uploadBuffer);
 
-	static winrt::com_ptr<ID3D12Resource> create_static_texture(
+	static winrt::com_ptr<ID3D12Resource> create_static_texture_resource(
 		ID3D12Device* device,
 		ID3D12GraphicsCommandList* cmdList,
 		D3D12_RESOURCE_DESC texture_desc,

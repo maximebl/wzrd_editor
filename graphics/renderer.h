@@ -4,6 +4,7 @@
 #include "upload_buffer.h"
 #include "buffer.h"
 #include "utilities.h"
+#include "texture.h"
 #include "../wzrd_editor/DDSTextureLoader.h"
 
 namespace winrt::graphics::implementation
@@ -32,7 +33,7 @@ namespace winrt::graphics::implementation
 			hstring const entry_point, 
 			hstring const version);		
 
-		Windows::Foundation::IAsyncOperation<Windows::Graphics::Imaging::SoftwareBitmap> pick_texture();
+        Windows::Foundation::IAsyncOperation<graphics::texture> pick_texture();
 		graphics::primitive_types current_topology();
 		void current_topology(graphics::primitive_types const& value);
 
@@ -123,6 +124,7 @@ namespace winrt::graphics::implementation
 		void render_2();
 
 		std::unordered_map<std::string, com_ptr<ID3DBlob>> m_shaders;
+		std::unordered_map<hstring, com_ptr<graphics::implementation::texture>> m_textures;
 	};
 }
 

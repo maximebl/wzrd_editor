@@ -27,6 +27,8 @@ namespace winrt::graphics::implementation
         winrt::event_token PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& handler);
         void PropertyChanged(winrt::event_token const& token) noexcept;
 
+		com_ptr<ID3D12Resource> texture_upload_buffer = nullptr;
+		com_ptr<ID3D12Resource> texture_default_buffer = nullptr;
 	private:
 		bool m_is_loading = false;
 		bool m_is_error = false;

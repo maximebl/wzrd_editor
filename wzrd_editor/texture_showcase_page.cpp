@@ -41,25 +41,19 @@ namespace winrt::wzrd_editor::implementation
 		return IAsyncAction();
 	}
 
-	IAsyncAction texture_showcase_page::onclick_menuflyout_pick_texture(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	IAsyncAction texture_showcase_page::onclick_pick_texture(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		auto new_texture_bitmap = co_await m_renderer.pick_texture();
-		if (new_texture_bitmap != nullptr)
+		// receive the projected graphics::texture with the SoftwareBitmapSource already set
+
+		auto new_texture = co_await m_renderer.pick_texture();
+
+		new_texture.is_loading(false);
+
+		if (new_texture != nullptr)
 		{
-			Windows::UI::Xaml::Media::Imaging::SoftwareBitmapSource bitmap_source;
-			co_await bitmap_source.SetBitmapAsync(new_texture_bitmap);
-
-			graphics::texture new_texture = winrt::graphics::texture();
-			new_texture.texture_name(L"crate_texture");
-			new_texture.bitmap_source(bitmap_source);
-			new_texture.is_error(false);
-			new_texture.is_loading(false);
-
-			texture_showcase_vm().textures().Append(new_texture);
-			//test_image().Source(bitmap_source);
-			//test_image1().Source(bitmap_source);
-			//test_image2().Source(bitmap_source);
+			new_texture.is_error(true);
 		}
+		texture_showcase_vm().textures().Append(new_texture);
 		co_return;
 	}
 

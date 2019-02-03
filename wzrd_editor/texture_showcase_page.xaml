@@ -11,9 +11,25 @@
     <Page.Resources>
         <DataTemplate x:Key="textures_list_template" x:DataType="graphics:texture" >
             <ListViewItem
+                HorizontalContentAlignment="Stretch"
                 PointerEntered="onmouseenter_textures_list"
                 PointerExited="onmouseexit_textures_list">
-                <Image Source="{x:Bind bitmap_source}"></Image>
+
+                    <!--<Image x:Name="texture_img" Source="{x:Bind bitmap_source}" />-->
+
+                    <Grid HorizontalAlignment="Stretch" x:Name="textures_info_grid">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                        <Button HorizontalAlignment="Stretch" Content="first" Grid.Row="0" Grid.Column="0" Grid.RowSpan="1" Grid.ColumnSpan="1"/>
+                        <Button HorizontalAlignment="Stretch" Content="second" Grid.Row="0" Grid.Column="1" Grid.RowSpan="1" Grid.ColumnSpan="1"/>
+                    </Grid>
             </ListViewItem>
         </DataTemplate>
     </Page.Resources>
@@ -26,20 +42,7 @@
                 <PivotItem Header="Textures">
                     <StackPanel Orientation="Vertical">
                         <CommandBar x:Name="textures_cmd_bar" Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" HorizontalAlignment="Left">
-                            <AppBarButton Icon="Add" Label="Add" x:Name="textures_picker" Click="onclick_menuflyout_pick_texture">
-                                <!--<AppBarButton.Flyout>
-                                    <MenuFlyout>
-                                        <MenuFlyoutItem x:Name="menuflyout_texture_picker" Click="onclick_menuflyout_pick_texture" IsEnabled="True">
-                                            <MenuFlyoutItem.Icon>
-                                                <FontIcon Glyph="&#xE75C;"/>
-                                            </MenuFlyoutItem.Icon>
-                                            <MenuFlyoutItem.Text>Texture</MenuFlyoutItem.Text>
-                                        </MenuFlyoutItem>
-
-                                    </MenuFlyout>
-                                </AppBarButton.Flyout>-->
-                            </AppBarButton>
-
+                            <AppBarButton Icon="Add" Label="Add" x:Name="textures_picker" Click="onclick_pick_texture"/>
                             <AppBarButton Icon="Edit" Label="Edit"/>
                             <AppBarButton Icon="Delete" Label="Delete" x:Name="menuflyout_clear_textures" Click="menuflyout_clear_textures_click"/>
                         </CommandBar>
@@ -49,6 +52,7 @@
                                   ItemTemplate="{StaticResource textures_list_template}"
                                   ItemsSource="{x:Bind texture_showcase_vm.textures}"
                                   VerticalContentAlignment="Stretch"
+                                  HorizontalContentAlignment="Stretch"
                                   Visibility="Visible">
 
                             <ListView.Resources>
@@ -66,26 +70,6 @@
                                     <Setter Property="HorizontalAlignment" Value="Left"></Setter>
                                 </Style>
                             </ListView.Resources>
-
-                            <ListViewItem 
-                               PointerEntered="onmouseenter_textures_list"
-                               PointerExited="onmouseexit_textures_list"
-                               PointerPressed="onclick_textures_list">
-                                <Image x:Name="test_image2" ></Image>
-                            </ListViewItem>
-
-                            <ListViewItem 
-                               PointerEntered="onmouseenter_textures_list"
-                               PointerExited="onmouseexit_textures_list">
-                                <Image  x:Name="test_image"></Image>
-                            </ListViewItem>
-
-                            <ListViewItem 
-                               PointerEntered="onmouseenter_textures_list"
-                               PointerExited="onmouseexit_textures_list">
-                                <Image x:Name="test_image1"></Image>
-                            </ListViewItem>
-
                         </ListView>
                     </StackPanel>
                 </PivotItem>

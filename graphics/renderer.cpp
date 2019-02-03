@@ -292,7 +292,9 @@ namespace winrt::graphics::implementation
 		m_current_buffer = value.as<graphics::implementation::buffer>();
 	}
 
-	Windows::Foundation::IAsyncOperation<Windows::Graphics::Imaging::SoftwareBitmap> renderer::pick_texture()
+	// return new_crate_texture.as<graphics::texture>() to the caller
+	// return an IObservableMap?
+	Windows::Foundation::IAsyncOperation<graphics::texture> renderer::pick_texture()
 	{
 		using namespace Windows::Graphics::Imaging;
 
@@ -304,21 +306,29 @@ namespace winrt::graphics::implementation
 
 		if (file == nullptr)
 		{
-			return new_software_bitmap;
+			//return new_software_bitmap;
 		}
 
-		auto texture_file_buffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
+		m_textures[file.Name()] = winrt::make_self<graphics::implementation::texture>();
+		m_textures[file.Name()]->texture_name(file.Name());
 
+		auto texture_file_buffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
 		auto texture_file_bytes = co_await read_file_bytes(texture_file_buffer);
-		create_crate_texture(texture_file_bytes, texture_file_bytes.size(), hstring(L"default_texture"));
+		create_crate_texture(texture_file_bytes, texture_file_bytes.size(), file.Name());
 
 		Windows::Storage::Streams::IRandomAccessStream stream;
 		stream = co_await file.OpenAsync(Windows::Storage::FileAccessMode::Read);
 		auto decoder = co_await BitmapDecoder::CreateAsync(stream);
+
 		new_software_bitmap = co_await decoder.GetSoftwareBitmapAsync();
 		new_software_bitmap = SoftwareBitmap::Convert(new_software_bitmap, BitmapPixelFormat::Bgra8, BitmapAlphaMode::Premultiplied);
 
-		co_return new_software_bitmap;
+		Windows::UI::Xaml::Media::Imaging::SoftwareBitmapSource new_bitmap_source;
+		co_await new_bitmap_source.SetBitmapAsync(new_software_bitmap);
+
+		m_textures[file.Name()]->bitmap_source(new_bitmap_source);
+
+		co_return m_textures[file.Name()].as<graphics::texture>();
 	}
 
 	void renderer::create_crate_texture(std::vector<unsigned char> bytes, int file_size, hstring texture_name)
@@ -336,7 +346,7 @@ namespace winrt::graphics::implementation
 		texture_desc.SampleDesc.Count = 1;
 		texture_desc.SampleDesc.Quality = 0;
 
-		m_crate_texture = utilities::create_static_texture(
+		m_textures[texture_name]->texture_default_buffer = utilities::create_static_texture_resource(
 			renderer::g_device,
 			renderer::g_cmd_list,
 			texture_desc,
@@ -344,7 +354,7 @@ namespace winrt::graphics::implementation
 			512,
 			512,
 			4,
-			m_texture_upload_buffer
+			m_textures[texture_name]->texture_upload_buffer
 		);
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = {};
@@ -353,7 +363,7 @@ namespace winrt::graphics::implementation
 		srv_desc.Texture2D.MipLevels = texture_desc.MipLevels;
 		srv_desc.Format = texture_desc.Format;
 
-		m_device->CreateShaderResourceView(m_crate_texture.get(), &srv_desc, m_srv_heap->GetCPUDescriptorHandleForHeapStart());
+		m_device->CreateShaderResourceView(m_textures[texture_name]->texture_default_buffer.get(), &srv_desc, m_srv_heap->GetCPUDescriptorHandleForHeapStart());
 	}
 
 	void renderer::create_factory()
@@ -650,7 +660,7 @@ namespace winrt::graphics::implementation
 
 		std::vector<UINT8> texture_data = generate_texture_data(texture_width, texture_height, texture_pixel_size);
 
-		m_checkerboard_texture = utilities::create_static_texture(
+		m_checkerboard_texture = utilities::create_static_texture_resource(
 			renderer::g_device,
 			renderer::g_cmd_list,
 			texture_desc,

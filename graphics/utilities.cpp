@@ -59,7 +59,7 @@ winrt::com_ptr<ID3D12Resource> utilities::create_static_buffer(
 	// Keep the uploadBuffer reference alive until the command list has performed the copy
 }
 
-winrt::com_ptr<ID3D12Resource> utilities::create_static_texture(
+winrt::com_ptr<ID3D12Resource> utilities::create_static_texture_resource(
 	ID3D12Device* device, 
 	ID3D12GraphicsCommandList* cmdList, 
 	D3D12_RESOURCE_DESC texture_desc,

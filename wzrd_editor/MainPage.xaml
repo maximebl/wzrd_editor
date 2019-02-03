@@ -258,11 +258,7 @@
                 </StackPanel>
 
                 <StackPanel Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Top" Height="650" Width="400">
-
-
-
-                    <Grid xmlns:src="using:wzrd_editor" 
-         Margin="0,50,0,0">
+                    <Grid xmlns:src="using:wzrd_editor" Margin="0,50,0,0">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
@@ -367,8 +363,6 @@
                                 <ColumnDefinition Width="*"></ColumnDefinition>
                                 <ColumnDefinition Width="*"></ColumnDefinition>
                             </Grid.ColumnDefinitions>
-
-
 
                             <Button x:Name="new_vertex_button" 
                             Content="New vertex" 
