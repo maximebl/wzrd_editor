@@ -12,11 +12,15 @@ namespace winrt::wzrd_editor::implementation
 		m_spring_animation = Window::Current().Compositor().CreateSpringVector3Animation();
 		m_spring_animation.DampingRatio(0.65f);
 		m_spring_animation.Period(std::chrono::milliseconds{ 50 });
-		//m_spring_animation.StopBehavior(Windows::UI::Composition::AnimationStopBehavior::SetToFinalValue);
 		m_spring_animation.Target(hstring{ L"Scale" });
 
 		m_renderer.enable_debug_layer();
 		m_renderer.initialize_textures_showcase(swapchain_panel());
+	}
+
+	wzrd_editor::texture_showcase_vm texture_showcase_page::texture_showcase_vm()
+	{
+		return m_texture_showcase_vm;
 	}
 
 	IAsyncAction texture_showcase_page::onclick_pixelshader_picker(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
@@ -44,9 +48,17 @@ namespace winrt::wzrd_editor::implementation
 		{
 			Windows::UI::Xaml::Media::Imaging::SoftwareBitmapSource bitmap_source;
 			co_await bitmap_source.SetBitmapAsync(new_texture_bitmap);
-			test_image().Source(bitmap_source);
-			test_image1().Source(bitmap_source);
-			test_image2().Source(bitmap_source);
+
+			graphics::texture new_texture = winrt::graphics::texture();
+			new_texture.texture_name(L"crate_texture");
+			new_texture.bitmap_source(bitmap_source);
+			new_texture.is_error(false);
+			new_texture.is_loading(false);
+
+			texture_showcase_vm().textures().Append(new_texture);
+			//test_image().Source(bitmap_source);
+			//test_image1().Source(bitmap_source);
+			//test_image2().Source(bitmap_source);
 		}
 		co_return;
 	}

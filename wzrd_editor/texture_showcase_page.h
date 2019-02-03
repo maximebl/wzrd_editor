@@ -4,8 +4,9 @@
 
 #pragma once
 
-#include "texture_showcase_page.g.h"
 #include "winrt\graphics.h"
+#include "texture_showcase_page.g.h"
+#include "texture_showcase_vm.h"
 
 namespace winrt::wzrd_editor::implementation
 {
@@ -24,11 +25,14 @@ namespace winrt::wzrd_editor::implementation
 		IAsyncAction onmouseenter_textures_list(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
 		IAsyncAction onmouseexit_textures_list(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
 		IAsyncAction onclick_textures_list(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
+		wzrd_editor::texture_showcase_vm texture_showcase_vm();
 
 	private:
 		graphics::renderer m_renderer;
 		Windows::UI::Composition::SpringVector3NaturalMotionAnimation m_spring_animation = nullptr;
 		void play_spring_animation(float target_value, IInspectable const & sender);
+
+		wzrd_editor::texture_showcase_vm m_texture_showcase_vm = winrt::make<wzrd_editor::implementation::texture_showcase_vm>();
     };
 }
 

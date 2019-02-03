@@ -354,27 +354,6 @@ namespace winrt::graphics::implementation
 		srv_desc.Format = texture_desc.Format;
 
 		m_device->CreateShaderResourceView(m_crate_texture.get(), &srv_desc, m_srv_heap->GetCPUDescriptorHandleForHeapStart());
-		//auto woodcrate_texture = std::make_unique<winrt::wzrd_editor::data::Texture>();
-		//woodcrate_texture->Name = texture_name;
-
-		//Microsoft::WRL::ComPtr<ID3D12Resource> tmpResource = nullptr;
-		//Microsoft::WRL::ComPtr<ID3D12Resource> tmpUploadHeap = nullptr;
-
-		//winrt::check_hresult(
-		//	DirectX::CreateDDSTextureFromMemory12(
-		//		m_device.get(),
-		//		m_graphics_cmdlist.get(),
-		//		&bytes.front(),
-		//		file_size,
-		//		tmpResource,
-		//		tmpUploadHeap
-		//	)
-		//);
-
-		//woodcrate_texture->Resource.copy_from(tmpResource.Get());
-		//woodcrate_texture->UploadHeap.copy_from(tmpUploadHeap.Get());
-
-		//return woodcrate_texture;
 	}
 
 	void renderer::create_factory()

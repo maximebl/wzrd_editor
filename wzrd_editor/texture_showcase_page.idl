@@ -1,8 +1,11 @@
+import "texture_showcase_vm.idl";
+
 namespace wzrd_editor
 {
     [default_interface]
     runtimeclass texture_showcase_page : Windows.UI.Xaml.Controls.Page
     {
         texture_showcase_page();
+		texture_showcase_vm texture_showcase_vm{ get; };
     }
 }

@@ -1,0 +1,10 @@
+namespace wzrd_editor
+{
+    [bindable]
+    [default_interface]
+    runtimeclass texture_showcase_vm 
+    {
+        texture_showcase_vm();
+		Windows.Foundation.Collections.IObservableVector<IInspectable> textures{ get; };
+    }
+}

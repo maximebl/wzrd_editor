@@ -1,12 +1,12 @@
 namespace graphics
 {
     [bindable]
-    [default_interface]
-    runtimeclass texture 
+    runtimeclass texture : Windows.UI.Xaml.Data.INotifyPropertyChanged
     {
-        texture();
+		texture();
 		String texture_name;
 		Boolean is_loading;
-		Boolean is_error;
+		Boolean is_error; 
+		Windows.UI.Xaml.Media.Imaging.SoftwareBitmapSource bitmap_source;
     }
 }
