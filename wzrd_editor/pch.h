@@ -19,9 +19,11 @@
 #include "winrt/Windows.UI.Xaml.Navigation.h"
 #include "winrt/Windows.UI.Xaml.Hosting.h"
 #include <winrt/Windows.UI.Xaml.Media.h>
+#include <winrt/Windows.UI.Xaml.Media.Animation.h>
 #include <winrt/Windows.UI.Xaml.Input.h>
 #include <winrt/Windows.UI.Input.h>
 #include <winrt/Windows.UI.Xaml.Media.Imaging.h>
+#include <winrt/Windows.UI.Xaml.Shapes.h>
 
 #include "winrt/Windows.UI.Core.h"
 #include "winrt/Windows.UI.Popups.h"

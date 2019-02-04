@@ -9,28 +9,57 @@
     mc:Ignorable="d">
 
     <Page.Resources>
+
         <DataTemplate x:Key="textures_list_template" x:DataType="graphics:texture" >
             <ListViewItem
                 HorizontalContentAlignment="Stretch"
                 PointerEntered="onmouseenter_textures_list"
                 PointerExited="onmouseexit_textures_list">
 
-                    <!--<Image x:Name="texture_img" Source="{x:Bind bitmap_source}" />-->
+                <Grid HorizontalAlignment="Stretch" x:Name="textures_info_grid">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
 
-                    <Grid HorizontalAlignment="Stretch" x:Name="textures_info_grid">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-
-                        <Grid.RowDefinitions>
+                    <Grid.RowDefinitions>
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-                        <Button HorizontalAlignment="Stretch" Content="first" Grid.Row="0" Grid.Column="0" Grid.RowSpan="1" Grid.ColumnSpan="1"/>
-                        <Button HorizontalAlignment="Stretch" Content="second" Grid.Row="0" Grid.Column="1" Grid.RowSpan="1" Grid.ColumnSpan="1"/>
-                    </Grid>
+
+                    <Image x:Name="texture_img" Source="{x:Bind bitmap_source}"
+                           Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="1"/>
+
+                    <Button x:Name="first_btn" HorizontalAlignment="Stretch" Content="first" 
+                           Grid.Row="0" Grid.Column="1" Grid.RowSpan="1" Grid.ColumnSpan="1">
+                        <Button.Transitions>
+                            <TransitionCollection>
+                                <RepositionThemeTransition />
+                            </TransitionCollection>
+                        </Button.Transitions>
+                    </Button>
+
+                    <Button HorizontalAlignment="Stretch" Content="second" 
+                           Grid.Row="1" Grid.Column="1" Grid.RowSpan="1" Grid.ColumnSpan="1"/>
+                </Grid>
+
             </ListViewItem>
+        </DataTemplate>
+
+        <DataTemplate x:Key="shaders_list_template" x:DataType="graphics:shader" >
+            <!--<ListViewItem
+                HorizontalContentAlignment="Stretch"
+                PointerEntered="onmouseenter_textures_list"
+                PointerExited="onmouseexit_textures_list">
+            </ListViewItem>-->
+
+            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="8,8,0,0">
+                <SymbolIcon Margin="0,0,13,0" x:Name="shader_type_icon" Symbol="{x:Bind type_glyph}"></SymbolIcon>
+                <TextBlock Margin="0,0,13,0" Text="{x:Bind shader_name}"/>
+                <ProgressRing Margin="0,0,13,0" Visibility="{x:Bind is_loading, Mode=OneWay}" IsActive="{x:Bind is_loading, Mode=TwoWay}"/>
+                <TextBlock Text="Compilation failed." Visibility="{x:Bind is_error,Mode=OneWay}" Foreground="{StaticResource SystemControlErrorTextForegroundBrush}"/>
+            </StackPanel>
+
         </DataTemplate>
     </Page.Resources>
 
@@ -70,40 +99,68 @@
                                     <Setter Property="HorizontalAlignment" Value="Left"></Setter>
                                 </Style>
                             </ListView.Resources>
+
                         </ListView>
                     </StackPanel>
                 </PivotItem>
                 <PivotItem Header="Shaders">
-                    <CommandBar x:Name="shaders_cmd_bar" Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" HorizontalAlignment="Left">
-                        <AppBarButton Icon="Add" Label="Add" x:Name="shaderPicker">
-                            <AppBarButton.Flyout>
-                                <MenuFlyout>
-                                    <MenuFlyoutItem x:Name="pixelShaderPicker" Click="onclick_pixelshader_picker">
-                                        <MenuFlyoutItem.Icon>
-                                            <SymbolIcon Symbol="SelectAll"></SymbolIcon>
-                                        </MenuFlyoutItem.Icon>
-                                        <MenuFlyoutItem.Text>Pixel</MenuFlyoutItem.Text>
-                                        <MenuFlyoutItem.KeyboardAccelerators>
-                                            <KeyboardAccelerator Key="P" Modifiers="Shift"/>
-                                        </MenuFlyoutItem.KeyboardAccelerators>
-                                    </MenuFlyoutItem>
+                    <StackPanel Orientation="Vertical">
+                        <CommandBar x:Name="shaders_cmd_bar" Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" HorizontalAlignment="Left">
+                            <AppBarButton Icon="Add" Label="Add" x:Name="shaderPicker">
+                                <AppBarButton.Flyout>
+                                    <MenuFlyout>
+                                        <MenuFlyoutItem x:Name="pixelShaderPicker" Click="onclick_pixelshader_picker">
+                                            <MenuFlyoutItem.Icon>
+                                                <SymbolIcon Symbol="SelectAll"></SymbolIcon>
+                                            </MenuFlyoutItem.Icon>
+                                            <MenuFlyoutItem.Text>Pixel</MenuFlyoutItem.Text>
+                                            <MenuFlyoutItem.KeyboardAccelerators>
+                                                <KeyboardAccelerator Key="P" Modifiers="Shift"/>
+                                            </MenuFlyoutItem.KeyboardAccelerators>
+                                        </MenuFlyoutItem>
 
-                                    <MenuFlyoutItem x:Name="vertexShaderPicker" Click="onclick_vertexshader_picker">
-                                        <MenuFlyoutItem.Icon>
-                                            <SymbolIcon Symbol="Play"></SymbolIcon>
-                                        </MenuFlyoutItem.Icon>
-                                        <MenuFlyoutItem.Text>Vertex</MenuFlyoutItem.Text>
-                                        <MenuFlyoutItem.KeyboardAccelerators>
-                                            <KeyboardAccelerator Key="V" Modifiers="Shift"/>
-                                        </MenuFlyoutItem.KeyboardAccelerators>
-                                    </MenuFlyoutItem>
-                                </MenuFlyout>
-                            </AppBarButton.Flyout>
-                        </AppBarButton>
+                                        <MenuFlyoutItem x:Name="vertexShaderPicker" Click="onclick_vertexshader_picker">
+                                            <MenuFlyoutItem.Icon>
+                                                <SymbolIcon Symbol="Play"></SymbolIcon>
+                                            </MenuFlyoutItem.Icon>
+                                            <MenuFlyoutItem.Text>Vertex</MenuFlyoutItem.Text>
+                                            <MenuFlyoutItem.KeyboardAccelerators>
+                                                <KeyboardAccelerator Key="V" Modifiers="Shift"/>
+                                            </MenuFlyoutItem.KeyboardAccelerators>
+                                        </MenuFlyoutItem>
+                                    </MenuFlyout>
+                                </AppBarButton.Flyout>
+                            </AppBarButton>
 
-                        <AppBarButton Icon="Edit" Label="Edit"/>
-                        <AppBarButton Icon="Delete" Label="Delete" x:Name="menuflyout_clear_shaders" Click="menuflyout_clear_shaders_click"/>
-                    </CommandBar>
+                            <AppBarButton Icon="Edit" Label="Edit"/>
+                            <AppBarButton Icon="Delete" Label="Delete" x:Name="menuflyout_clear_shaders" Click="menuflyout_clear_shaders_click"/>
+                        </CommandBar>
+
+                        <ListView x:Name="shaders_list" 
+                                  HorizontalAlignment="Left"
+                                  ItemTemplate="{StaticResource shaders_list_template}"
+                                  ItemsSource="{x:Bind texture_showcase_vm.shaders}"
+                                  VerticalContentAlignment="Stretch"
+                                  HorizontalContentAlignment="Stretch"
+                                  Visibility="Visible">
+
+                            <ListView.Resources>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="VerticalAlignment" Value="Stretch"></Setter>
+                                    <Setter Property="VerticalContentAlignment" Value="Stretch"></Setter>
+                                    <Setter Property="MaxHeight" Value="1000"></Setter>
+                                    <Setter Property="MaxWidth" Value="1000"></Setter>
+                                    <Setter Property="Width" Value="700"></Setter>
+                                </Style>
+                                <Style TargetType="Image">
+                                    <Setter Property="Width" Value="100"></Setter>
+                                    <Setter Property="Height" Value="100"></Setter>
+                                    <Setter Property="VerticalAlignment" Value="Top"></Setter>
+                                    <Setter Property="HorizontalAlignment" Value="Left"></Setter>
+                                </Style>
+                            </ListView.Resources>
+                        </ListView>
+                    </StackPanel>
                 </PivotItem>
             </Pivot>
 

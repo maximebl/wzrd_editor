@@ -6,5 +6,6 @@ namespace wzrd_editor
     {
         texture_showcase_vm();
 		Windows.Foundation.Collections.IObservableVector<IInspectable> textures{ get; };
+		Windows.Foundation.Collections.IObservableVector<IInspectable> shaders{ get; };
     }
 }

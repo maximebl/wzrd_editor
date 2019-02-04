@@ -25,8 +25,28 @@ namespace winrt::wzrd_editor::implementation
 
 	IAsyncAction texture_showcase_page::onclick_pixelshader_picker(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		graphics::shader new_shader = graphics::shader(hstring(L"default_ps"), graphics::shader_type::pixel);
+		auto new_shader = graphics::shader(hstring(L"default_ps"), graphics::shader_type::pixel);
+
+		texture_showcase_vm().shaders().Append(new_shader);
+
+		new_shader.is_loading(true);
 		auto result = co_await m_renderer.pick_and_compile_shader(new_shader.shader_name(), hstring(L"PS"), hstring(L"ps_5_0"));
+		new_shader.is_loading(false);
+
+		switch (result.status)
+		{
+		case graphics::compilation_status::error:
+			new_shader.is_error(true);
+			show_error_dialog(result.error_message);
+			break;
+
+		case graphics::compilation_status::cancelled:
+			texture_showcase_vm().shaders().RemoveAtEnd();
+
+		default:
+			break;
+		}
+
 		co_return;
 	}
 
@@ -43,17 +63,12 @@ namespace winrt::wzrd_editor::implementation
 
 	IAsyncAction texture_showcase_page::onclick_pick_texture(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		// receive the projected graphics::texture with the SoftwareBitmapSource already set
-
-		auto new_texture = co_await m_renderer.pick_texture();
-
-		new_texture.is_loading(false);
-
-		if (new_texture != nullptr)
-		{
-			new_texture.is_error(true);
-		}
+		auto new_texture = graphics::texture();
 		texture_showcase_vm().textures().Append(new_texture);
+
+		new_texture.is_loading(true);
+		new_texture = co_await m_renderer.pick_texture();
+		new_texture.is_loading(false);
 		co_return;
 	}
 
@@ -72,7 +87,9 @@ namespace winrt::wzrd_editor::implementation
 	IAsyncAction texture_showcase_page::onmouseenter_textures_list(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
 		sender.as<Windows::UI::Xaml::FrameworkElement>().Height(200);
+		sender.as<Windows::UI::Xaml::FrameworkElement>().Width(1000);
 		play_spring_animation(2.0f, sender);
+
 		co_return;
 	}
 

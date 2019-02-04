@@ -6,7 +6,12 @@ using namespace Windows::UI::Xaml;
 
 namespace winrt::wzrd_editor::implementation
 {
-	Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> texture_showcase_vm::textures()
+	IObservableVector<IInspectable> texture_showcase_vm::textures()
+	{
+		return m_textures;
+	}
+
+	IObservableVector<IInspectable> texture_showcase_vm::shaders()
 	{
 		return m_textures;
 	}
