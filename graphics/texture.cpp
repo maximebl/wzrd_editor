@@ -20,6 +20,16 @@ namespace winrt::graphics::implementation
 		update_value(L"texture_name", m_texture_name, value);
 	}
 
+	hstring texture::file_name()
+	{
+		return m_file_name;
+	}
+
+	void texture::file_name(hstring const & value)
+	{
+		update_value(L"file_name", m_file_name, value);
+	}
+
 	bool texture::is_loading()
 	{
 		return m_is_loading;

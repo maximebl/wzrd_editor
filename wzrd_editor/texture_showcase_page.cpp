@@ -23,21 +23,46 @@ namespace winrt::wzrd_editor::implementation
 		return m_texture_showcase_vm;
 	}
 
-	IAsyncAction texture_showcase_page::onclick_pixelshader_picker(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	IAsyncAction texture_showcase_page::onclick_vertexshader_picker(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		auto new_shader = graphics::shader(hstring(L"default_ps"), graphics::shader_type::pixel);
-
+		auto new_shader = graphics::shader(hstring(L"default_vs"), graphics::shader_type::vertex);
 		texture_showcase_vm().shaders().Append(new_shader);
 
 		new_shader.is_loading(true);
-		auto result = co_await m_renderer.pick_and_compile_shader(new_shader.shader_name(), hstring(L"PS"), hstring(L"ps_5_0"));
+		auto result = co_await m_renderer.pick_and_compile_shader(new_shader);
 		new_shader.is_loading(false);
 
 		switch (result.status)
 		{
 		case graphics::compilation_status::error:
 			new_shader.is_error(true);
-			show_error_dialog(result.error_message);
+			co_await os_utilities::show_error_dialog(result.error_message, hstring{L"Vertex shader compilation error"});
+			break;
+
+		case graphics::compilation_status::cancelled:
+			texture_showcase_vm().shaders().RemoveAtEnd();
+
+		default:
+			break;
+		}
+
+		co_return;
+	}
+
+	IAsyncAction texture_showcase_page::onclick_pixelshader_picker(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		auto new_shader = graphics::shader(hstring(L"default_ps"), graphics::shader_type::pixel);
+		texture_showcase_vm().shaders().Append(new_shader);
+
+		new_shader.is_loading(true);
+		auto result = co_await m_renderer.pick_and_compile_shader(new_shader);
+		new_shader.is_loading(false);
+
+		switch (result.status)
+		{
+		case graphics::compilation_status::error:
+			new_shader.is_error(true);
+			co_await os_utilities::show_error_dialog(result.error_message, hstring{L"Vertex shader compilation error"});
 			break;
 
 		case graphics::compilation_status::cancelled:
@@ -52,13 +77,29 @@ namespace winrt::wzrd_editor::implementation
 
 	IAsyncAction texture_showcase_page::menuflyout_clear_shaders_click(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		m_renderer.clear_shaders();
+		auto _shaders_list = shaders_list();
+
+		winrt::get_class_name(sender);
+		winrt::get_class_name(_shaders_list.ItemsSource());
+		auto abc = args;
+
+		auto items_source = _shaders_list.ItemsSource();
+		auto items_list = winrt::unbox_value<IObservableVector<IInspectable>>(items_source);
+		items_list.RemoveAt(_shaders_list.SelectedIndex());
+
+		
+		//m_renderer.remove_shader()
 		co_return;
 	}
 
 	IAsyncAction texture_showcase_page::menuflyout_clear_textures_click(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		return IAsyncAction();
+		auto _textures_list = textures_list();
+
+		auto items_source = _textures_list.ItemsSource();
+		auto items_list = winrt::unbox_value<IObservableVector<IInspectable>>(items_source);
+		items_list.RemoveAt(_textures_list.SelectedIndex());
+		co_return;
 	}
 
 	IAsyncAction texture_showcase_page::onclick_pick_texture(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
@@ -67,7 +108,7 @@ namespace winrt::wzrd_editor::implementation
 		texture_showcase_vm().textures().Append(new_texture);
 
 		new_texture.is_loading(true);
-		new_texture = co_await m_renderer.pick_texture();
+		new_texture = co_await m_renderer.pick_texture(new_texture, hstring{ L"default_texture" });
 		new_texture.is_loading(false);
 		co_return;
 	}
@@ -103,13 +144,6 @@ namespace winrt::wzrd_editor::implementation
 	IAsyncAction texture_showcase_page::onclick_textures_list(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
 		return IAsyncAction();
-	}
-
-	IAsyncAction texture_showcase_page::onclick_vertexshader_picker(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
-	{
-		graphics::shader new_shader = graphics::shader(hstring(L"default_vs"), graphics::shader_type::vertex);
-		auto result = co_await m_renderer.pick_and_compile_shader(new_shader.shader_name(), hstring(L"VS"), hstring(L"vs_5_0"));
-		co_return;
 	}
 
 	IAsyncAction texture_showcase_page::render_onclick(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)

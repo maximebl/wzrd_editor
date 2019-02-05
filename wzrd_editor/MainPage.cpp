@@ -81,7 +81,6 @@ namespace winrt::wzrd_editor::implementation
 
 	IAsyncAction MainPage::menuflyout_clear_shaders_click(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args)
 	{
-		//m_graphics_resources.m_shaders.clear();
 		m_renderer.clear_shaders();
 		m_geometryViewModel.Shaders().Clear();
 		co_return;
@@ -127,7 +126,7 @@ namespace winrt::wzrd_editor::implementation
 		m_geometryViewModel.Shaders().Append(new_shader);
 
 		new_shader.is_loading(true);
-		auto result = co_await m_renderer.pick_and_compile_shader(new_shader.shader_name(), hstring(L"PS"), hstring(L"ps_5_0"));
+		auto result = co_await m_renderer.pick_and_compile_shader(new_shader);
 		new_shader.is_loading(false);
 
 		switch (result.status)
@@ -153,7 +152,7 @@ namespace winrt::wzrd_editor::implementation
 		m_geometryViewModel.Shaders().Append(new_shader);
 
 		new_shader.is_loading(true);
-		auto result = co_await m_renderer.pick_and_compile_shader(new_shader.shader_name(), hstring(L"VS"), hstring(L"vs_5_0"));
+		auto result = co_await m_renderer.pick_and_compile_shader(new_shader);
 		new_shader.is_loading(false);
 
 		switch (result.status)

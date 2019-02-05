@@ -25,15 +25,15 @@ namespace winrt::graphics::implementation
 		void start_render_loop();
 		void stop_render_loop();
 		void clear_shaders();
+		void clear_textures();
+		void remove_texture(hstring name);
+		void remove_shader(hstring name);
 		bool is_rendering();
 		graphics::buffer current_buffer();
 		void current_buffer(graphics::buffer const& value);
-		Windows::Foundation::IAsyncOperation<graphics::compilation_result> pick_and_compile_shader(
-			hstring const shader_name, 
-			hstring const entry_point, 
-			hstring const version);		
+		Windows::Foundation::IAsyncOperation<graphics::compilation_result> pick_and_compile_shader(graphics::shader new_shader);		
 
-        Windows::Foundation::IAsyncOperation<graphics::texture> pick_texture();
+        Windows::Foundation::IAsyncOperation<graphics::texture> pick_texture(graphics::texture new_texture, hstring name);
 		graphics::primitive_types current_topology();
 		void current_topology(graphics::primitive_types const& value);
 
@@ -123,8 +123,8 @@ namespace winrt::graphics::implementation
 		void render_1();
 		void render_2();
 
-		std::unordered_map<std::string, com_ptr<ID3DBlob>> m_shaders;
-		std::unordered_map<hstring, com_ptr<graphics::implementation::texture>> m_textures;
+		std::unordered_map<hstring, com_ptr<ID3DBlob>> m_shaders;
+		std::unordered_map<hstring, graphics::texture> m_textures;
 	};
 }
 

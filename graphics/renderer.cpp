@@ -6,20 +6,25 @@ ID3D12GraphicsCommandList* winrt::graphics::implementation::renderer::g_cmd_list
 
 namespace winrt::graphics::implementation
 {
-	Windows::Foundation::IAsyncOperation<graphics::compilation_result> renderer::pick_and_compile_shader(
-		hstring const shader_name,
-		hstring const entry_point,
-		hstring const version)
+	Windows::Foundation::IAsyncOperation<graphics::compilation_result>
+		renderer::pick_and_compile_shader(graphics::shader new_shader)
 	{
 		graphics::compilation_result result;
 
-		auto shader_file_bytes = co_await pick_file(winrt::hstring(L".hlsl"));
+		Windows::Storage::Pickers::FileOpenPicker picker;
+		picker.FileTypeFilter().Append(hstring(L".hlsl"));
+		auto file = co_await picker.PickSingleFileAsync();
 
-		if (shader_file_bytes.size() == 0)
+		if (file == nullptr)
 		{
 			result.status = graphics::compilation_status::cancelled;
 			return result;
 		}
+
+		auto shader_file_buffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
+		auto shader_file_bytes = co_await os_utilities::read_file_bytes(shader_file_buffer);
+		auto shader_file_name = file.Name();
+		new_shader.file_name(shader_file_name);
 
 		co_await winrt::resume_background();
 
@@ -27,14 +32,33 @@ namespace winrt::graphics::implementation
 		com_ptr<ID3DBlob> byte_code = nullptr;
 		com_ptr<ID3DBlob> errors = nullptr;
 
+		std::string entry_point{};
+		std::string version{};
+
+		switch (new_shader.shader_type())
+		{
+		case graphics::shader_type::pixel:
+			entry_point = "PS";
+			version = "ps_5_0";
+			break;
+
+		case graphics::shader_type::vertex:
+			entry_point = "VS";
+			version = "vs_5_0";
+			break;
+
+		default:
+			break;
+		}
+
 		D3DCompile(
 			&shader_file_bytes.front(),
 			shader_file_bytes.size(),
 			nullptr,
 			nullptr,
 			D3D_COMPILE_STANDARD_FILE_INCLUDE,
-			to_string(entry_point).c_str(),
-			to_string(version).c_str(),
+			entry_point.c_str(),
+			version.c_str(),
 			compile_flags,
 			0,
 			byte_code.put(),
@@ -51,7 +75,8 @@ namespace winrt::graphics::implementation
 		}
 
 		result.status = graphics::compilation_status::success;
-		m_shaders[to_string(shader_name)] = byte_code;
+
+		m_shaders[new_shader.shader_name()] = byte_code;
 		return result;
 	}
 
@@ -268,6 +293,21 @@ namespace winrt::graphics::implementation
 		m_shaders.clear();
 	}
 
+	void renderer::clear_textures()
+	{
+		m_textures.clear();
+	}
+
+	void renderer::remove_texture(winrt::hstring name)
+	{
+		m_textures.erase(name);
+	}
+
+	void renderer::remove_shader(winrt::hstring name)
+	{
+		m_shaders.erase(name);
+	}
+
 	bool renderer::is_rendering()
 	{
 		return m_is_rendering;
@@ -294,7 +334,7 @@ namespace winrt::graphics::implementation
 
 	// return new_crate_texture.as<graphics::texture>() to the caller
 	// return an IObservableMap?
-	Windows::Foundation::IAsyncOperation<graphics::texture> renderer::pick_texture()
+	Windows::Foundation::IAsyncOperation<graphics::texture> renderer::pick_texture(graphics::texture new_texture, hstring name)
 	{
 		using namespace Windows::Graphics::Imaging;
 
@@ -308,13 +348,13 @@ namespace winrt::graphics::implementation
 		{
 			//return new_software_bitmap;
 		}
-
-		m_textures[file.Name()] = winrt::make_self<graphics::implementation::texture>();
-		m_textures[file.Name()]->texture_name(file.Name());
+		new_texture.file_name(file.Name());
+		new_texture.texture_name(name);
+		m_textures[name] = new_texture;
 
 		auto texture_file_buffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
-		auto texture_file_bytes = co_await read_file_bytes(texture_file_buffer);
-		create_crate_texture(texture_file_bytes, texture_file_bytes.size(), file.Name());
+		auto texture_file_bytes = co_await os_utilities::read_file_bytes(texture_file_buffer);
+		create_crate_texture(texture_file_bytes, texture_file_bytes.size(), name);
 
 		Windows::Storage::Streams::IRandomAccessStream stream;
 		stream = co_await file.OpenAsync(Windows::Storage::FileAccessMode::Read);
@@ -326,9 +366,9 @@ namespace winrt::graphics::implementation
 		Windows::UI::Xaml::Media::Imaging::SoftwareBitmapSource new_bitmap_source;
 		co_await new_bitmap_source.SetBitmapAsync(new_software_bitmap);
 
-		m_textures[file.Name()]->bitmap_source(new_bitmap_source);
+		m_textures[name].bitmap_source(new_bitmap_source);
 
-		co_return m_textures[file.Name()].as<graphics::texture>();
+		co_return m_textures[name].as<graphics::texture>();
 	}
 
 	void renderer::create_crate_texture(std::vector<unsigned char> bytes, int file_size, hstring texture_name)
@@ -346,7 +386,7 @@ namespace winrt::graphics::implementation
 		texture_desc.SampleDesc.Count = 1;
 		texture_desc.SampleDesc.Quality = 0;
 
-		m_textures[texture_name]->texture_default_buffer = utilities::create_static_texture_resource(
+		m_textures[texture_name].as<graphics::implementation::texture>()->texture_default_buffer = utilities::create_static_texture_resource(
 			renderer::g_device,
 			renderer::g_cmd_list,
 			texture_desc,
@@ -354,7 +394,7 @@ namespace winrt::graphics::implementation
 			512,
 			512,
 			4,
-			m_textures[texture_name]->texture_upload_buffer
+			m_textures[texture_name].as<graphics::implementation::texture>()->texture_upload_buffer
 		);
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = {};
@@ -363,7 +403,7 @@ namespace winrt::graphics::implementation
 		srv_desc.Texture2D.MipLevels = texture_desc.MipLevels;
 		srv_desc.Format = texture_desc.Format;
 
-		m_device->CreateShaderResourceView(m_textures[texture_name]->texture_default_buffer.get(), &srv_desc, m_srv_heap->GetCPUDescriptorHandleForHeapStart());
+		m_device->CreateShaderResourceView(m_textures[texture_name].as<graphics::implementation::texture>()->texture_default_buffer.get(), &srv_desc, m_srv_heap->GetCPUDescriptorHandleForHeapStart());
 	}
 
 	void renderer::create_factory()
@@ -798,8 +838,8 @@ namespace winrt::graphics::implementation
 
 	void renderer::init_psos()
 	{
-		auto vs = std::string("default_vs");
-		auto ps = std::string("default_ps");
+		auto vs = hstring(L"default_vs");
+		auto ps = hstring(L"default_ps");
 
 		create_basic_input_layout();
 		create_pso(m_shaders[vs], m_shaders[ps], D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT, m_points_pso);

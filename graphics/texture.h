@@ -15,6 +15,9 @@ namespace winrt::graphics::implementation
 		hstring texture_name();
 		void texture_name(hstring const& value);
 
+		hstring file_name();
+		void file_name(hstring const& value);
+
 		bool is_loading();
 		void is_loading(bool value);
 
@@ -29,10 +32,12 @@ namespace winrt::graphics::implementation
 
 		com_ptr<ID3D12Resource> texture_upload_buffer = nullptr;
 		com_ptr<ID3D12Resource> texture_default_buffer = nullptr;
+
 	private:
 		bool m_is_loading = false;
 		bool m_is_error = false;
 		hstring m_texture_name;
+		hstring m_file_name;
 		Windows::UI::Xaml::Media::Imaging::SoftwareBitmapSource m_bitmap_source;
 
 		winrt::event<Windows::UI::Xaml::Data::PropertyChangedEventHandler> m_property_changed;

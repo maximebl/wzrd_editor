@@ -4,3 +4,4 @@ EXPORTS
 	pick_file_buffer
 	read_file_bytes
 	wait_duration
+	show_error_dialog

@@ -35,13 +35,16 @@ namespace graphics
 		void initialize_buffers_showcase(Windows.UI.Xaml.Controls.SwapChainPanel target_swapchain);
 		void initialize_textures_showcase(Windows.UI.Xaml.Controls.SwapChainPanel target_swapchain);
 		void clear_shaders();
+		void clear_textures();
+		void remove_texture(String name);
+		void remove_shader(String name);
 		void start_render_loop();
 		void stop_render_loop();
 
 		Boolean is_rendering{ get; };
 		primitive_types current_topology{ get; set; };
-		Windows.Foundation.IAsyncOperation<compilation_result> pick_and_compile_shader(String shader_name, String entry_point, String version);
-		Windows.Foundation.IAsyncOperation<texture> pick_texture();
+		Windows.Foundation.IAsyncOperation<compilation_result> pick_and_compile_shader(shader new_shader);
+		Windows.Foundation.IAsyncOperation<texture> pick_texture(graphics.texture new_texture, String name);
 		buffer current_buffer{ get; set; };
 	}
 }

@@ -31,6 +31,16 @@ namespace winrt::graphics::implementation
 		update_value(L"shader_name", m_shader_name, value);
 	}
 
+	hstring shader::file_name()
+	{
+		return m_file_name;
+	}
+
+	void shader::file_name(hstring const & value)
+	{
+		update_value(L"file_name", m_file_name, value);
+	}
+
 	hstring shader::type_glyph()
 	{
 		return m_type_glyph;

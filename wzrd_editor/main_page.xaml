@@ -32,7 +32,13 @@
         </NavigationView.MenuItems>
 
         <ScrollViewer>
-            <Frame x:Name="content_frame" Padding="12,0,12,24" IsTabStop="True"/>
+            <Frame x:Name="content_frame" Padding="12,0,12,24" IsTabStop="True">
+                <Frame.ContentTransitions>
+                    <TransitionCollection>
+                        <NavigationThemeTransition />
+                    </TransitionCollection>
+                </Frame.ContentTransitions>
+            </Frame>
         </ScrollViewer>
     </NavigationView>
 

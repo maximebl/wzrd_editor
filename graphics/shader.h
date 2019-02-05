@@ -16,6 +16,9 @@ namespace winrt::graphics::implementation
         hstring shader_name();
         void shader_name(hstring const& value);
 
+        hstring file_name();
+        void file_name(hstring const& value);
+
         hstring type_glyph();
         void type_glyph(hstring const& value);
 
@@ -34,6 +37,7 @@ namespace winrt::graphics::implementation
 	private:
 
 		hstring m_shader_name;
+		hstring m_file_name;
 		hstring m_type_glyph;
 		graphics::shader_type m_shader_type;
 		bool m_is_loading = false;

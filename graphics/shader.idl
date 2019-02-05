@@ -13,6 +13,7 @@ namespace graphics
 		shader(String name, shader_type type);
 
 		String shader_name;
+		String file_name;
 		String type_glyph;
 		Boolean is_loading;
 		Boolean is_error;

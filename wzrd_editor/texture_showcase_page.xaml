@@ -16,7 +16,18 @@
                 PointerEntered="onmouseenter_textures_list"
                 PointerExited="onmouseexit_textures_list">
 
-                <Grid HorizontalAlignment="Stretch" x:Name="textures_info_grid">
+                <Image x:Name="texture_img" Source="{x:Bind bitmap_source, Mode=TwoWay}"
+                           Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="1">
+                    <Image.Transitions>
+                        <TransitionCollection>
+                                <RepositionThemeTransition />
+                                <AddDeleteThemeTransition />
+                                <ContentThemeTransition/>
+                        </TransitionCollection>
+                    </Image.Transitions>
+                </Image>
+
+                <!--<Grid HorizontalAlignment="Stretch" x:Name="textures_info_grid">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto" />
                         <ColumnDefinition Width="*" />
@@ -26,9 +37,6 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
-
-                    <Image x:Name="texture_img" Source="{x:Bind bitmap_source}"
-                           Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="1"/>
 
                     <Button x:Name="first_btn" HorizontalAlignment="Stretch" Content="first" 
                            Grid.Row="0" Grid.Column="1" Grid.RowSpan="1" Grid.ColumnSpan="1">
@@ -41,25 +49,29 @@
 
                     <Button HorizontalAlignment="Stretch" Content="second" 
                            Grid.Row="1" Grid.Column="1" Grid.RowSpan="1" Grid.ColumnSpan="1"/>
-                </Grid>
+                </Grid>-->
 
             </ListViewItem>
         </DataTemplate>
 
         <DataTemplate x:Key="shaders_list_template" x:DataType="graphics:shader" >
-            <!--<ListViewItem
-                HorizontalContentAlignment="Stretch"
-                PointerEntered="onmouseenter_textures_list"
-                PointerExited="onmouseexit_textures_list">
-            </ListViewItem>-->
-
-            <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="8,8,0,0">
-                <SymbolIcon Margin="0,0,13,0" x:Name="shader_type_icon" Symbol="{x:Bind type_glyph}"></SymbolIcon>
-                <TextBlock Margin="0,0,13,0" Text="{x:Bind shader_name}"/>
-                <ProgressRing Margin="0,0,13,0" Visibility="{x:Bind is_loading, Mode=OneWay}" IsActive="{x:Bind is_loading, Mode=TwoWay}"/>
-                <TextBlock Text="Compilation failed." Visibility="{x:Bind is_error,Mode=OneWay}" Foreground="{StaticResource SystemControlErrorTextForegroundBrush}"/>
-            </StackPanel>
-
+            <ListViewItem>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="8,8,0,0">
+                    <SymbolIcon Margin="0,0,13,0" x:Name="shader_type_icon" Symbol="{x:Bind type_glyph}"></SymbolIcon>
+                    <TextBlock Margin="0,0,13,0" Text="{x:Bind shader_name, Mode=TwoWay}">
+                        <TextBlock.Transitions>
+                            <TransitionCollection>
+                                <RepositionThemeTransition />
+                                <AddDeleteThemeTransition />
+                                <ContentThemeTransition/>
+                                <EntranceThemeTransition IsStaggeringEnabled="True" />
+                            </TransitionCollection>
+                        </TextBlock.Transitions>
+                    </TextBlock>
+                    <ProgressRing Margin="0,0,13,0" Visibility="{x:Bind is_loading, Mode=OneWay}" IsActive="{x:Bind is_loading, Mode=TwoWay}"/>
+                    <TextBlock Text="Compilation failed." Visibility="{x:Bind is_error,Mode=OneWay}" Foreground="{StaticResource SystemControlErrorTextForegroundBrush}"/>
+                </StackPanel>
+            </ListViewItem>
         </DataTemplate>
     </Page.Resources>
 
@@ -84,6 +96,13 @@
                                   HorizontalContentAlignment="Stretch"
                                   Visibility="Visible">
 
+                            <ListView.ItemContainerTransitions>
+                                <TransitionCollection>
+                                    <AddDeleteThemeTransition />
+                                    <RepositionThemeTransition />
+                                </TransitionCollection>
+                            </ListView.ItemContainerTransitions>
+
                             <ListView.Resources>
                                 <Style TargetType="ListViewItem">
                                     <Setter Property="VerticalAlignment" Value="Stretch"></Setter>
@@ -99,8 +118,8 @@
                                     <Setter Property="HorizontalAlignment" Value="Left"></Setter>
                                 </Style>
                             </ListView.Resources>
-
                         </ListView>
+
                     </StackPanel>
                 </PivotItem>
                 <PivotItem Header="Shaders">
@@ -131,7 +150,6 @@
                                     </MenuFlyout>
                                 </AppBarButton.Flyout>
                             </AppBarButton>
-
                             <AppBarButton Icon="Edit" Label="Edit"/>
                             <AppBarButton Icon="Delete" Label="Delete" x:Name="menuflyout_clear_shaders" Click="menuflyout_clear_shaders_click"/>
                         </CommandBar>
@@ -143,6 +161,14 @@
                                   VerticalContentAlignment="Stretch"
                                   HorizontalContentAlignment="Stretch"
                                   Visibility="Visible">
+
+                            <ListView.ItemContainerTransitions>
+                                <TransitionCollection>
+                                    <AddDeleteThemeTransition />
+                                    <RepositionThemeTransition />
+                                    <EntranceThemeTransition IsStaggeringEnabled="True" />
+                                </TransitionCollection>
+                            </ListView.ItemContainerTransitions>
 
                             <ListView.Resources>
                                 <Style TargetType="ListViewItem">

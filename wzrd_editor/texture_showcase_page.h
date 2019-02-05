@@ -7,6 +7,7 @@
 #include "winrt\graphics.h"
 #include "texture_showcase_page.g.h"
 #include "texture_showcase_vm.h"
+#include "../os_utilities/os_utilities.h"
 
 namespace winrt::wzrd_editor::implementation
 {

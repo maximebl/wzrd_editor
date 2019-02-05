@@ -86,6 +86,7 @@
     <ClCompile Include="vertex2.cpp" />
     <ClCompile Include="main_page.cpp" />
     <ClCompile Include="texture_showcase_page.cpp" />
+    <ClCompile Include="texture_showcase_vm.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -119,6 +120,7 @@
     <ClInclude Include="vertex2.h" />
     <ClInclude Include="main_page.h" />
     <ClInclude Include="texture_showcase_page.h" />
+    <ClInclude Include="texture_showcase_vm.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Wide310x150Logo.scale-200.png">
