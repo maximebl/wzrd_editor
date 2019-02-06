@@ -36,7 +36,7 @@ namespace winrt::wzrd_editor::implementation
 		{
 		case graphics::compilation_status::error:
 			new_shader.is_error(true);
-			co_await os_utilities::show_error_dialog(result.error_message, hstring{L"Vertex shader compilation error"});
+			co_await os_utilities::show_error_dialog(result.error_message, hstring{ L"Vertex shader compilation error" });
 			break;
 
 		case graphics::compilation_status::cancelled:
@@ -62,7 +62,7 @@ namespace winrt::wzrd_editor::implementation
 		{
 		case graphics::compilation_status::error:
 			new_shader.is_error(true);
-			co_await os_utilities::show_error_dialog(result.error_message, hstring{L"Vertex shader compilation error"});
+			co_await os_utilities::show_error_dialog(result.error_message, hstring{ L"Vertex shader compilation error" });
 			break;
 
 		case graphics::compilation_status::cancelled:
@@ -77,28 +77,30 @@ namespace winrt::wzrd_editor::implementation
 
 	IAsyncAction texture_showcase_page::menuflyout_clear_shaders_click(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		auto _shaders_list = shaders_list();
+		//auto _shaders_list = shaders_list();
 
-		winrt::get_class_name(sender);
-		winrt::get_class_name(_shaders_list.ItemsSource());
-		auto abc = args;
+		//auto items_source = _shaders_list.ItemsSource();
+		//auto items_list = winrt::unbox_value<IObservableVector<IInspectable>>(items_source);
+		//auto selected_index = _shaders_list.SelectedIndex();
+		//auto current_shader_selection = winrt::unbox_value<graphics::shader>(items_list.GetAt(selected_index));
 
-		auto items_source = _shaders_list.ItemsSource();
-		auto items_list = winrt::unbox_value<IObservableVector<IInspectable>>(items_source);
-		items_list.RemoveAt(_shaders_list.SelectedIndex());
-
-		
-		//m_renderer.remove_shader()
+		//m_renderer.remove_shader(current_shader_selection.shader_name());
+		//items_list.RemoveAt(selected_index);
 		co_return;
 	}
 
 	IAsyncAction texture_showcase_page::menuflyout_clear_textures_click(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		auto _textures_list = textures_list();
+		//auto _textures_list = textures_list();
 
-		auto items_source = _textures_list.ItemsSource();
-		auto items_list = winrt::unbox_value<IObservableVector<IInspectable>>(items_source);
-		items_list.RemoveAt(_textures_list.SelectedIndex());
+		//auto items_source = _textures_list.ItemsSource();
+		//auto items_list = winrt::unbox_value<IObservableVector<IInspectable>>(items_source);
+
+		//auto selected_index = _textures_list.SelectedIndex();
+		//auto current_texture_selection = winrt::unbox_value<graphics::texture>(items_list.GetAt(selected_index));
+
+		//m_renderer.remove_texture(current_texture_selection.texture_name());
+		//items_list.RemoveAt(selected_index);
 		co_return;
 	}
 

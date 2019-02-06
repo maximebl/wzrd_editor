@@ -15,14 +15,13 @@
                 HorizontalContentAlignment="Stretch"
                 PointerEntered="onmouseenter_textures_list"
                 PointerExited="onmouseexit_textures_list">
-
                 <Image x:Name="texture_img" Source="{x:Bind bitmap_source, Mode=TwoWay}"
                            Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="1">
                     <Image.Transitions>
                         <TransitionCollection>
-                                <RepositionThemeTransition />
-                                <AddDeleteThemeTransition />
-                                <ContentThemeTransition/>
+                            <RepositionThemeTransition />
+                            <AddDeleteThemeTransition />
+                            <ContentThemeTransition/>
                         </TransitionCollection>
                     </Image.Transitions>
                 </Image>
@@ -94,7 +93,7 @@
                                   ItemsSource="{x:Bind texture_showcase_vm.textures}"
                                   VerticalContentAlignment="Stretch"
                                   HorizontalContentAlignment="Stretch"
-                                  Visibility="Visible">
+                                  Visibility="Visible" >
 
                             <ListView.ItemContainerTransitions>
                                 <TransitionCollection>
@@ -102,7 +101,6 @@
                                     <RepositionThemeTransition />
                                 </TransitionCollection>
                             </ListView.ItemContainerTransitions>
-
                             <ListView.Resources>
                                 <Style TargetType="ListViewItem">
                                     <Setter Property="VerticalAlignment" Value="Stretch"></Setter>
@@ -119,10 +117,10 @@
                                 </Style>
                             </ListView.Resources>
                         </ListView>
-
                     </StackPanel>
                 </PivotItem>
                 <PivotItem Header="Shaders">
+
                     <StackPanel Orientation="Vertical">
                         <CommandBar x:Name="shaders_cmd_bar" Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" HorizontalAlignment="Left">
                             <AppBarButton Icon="Add" Label="Add" x:Name="shaderPicker">
@@ -160,7 +158,7 @@
                                   ItemsSource="{x:Bind texture_showcase_vm.shaders}"
                                   VerticalContentAlignment="Stretch"
                                   HorizontalContentAlignment="Stretch"
-                                  Visibility="Visible">
+                                  Visibility="Visible" >
 
                             <ListView.ItemContainerTransitions>
                                 <TransitionCollection>
