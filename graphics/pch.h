@@ -21,3 +21,4 @@
 #include <pplawait.h>
 #include "winrt/Windows.Graphics.Imaging.h"
 #include "d3d12shader.h"
+#include <winrt/Windows.UI.Core.h>

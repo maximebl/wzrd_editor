@@ -9,6 +9,8 @@ namespace winrt::graphics::implementation
 	Windows::Foundation::IAsyncOperation<graphics::compilation_result>
 		renderer::pick_and_compile_shader(graphics::shader new_shader)
 	{
+		m_ui_thread = winrt::apartment_context();
+
 		graphics::compilation_result result;
 
 		Windows::Storage::Pickers::FileOpenPicker picker;
@@ -75,9 +77,14 @@ namespace winrt::graphics::implementation
 			result.error_message = message;
 		}
 
+		auto impl_shader = new_shader.as<implementation::shader>();
 		result.status = graphics::compilation_status::success;
-
 		m_shaders[new_shader.shader_name()] = byte_code;
+
+		co_await m_ui_thread;
+		impl_shader->byte_code(byte_code);
+		reflect_shader(impl_shader);
+
 		return result;
 	}
 
@@ -900,8 +907,8 @@ namespace winrt::graphics::implementation
 	}
 
 	void renderer::create_pso(
-		com_ptr<ID3D10Blob> vertex_shader,
-		com_ptr<ID3D10Blob> pixel_shader,
+		com_ptr<ID3DBlob> vertex_shader,
+		com_ptr<ID3DBlob> pixel_shader,
 		D3D12_PRIMITIVE_TOPOLOGY_TYPE topolgy_type,
 		com_ptr<ID3D12PipelineState>& m_pso)
 	{
@@ -933,34 +940,46 @@ namespace winrt::graphics::implementation
 			pixel_shader->GetBufferSize()
 		};
 
-		check_hresult(m_device->CreateGraphicsPipelineState(&pso_desc, __uuidof(ID3D12PipelineState), m_pso.put_void()));
+		check_hresult(m_device->CreateGraphicsPipelineState(&pso_desc, guid_of<ID3D12PipelineState>(), m_pso.put_void()));
+	}
+
+	void renderer::reflect_shader(com_ptr<implementation::shader> target_shader)
+	{
+		auto shader_byte_code = target_shader->byte_code();
 
 		// reflect the shader
-		com_ptr<ID3D12ShaderReflection> pixel_shader_reflector;
-		check_hresult(D3DReflect(pixel_shader->GetBufferPointer(), pixel_shader->GetBufferSize(), winrt::guid_of<ID3D12ShaderReflection>(), pixel_shader_reflector.put_void()));
+		com_ptr<ID3D12ShaderReflection> shader_reflector;
+		check_hresult(D3DReflect(
+			shader_byte_code->GetBufferPointer(),
+			shader_byte_code->GetBufferSize(),
+			guid_of<ID3D12ShaderReflection>(),
+			shader_reflector.put_void()));
 
 		// pixel shader description
 		D3D12_SHADER_DESC shader_desc = {};
-		check_hresult(pixel_shader_reflector->GetDesc(&shader_desc));
+		check_hresult(shader_reflector->GetDesc(&shader_desc));
+		target_shader->compiler(winrt::to_hstring(shader_desc.Creator));
+
+		// check if resources bound is greater than 0
 
 		// description of the resource at index 0
-		D3D12_SHADER_INPUT_BIND_DESC shader_bind_desc = {};
-		check_hresult(pixel_shader_reflector->GetResourceBindingDesc(0, &shader_bind_desc));
+		//D3D12_SHADER_INPUT_BIND_DESC shader_bind_desc = {};
+		//check_hresult(shader_reflector->GetResourceBindingDesc(0, &shader_bind_desc));
 
-		D3D12_SHADER_INPUT_BIND_DESC shader_bind_desc2 = {};
-		check_hresult(pixel_shader_reflector->GetResourceBindingDesc(1, &shader_bind_desc2));
+		//D3D12_SHADER_INPUT_BIND_DESC shader_bind_desc2 = {};
+		//check_hresult(shader_reflector->GetResourceBindingDesc(1, &shader_bind_desc2));
 
 		// pixel shader input parameter at index 0
 		D3D12_SIGNATURE_PARAMETER_DESC signature_param_desc = {};
-		check_hresult(pixel_shader_reflector->GetInputParameterDesc(0, &signature_param_desc));
+		check_hresult(shader_reflector->GetInputParameterDesc(0, &signature_param_desc));
 
 		// pixel shader output parameters at index 0
 		D3D12_SIGNATURE_PARAMETER_DESC signature_output_param_desc = {};
-		check_hresult(pixel_shader_reflector->GetOutputParameterDesc(0, &signature_output_param_desc));
+		check_hresult(shader_reflector->GetOutputParameterDesc(0, &signature_output_param_desc));
 
 		// instructions information
-		auto movc_instr_count = pixel_shader_reflector->GetMovcInstructionCount();
-		auto mov_instr_count = pixel_shader_reflector->GetMovInstructionCount();
-		auto num_interface_slots = pixel_shader_reflector->GetNumInterfaceSlots();
+		auto movc_instr_count = shader_reflector->GetMovcInstructionCount();
+		auto mov_instr_count = shader_reflector->GetMovInstructionCount();
+		auto num_interface_slots = shader_reflector->GetNumInterfaceSlots();
 	}
 }

@@ -69,8 +69,8 @@ namespace winrt::wzrd_editor::implementation
 		double m_current_slider_x = 0;
 		double m_current_slider_y = 0;
 		double m_current_slider_z = 0;
-		winrt::apartment_context m_ui_thread;
 
+		winrt::apartment_context m_ui_thread;
 		std::unordered_map<std::string, std::unique_ptr<MeshGeometry>> m_geometries;
 
 		uint32_t current_buffer_capacity = 0;

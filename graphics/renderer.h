@@ -5,6 +5,7 @@
 #include "buffer.h"
 #include "utilities.h"
 #include "texture.h"
+#include "shader.h"
 #include "../wzrd_editor/DDSTextureLoader.h"
 
 namespace winrt::graphics::implementation
@@ -31,9 +32,9 @@ namespace winrt::graphics::implementation
 		bool is_rendering();
 		graphics::buffer current_buffer();
 		void current_buffer(graphics::buffer const& value);
-		Windows::Foundation::IAsyncOperation<graphics::compilation_result> pick_and_compile_shader(graphics::shader new_shader);		
+		Windows::Foundation::IAsyncOperation<graphics::compilation_result> pick_and_compile_shader(graphics::shader new_shader);
 
-        Windows::Foundation::IAsyncOperation<graphics::texture> pick_texture(graphics::texture new_texture, hstring name);
+		Windows::Foundation::IAsyncOperation<graphics::texture> pick_texture(graphics::texture new_texture, hstring name);
 		graphics::primitive_types current_topology();
 		void current_topology(graphics::primitive_types const& value);
 
@@ -41,6 +42,7 @@ namespace winrt::graphics::implementation
 		static ID3D12GraphicsCommandList* g_cmd_list;
 
 	private:
+		winrt::apartment_context m_ui_thread;
 		bool m_is_rendering = false;
 		com_ptr<buffer> m_current_buffer = nullptr;
 		constexpr static int m_swapchain_buffer_count = 2;
@@ -111,6 +113,7 @@ namespace winrt::graphics::implementation
 			com_ptr<ID3D10Blob> pixel_shader,
 			D3D12_PRIMITIVE_TOPOLOGY_TYPE topolgy_type,
 			com_ptr<ID3D12PipelineState>& m_pso);
+		void reflect_shader(com_ptr<implementation::shader> target_shader);
 		D3D12_CPU_DESCRIPTOR_HANDLE current_backbuffer_view() const;
 		void create_crate_texture(std::vector<unsigned char> bytes, int file_size, hstring texture_name);
 		Windows::Foundation::IAsyncAction main_loop();

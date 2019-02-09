@@ -88,7 +88,6 @@ namespace winrt::graphics::implementation
 
 	void shader::compiler(hstring const& value)
 	{
-
 		update_value(L"compiler", m_compiler, value);
 	}
 
@@ -201,4 +200,15 @@ namespace winrt::graphics::implementation
 	{
 		m_property_changed.remove(token);
 	}
+
+	com_ptr<ID3DBlob> shader::byte_code()
+	{
+		return m_byte_code;
+	}
+
+	void shader::byte_code(com_ptr<ID3DBlob> value)
+	{
+		update_value(L"byte_code", m_byte_code, value);
+	}
+
 }

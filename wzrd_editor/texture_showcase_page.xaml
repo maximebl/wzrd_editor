@@ -69,6 +69,19 @@
                     </TextBlock>
                     <ProgressRing Margin="0,0,13,0" Visibility="{x:Bind is_loading, Mode=OneWay}" IsActive="{x:Bind is_loading, Mode=TwoWay}"/>
                     <TextBlock Text="Compilation failed." Visibility="{x:Bind is_error,Mode=OneWay}" Foreground="{StaticResource SystemControlErrorTextForegroundBrush}"/>
+
+                    <!--<TreeView Visibility="Visible" ItemsSource="{Binding Path=texture_showcase_vm.shaders , RelativeSource={RelativeSource  Mode=None}}" >-->
+                    <TreeView Visibility="Visible" ItemsSource="{Binding }" >
+                        <TreeView.ItemTemplate>
+                            <DataTemplate x:DataType="graphics:shader_type">
+                                <TreeViewItem IsExpanded="True">
+                                    <Button Content="aaa"></Button>
+                                </TreeViewItem>
+                            </DataTemplate>
+                        </TreeView.ItemTemplate>
+                    </TreeView>
+
+                    <TextBlock Text="{x:Bind compiler, Mode=OneWay}"></TextBlock>
                 </StackPanel>
             </ListViewItem>
         </DataTemplate>
@@ -151,7 +164,6 @@
                             <AppBarButton Icon="Edit" Label="Edit"/>
                             <AppBarButton Icon="Delete" Label="Delete" x:Name="menuflyout_clear_shaders" Click="menuflyout_clear_shaders_click"/>
                         </CommandBar>
-
                         <ListView x:Name="shaders_list" 
                                   HorizontalAlignment="Left"
                                   ItemTemplate="{StaticResource shaders_list_template}"

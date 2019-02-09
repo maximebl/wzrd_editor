@@ -52,6 +52,10 @@ namespace winrt::graphics::implementation
 		winrt::event_token PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& handler);
 		void PropertyChanged(winrt::event_token const& token) noexcept;
 
+		// implementation only (not exposed as .winmd metadata)
+		com_ptr<ID3DBlob> byte_code();
+		void byte_code(com_ptr<ID3DBlob> value);
+
 	private:
 
 		hstring m_shader_name;
@@ -72,6 +76,8 @@ namespace winrt::graphics::implementation
 		uint64_t m_texture_comparison_instructions_count;
 		uint64_t m_texture_bias_instructions_count;
 		uint64_t m_texture_gradient_instructions_count;
+
+		com_ptr<ID3DBlob> m_byte_code;
 
 		winrt::event<Windows::UI::Xaml::Data::PropertyChangedEventHandler> m_property_changed;
 
