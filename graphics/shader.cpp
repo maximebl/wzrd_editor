@@ -6,7 +6,7 @@ using namespace Windows::UI::Xaml;
 
 namespace winrt::graphics::implementation
 {
-	shader::shader(hstring const& shader_name, graphics::shader_type const& shader_type): m_shader_name(shader_name), m_shader_type(shader_type)
+	shader::shader(hstring const& shader_name, graphics::shader_type const& shader_type) : m_shader_name(shader_name), m_shader_type(shader_type)
 	{
 		switch (shader_type)
 		{
@@ -79,6 +79,117 @@ namespace winrt::graphics::implementation
 	void shader::shader_type(graphics::shader_type const& value)
 	{
 		update_value(L"shader_type", m_shader_type, value);
+	}
+
+	hstring shader::compiler()
+	{
+		return m_compiler;
+	}
+
+	void shader::compiler(hstring const& value)
+	{
+
+		update_value(L"compiler", m_compiler, value);
+	}
+
+	uint64_t shader::instruction_count()
+	{
+		return m_instruction_count;
+	}
+
+	void shader::instruction_count(uint64_t value)
+	{
+		update_value(L"instruction_count", m_instruction_count, value);
+	}
+
+	uint64_t shader::version()
+	{
+		return m_version;
+	}
+
+	void shader::version(uint64_t value)
+	{
+		update_value(L"version", m_version, value);
+	}
+
+	uint64_t shader::constant_buffer_count()
+	{
+		return m_constant_buffer_count;
+	}
+
+	void shader::constant_buffer_count(uint64_t value)
+	{
+		update_value(L"constant_buffer_count", m_constant_buffer_count, value);
+	}
+
+	uint64_t shader::bound_resources_count()
+	{
+		return m_bound_resources_count;
+	}
+
+	void shader::bound_resources_count(uint64_t value)
+	{
+		update_value(L"bound_resources_count", m_constant_buffer_count, value);
+	}
+
+	uint64_t shader::texture_writes_count()
+	{
+		return m_texture_writes_count;
+	}
+
+	void shader::texture_writes_count(uint64_t value)
+	{
+		update_value(L"texture_writes_count", m_texture_writes_count, value);
+	}
+
+	uint64_t shader::texture_load_instructions_count()
+	{
+		return m_texture_load_instructions_count;
+	}
+
+	void shader::texture_load_instructions_count(uint64_t value)
+	{
+		update_value(L"texture_load_instructions_count", m_texture_load_instructions_count, value);
+	}
+
+	uint64_t shader::texture_normal_instructions_count()
+	{
+		return m_texture_normal_instructions_count;
+	}
+
+	void shader::texture_normal_instructions_count(uint64_t value)
+	{
+		update_value(L"texture_normal_instructions_count", m_texture_normal_instructions_count, value);
+	}
+
+	uint64_t shader::texture_comparison_instructions_count()
+	{
+		return m_texture_comparison_instructions_count;
+	}
+
+	void shader::texture_comparison_instructions_count(uint64_t value)
+	{
+		update_value(L"texture_comparison_instructions_count", m_texture_comparison_instructions_count, value);
+	}
+
+	uint64_t shader::texture_bias_instructions_count()
+	{
+		return m_texture_bias_instructions_count;
+	}
+
+	void shader::texture_bias_instructions_count(uint64_t value)
+	{
+		update_value(L"texture_bias_instructions_count", m_texture_bias_instructions_count, value);
+	}
+
+	uint64_t shader::texture_gradient_instructions_count()
+	{
+		return m_texture_gradient_instructions_count;
+	}
+
+	void shader::texture_gradient_instructions_count(uint64_t value)
+	{
+		update_value(L"texture_gradient_instructions_count", m_texture_gradient_instructions_count, value);
 	}
 
 	winrt::event_token shader::PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& handler)

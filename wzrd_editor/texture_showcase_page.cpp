@@ -77,30 +77,30 @@ namespace winrt::wzrd_editor::implementation
 
 	IAsyncAction texture_showcase_page::menuflyout_clear_shaders_click(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		//auto _shaders_list = shaders_list();
+		auto _shaders_list = shaders_list();
 
-		//auto items_source = _shaders_list.ItemsSource();
-		//auto items_list = winrt::unbox_value<IObservableVector<IInspectable>>(items_source);
-		//auto selected_index = _shaders_list.SelectedIndex();
-		//auto current_shader_selection = winrt::unbox_value<graphics::shader>(items_list.GetAt(selected_index));
+		auto items_source = _shaders_list.ItemsSource();
+		auto items_list = winrt::unbox_value<IObservableVector<IInspectable>>(items_source);
+		auto selected_index = _shaders_list.SelectedIndex();
+		auto current_shader_selection = winrt::unbox_value<graphics::shader>(items_list.GetAt(selected_index));
 
-		//m_renderer.remove_shader(current_shader_selection.shader_name());
-		//items_list.RemoveAt(selected_index);
+		m_renderer.remove_shader(current_shader_selection.shader_name());
+		items_list.RemoveAt(selected_index);
 		co_return;
 	}
 
 	IAsyncAction texture_showcase_page::menuflyout_clear_textures_click(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		//auto _textures_list = textures_list();
+		auto _textures_list = textures_list();
 
-		//auto items_source = _textures_list.ItemsSource();
-		//auto items_list = winrt::unbox_value<IObservableVector<IInspectable>>(items_source);
+		auto items_source = _textures_list.ItemsSource();
+		auto items_list = winrt::unbox_value<IObservableVector<IInspectable>>(items_source);
 
-		//auto selected_index = _textures_list.SelectedIndex();
-		//auto current_texture_selection = winrt::unbox_value<graphics::texture>(items_list.GetAt(selected_index));
+		auto selected_index = _textures_list.SelectedIndex();
+		auto current_texture_selection = winrt::unbox_value<graphics::texture>(items_list.GetAt(selected_index));
 
-		//m_renderer.remove_texture(current_texture_selection.texture_name());
-		//items_list.RemoveAt(selected_index);
+		m_renderer.remove_texture(current_texture_selection.texture_name());
+		items_list.RemoveAt(selected_index);
 		co_return;
 	}
 
@@ -129,17 +129,17 @@ namespace winrt::wzrd_editor::implementation
 
 	IAsyncAction texture_showcase_page::onmouseenter_textures_list(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		sender.as<Windows::UI::Xaml::FrameworkElement>().Height(200);
-		sender.as<Windows::UI::Xaml::FrameworkElement>().Width(1000);
-		play_spring_animation(2.0f, sender);
+		//sender.as<Windows::UI::Xaml::FrameworkElement>().Height(200);
+		//sender.as<Windows::UI::Xaml::FrameworkElement>().Width(1000);
+		//play_spring_animation(2.0f, sender);
 
 		co_return;
 	}
 
 	IAsyncAction texture_showcase_page::onmouseexit_textures_list(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		sender.as<Windows::UI::Xaml::FrameworkElement>().Height(100);
-		play_spring_animation(1.0f, sender);
+		//sender.as<Windows::UI::Xaml::FrameworkElement>().Height(100);
+		//play_spring_animation(1.0f, sender);
 		co_return;
 	}
 

@@ -23,16 +23,16 @@ namespace interop_test_app
         public MainPage()
         {
             this.InitializeComponent();
-            //renderer.enable_debug_layer();
-            //renderer.initialize(swapChainPanel);
-            //renderer.start_render_loop();
             test_abi_calls();
         }
 
         async Task test_abi_calls()
         {
             //tester = Customer.Customers();
-            //graphics.renderer renderer = new graphics.renderer();
+            graphics.renderer renderer = new graphics.renderer();
+            renderer.enable_debug_layer();
+            renderer.initialize_textures_showcase(swapChainPanel);
+            renderer.start_render_loop();
 
             //graphics.shader new_shader = new graphics.shader("default_vs", shader_type.vertex);
             //new_shader.is_loading = true;

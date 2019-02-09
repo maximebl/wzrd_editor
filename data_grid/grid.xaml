@@ -9,13 +9,13 @@
     mc:Ignorable="d"
     d:DesignHeight="300"
     d:DesignWidth="400">
-    <Button Content="aaaaaaaaaa"></Button>
-    <!--<controls:DataGrid
+    <controls:DataGrid
         x:Name="data_grid"
         Height="600" Margin="12"
         AutoGenerateColumns="True"
         ItemsSource="{x:Bind tester}"
         >
-    </controls:DataGrid>-->
+    </controls:DataGrid>
 
 </UserControl>
+

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
+//using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -15,7 +15,7 @@ using Windows.UI.Xaml.Navigation;
 
 namespace data_grid
 {
-    public sealed partial class grid : UserControl
+    public sealed partial class grid
     {
         private IList<Customer> tester;
         public grid()

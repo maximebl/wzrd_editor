@@ -18,5 +18,18 @@ namespace graphics
 		Boolean is_loading;
 		Boolean is_error;
 		shader_type shader_type;
+
+		String compiler;
+		UInt64 instruction_count;
+		UInt64 version;
+		UInt64 constant_buffer_count;
+		UInt64 bound_resources_count;
+
+		UInt64 texture_writes_count;
+		UInt64 texture_load_instructions_count;
+		UInt64 texture_normal_instructions_count;
+		UInt64 texture_comparison_instructions_count;
+		UInt64 texture_bias_instructions_count;
+		UInt64 texture_gradient_instructions_count;
 	}
 }

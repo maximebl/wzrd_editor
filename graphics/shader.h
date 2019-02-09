@@ -8,31 +8,49 @@
 
 namespace winrt::graphics::implementation
 {
-    struct shader : shaderT<shader>
-    {
-        shader() = delete;
-        shader(hstring const& shader_name, graphics::shader_type const& shader_type);
+	struct shader : shaderT<shader>
+	{
+		shader() = delete;
+		shader(hstring const& shader_name, graphics::shader_type const& shader_type);
 
-        hstring shader_name();
-        void shader_name(hstring const& value);
+		hstring shader_name();
+		void shader_name(hstring const& value);
+		hstring file_name();
+		void file_name(hstring const& value);
+		hstring type_glyph();
+		void type_glyph(hstring const& value);
+		bool is_loading();
+		void is_loading(bool value);
+		bool is_error();
+		void is_error(bool value);
+		graphics::shader_type shader_type();
+		void shader_type(graphics::shader_type const& value);
 
-        hstring file_name();
-        void file_name(hstring const& value);
+		hstring compiler();
+		void compiler(hstring const& value);
+		uint64_t instruction_count();
+		void instruction_count(uint64_t value);
+		uint64_t version();
+		void version(uint64_t value);
+		uint64_t constant_buffer_count();
+		void constant_buffer_count(uint64_t value);
+		uint64_t bound_resources_count();
+		void bound_resources_count(uint64_t value);
+		uint64_t texture_writes_count();
+		void texture_writes_count(uint64_t value);
+		uint64_t texture_load_instructions_count();
+		void texture_load_instructions_count(uint64_t value);
+		uint64_t texture_normal_instructions_count();
+		void texture_normal_instructions_count(uint64_t value);
+		uint64_t texture_comparison_instructions_count();
+		void texture_comparison_instructions_count(uint64_t value);
+		uint64_t texture_bias_instructions_count();
+		void texture_bias_instructions_count(uint64_t value);
+		uint64_t texture_gradient_instructions_count();
+		void texture_gradient_instructions_count(uint64_t value);
 
-        hstring type_glyph();
-        void type_glyph(hstring const& value);
-
-        bool is_loading();
-        void is_loading(bool value);
-
-        bool is_error();
-        void is_error(bool value);
-
-        graphics::shader_type shader_type();
-        void shader_type(graphics::shader_type const& value);
-
-        winrt::event_token PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& handler);
-        void PropertyChanged(winrt::event_token const& token) noexcept;
+		winrt::event_token PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& handler);
+		void PropertyChanged(winrt::event_token const& token) noexcept;
 
 	private:
 
@@ -42,6 +60,18 @@ namespace winrt::graphics::implementation
 		graphics::shader_type m_shader_type;
 		bool m_is_loading = false;
 		bool m_is_error = false;
+
+		hstring m_compiler;
+		uint64_t m_instruction_count;
+		uint64_t m_version;
+		uint64_t m_constant_buffer_count;
+		uint64_t m_bound_resources_count;
+		uint64_t m_texture_writes_count;
+		uint64_t m_texture_load_instructions_count;
+		uint64_t m_texture_normal_instructions_count;
+		uint64_t m_texture_comparison_instructions_count;
+		uint64_t m_texture_bias_instructions_count;
+		uint64_t m_texture_gradient_instructions_count;
 
 		winrt::event<Windows::UI::Xaml::Data::PropertyChangedEventHandler> m_property_changed;
 
@@ -59,12 +89,12 @@ namespace winrt::graphics::implementation
 				raise_property_changed(property_name);
 			}
 		}
-    };
+	};
 }
 
 namespace winrt::graphics::factory_implementation
 {
-    struct shader : shaderT<shader, implementation::shader>
-    {
-    };
+	struct shader : shaderT<shader, implementation::shader>
+	{
+	};
 }
