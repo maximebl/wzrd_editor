@@ -8,6 +8,7 @@
 #include "texture_showcase_page.g.h"
 #include "texture_showcase_vm.h"
 #include "../os_utilities/os_utilities.h"
+#include "bool_invert.h"
 
 namespace winrt::wzrd_editor::implementation
 {

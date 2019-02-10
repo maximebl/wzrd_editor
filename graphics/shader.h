@@ -49,6 +49,11 @@ namespace winrt::graphics::implementation
 		uint64_t texture_gradient_instructions_count();
 		void texture_gradient_instructions_count(uint64_t value);
 
+		void input_parameters_count(uint64_t value);
+		uint64_t input_parameters_count();
+		void output_parameters_count(uint64_t value);
+		uint64_t output_parameters_count();
+
 		winrt::event_token PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& handler);
 		void PropertyChanged(winrt::event_token const& token) noexcept;
 
@@ -76,6 +81,8 @@ namespace winrt::graphics::implementation
 		uint64_t m_texture_comparison_instructions_count;
 		uint64_t m_texture_bias_instructions_count;
 		uint64_t m_texture_gradient_instructions_count;
+		uint64_t m_input_parameters_count;
+		uint64_t m_output_parameters_count;
 
 		com_ptr<ID3DBlob> m_byte_code;
 

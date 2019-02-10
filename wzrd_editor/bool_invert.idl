@@ -1,0 +1,7 @@
+namespace wzrd_editor
+{
+    runtimeclass bool_invert : Windows.UI.Xaml.Data.IValueConverter
+    {
+        bool_invert();
+    }
+}

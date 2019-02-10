@@ -31,5 +31,8 @@ namespace graphics
 		UInt64 texture_comparison_instructions_count;
 		UInt64 texture_bias_instructions_count;
 		UInt64 texture_gradient_instructions_count;
+
+		UInt64 input_parameters_count;
+		UInt64 output_parameters_count;
 	}
 }

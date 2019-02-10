@@ -50,6 +50,9 @@
     <Midl Include="texture_showcase_vm.idl">
       <Filter>ViewModels</Filter>
     </Midl>
+    <Midl Include="bool_invert.idl">
+      <Filter>views\converters</Filter>
+    </Midl>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />

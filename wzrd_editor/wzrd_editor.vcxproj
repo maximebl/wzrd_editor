@@ -102,6 +102,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="bool_invert.h">
+      <DependentUpon>bool_invert.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="buffer_size_select_dialog.h">
       <DependentUpon>buffer_size_select_dialog.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -197,6 +201,10 @@
     <Image Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="bool_invert.cpp">
+      <DependentUpon>bool_invert.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="buffer_size_select_dialog.cpp">
       <DependentUpon>buffer_size_select_dialog.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -281,6 +289,9 @@
   <ItemGroup>
     <Midl Include="App.idl">
       <DependentUpon>App.xaml</DependentUpon>
+    </Midl>
+    <Midl Include="bool_invert.idl">
+      <SubType>Designer</SubType>
     </Midl>
     <Midl Include="buffer_size_select_dialog.idl">
       <DependentUpon>buffer_size_select_dialog.xaml</DependentUpon>

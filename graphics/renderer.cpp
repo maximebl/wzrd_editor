@@ -958,7 +958,20 @@ namespace winrt::graphics::implementation
 		// pixel shader description
 		D3D12_SHADER_DESC shader_desc = {};
 		check_hresult(shader_reflector->GetDesc(&shader_desc));
-		target_shader->compiler(winrt::to_hstring(shader_desc.Creator));
+		target_shader->compiler(to_hstring(shader_desc.Creator));
+		target_shader->instruction_count(shader_desc.InstructionCount);
+		target_shader->version(shader_desc.Version);
+		target_shader->input_parameters_count(shader_desc.InputParameters);
+		target_shader->output_parameters_count(shader_desc.OutputParameters);
+		target_shader->constant_buffer_count(shader_desc.ConstantBuffers);
+		target_shader->bound_resources_count(shader_desc.BoundResources);
+		target_shader->texture_load_instructions_count(shader_desc.TextureLoadInstructions);
+		target_shader->texture_normal_instructions_count(shader_desc.TextureNormalInstructions);
+		target_shader->texture_comparison_instructions_count(shader_desc.TextureCompInstructions);
+		target_shader->texture_bias_instructions_count(shader_desc.TextureBiasInstructions);
+		target_shader->texture_gradient_instructions_count(shader_desc.TextureGradientInstructions);
+
+
 
 		// check if resources bound is greater than 0
 

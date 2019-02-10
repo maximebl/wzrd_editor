@@ -128,7 +128,7 @@ namespace winrt::graphics::implementation
 
 	void shader::bound_resources_count(uint64_t value)
 	{
-		update_value(L"bound_resources_count", m_constant_buffer_count, value);
+		update_value(L"bound_resources_count", m_bound_resources_count, value);
 	}
 
 	uint64_t shader::texture_writes_count()
@@ -181,14 +181,34 @@ namespace winrt::graphics::implementation
 		update_value(L"texture_bias_instructions_count", m_texture_bias_instructions_count, value);
 	}
 
-	uint64_t shader::texture_gradient_instructions_count()
+	void shader::input_parameters_count(uint64_t value)
 	{
-		return m_texture_gradient_instructions_count;
+		update_value(L"input_parameters_count", m_input_parameters_count, value);
+	}
+
+	uint64_t shader::input_parameters_count()
+	{
+		return m_input_parameters_count;
+	}
+
+	void shader::output_parameters_count(uint64_t value)
+	{
+		update_value(L"output_parameters_count", m_output_parameters_count, value);
+	}
+
+	uint64_t shader::output_parameters_count()
+	{
+		return m_output_parameters_count;
 	}
 
 	void shader::texture_gradient_instructions_count(uint64_t value)
 	{
 		update_value(L"texture_gradient_instructions_count", m_texture_gradient_instructions_count, value);
+	}
+
+	uint64_t shader::texture_gradient_instructions_count()
+	{
+		return m_texture_gradient_instructions_count;
 	}
 
 	winrt::event_token shader::PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& handler)

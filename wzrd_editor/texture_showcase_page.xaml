@@ -6,9 +6,12 @@
     xmlns:local="using:wzrd_editor"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:converters="using:wzrd_editor"
     mc:Ignorable="d">
 
     <Page.Resources>
+
+        <converters:bool_invert x:Key="bool_invert_converter"/>
 
         <DataTemplate x:Key="textures_list_template" x:DataType="graphics:texture" >
             <ListViewItem
@@ -70,18 +73,22 @@
                     <ProgressRing Margin="0,0,13,0" Visibility="{x:Bind is_loading, Mode=OneWay}" IsActive="{x:Bind is_loading, Mode=TwoWay}"/>
                     <TextBlock Text="Compilation failed." Visibility="{x:Bind is_error,Mode=OneWay}" Foreground="{StaticResource SystemControlErrorTextForegroundBrush}"/>
 
-                    <!--<TreeView Visibility="Visible" ItemsSource="{Binding Path=texture_showcase_vm.shaders , RelativeSource={RelativeSource  Mode=None}}" >-->
-                    <TreeView Visibility="Visible" ItemsSource="{Binding }" >
-                        <TreeView.ItemTemplate>
-                            <DataTemplate x:DataType="graphics:shader_type">
-                                <TreeViewItem IsExpanded="True">
-                                    <Button Content="aaa"></Button>
-                                </TreeViewItem>
-                            </DataTemplate>
-                        </TreeView.ItemTemplate>
-                    </TreeView>
+                    <StackPanel Visibility="{x:Bind is_loading, Converter={StaticResource bool_invert_converter}, Mode=OneWay}" Orientation="Vertical">
+                        <TextBlock Text="{x:Bind file_name, Mode=OneWay}"/>
+                        <TextBlock Text="{x:Bind version, Mode=OneWay}"/>
+                        <TextBlock Text="{x:Bind compiler, Mode=OneWay}"/>
+                        <TextBlock Text="{x:Bind bound_resources_count, Mode=OneWay}"/>
+                        <TextBlock Text="{x:Bind output_parameters_count, Mode=OneWay}"/>
+                        <TextBlock Text="{x:Bind input_parameters_count, Mode=OneWay}"/>
+                        <TextBlock Text="{x:Bind constant_buffer_count, Mode=OneWay}"/>
+                        <TextBlock Text="{x:Bind instruction_count, Mode=OneWay}"/>
+                        <TextBlock Text="{x:Bind texture_bias_instructions_count, Mode=OneWay}"/>
+                        <TextBlock Text="{x:Bind texture_comparison_instructions_count, Mode=OneWay}"/>
+                        <TextBlock Text="{x:Bind texture_gradient_instructions_count, Mode=OneWay}"/>
+                        <TextBlock Text="{x:Bind texture_load_instructions_count, Mode=OneWay}"/>
+                        <TextBlock Text="{x:Bind texture_normal_instructions_count, Mode=OneWay}"/>
+                    </StackPanel>
 
-                    <TextBlock Text="{x:Bind compiler, Mode=OneWay}"></TextBlock>
                 </StackPanel>
             </ListViewItem>
         </DataTemplate>
