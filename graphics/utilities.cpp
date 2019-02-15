@@ -100,9 +100,6 @@ winrt::com_ptr<ID3D12Resource> utilities::create_static_texture_resource(
 	subresource_data.RowPitch = texture_width * texture_pixel_size;
 	subresource_data.SlicePitch = subresource_data.RowPitch * texture_height;
 
-	//cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(default_buffer.get(),
-	//	D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST));
-
 	UpdateSubresources(cmdList, default_buffer.get(), uploadBuffer.get(), 0, 0, 1, &subresource_data);
 
 	cmdList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(default_buffer.get(),

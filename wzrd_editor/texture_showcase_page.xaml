@@ -12,82 +12,136 @@
     <Page.Resources>
 
         <converters:bool_invert x:Key="bool_invert_converter"/>
+        <converters:ivector_to_bool x:Key="ivector_to_bool_converter"/>
 
         <DataTemplate x:Key="textures_list_template" x:DataType="graphics:texture" >
             <ListViewItem
                 HorizontalContentAlignment="Stretch"
                 PointerEntered="onmouseenter_textures_list"
                 PointerExited="onmouseexit_textures_list">
-                <Image x:Name="texture_img" Source="{x:Bind bitmap_source, Mode=TwoWay}"
-                           Grid.Row="0" Grid.Column="0" Grid.RowSpan="2" Grid.ColumnSpan="1">
-                    <Image.Transitions>
-                        <TransitionCollection>
-                            <RepositionThemeTransition />
-                            <AddDeleteThemeTransition />
-                            <ContentThemeTransition/>
-                        </TransitionCollection>
-                    </Image.Transitions>
-                </Image>
+                <StackPanel Orientation="Vertical">
+                    <StackPanel.ChildrenTransitions>
+                        <RepositionThemeTransition/>
+                        <EntranceThemeTransition IsStaggeringEnabled="True" />
+                    </StackPanel.ChildrenTransitions>
 
-                <!--<Grid HorizontalAlignment="Stretch" x:Name="textures_info_grid">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="auto" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
+                    <ProgressRing Margin="0,0,13,0" Visibility="{x:Bind is_loading, Mode=OneWay}" IsActive="{x:Bind is_loading, Mode=OneWay}" HorizontalAlignment="Center"/>
 
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="*"/>
-                    </Grid.RowDefinitions>
-
-                    <Button x:Name="first_btn" HorizontalAlignment="Stretch" Content="first" 
-                           Grid.Row="0" Grid.Column="1" Grid.RowSpan="1" Grid.ColumnSpan="1">
-                        <Button.Transitions>
-                            <TransitionCollection>
-                                <RepositionThemeTransition />
-                            </TransitionCollection>
-                        </Button.Transitions>
-                    </Button>
-
-                    <Button HorizontalAlignment="Stretch" Content="second" 
-                           Grid.Row="1" Grid.Column="1" Grid.RowSpan="1" Grid.ColumnSpan="1"/>
-                </Grid>-->
-
-            </ListViewItem>
-        </DataTemplate>
-
-        <DataTemplate x:Key="shaders_list_template" x:DataType="graphics:shader" >
-            <ListViewItem>
-                <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="8,8,0,0">
-                    <SymbolIcon Margin="0,0,13,0" x:Name="shader_type_icon" Symbol="{x:Bind type_glyph}"></SymbolIcon>
-                    <TextBlock Margin="0,0,13,0" Text="{x:Bind shader_name, Mode=TwoWay}">
-                        <TextBlock.Transitions>
+                    <Image x:Name="texture_img" Source="{x:Bind bitmap_source, Mode=OneWay}" HorizontalAlignment="Stretch">
+                        <Image.Transitions>
                             <TransitionCollection>
                                 <RepositionThemeTransition />
                                 <AddDeleteThemeTransition />
                                 <ContentThemeTransition/>
-                                <EntranceThemeTransition IsStaggeringEnabled="True" />
                             </TransitionCollection>
-                        </TextBlock.Transitions>
-                    </TextBlock>
-                    <ProgressRing Margin="0,0,13,0" Visibility="{x:Bind is_loading, Mode=OneWay}" IsActive="{x:Bind is_loading, Mode=TwoWay}"/>
-                    <TextBlock Text="Compilation failed." Visibility="{x:Bind is_error,Mode=OneWay}" Foreground="{StaticResource SystemControlErrorTextForegroundBrush}"/>
+                        </Image.Transitions>
+                    </Image>
 
-                    <StackPanel Visibility="{x:Bind is_loading, Converter={StaticResource bool_invert_converter}, Mode=OneWay}" Orientation="Vertical">
-                        <TextBlock Text="{x:Bind file_name, Mode=OneWay}"/>
-                        <TextBlock Text="{x:Bind version, Mode=OneWay}"/>
-                        <TextBlock Text="{x:Bind compiler, Mode=OneWay}"/>
-                        <TextBlock Text="{x:Bind bound_resources_count, Mode=OneWay}"/>
-                        <TextBlock Text="{x:Bind output_parameters_count, Mode=OneWay}"/>
-                        <TextBlock Text="{x:Bind input_parameters_count, Mode=OneWay}"/>
-                        <TextBlock Text="{x:Bind constant_buffer_count, Mode=OneWay}"/>
-                        <TextBlock Text="{x:Bind instruction_count, Mode=OneWay}"/>
-                        <TextBlock Text="{x:Bind texture_bias_instructions_count, Mode=OneWay}"/>
-                        <TextBlock Text="{x:Bind texture_comparison_instructions_count, Mode=OneWay}"/>
-                        <TextBlock Text="{x:Bind texture_gradient_instructions_count, Mode=OneWay}"/>
-                        <TextBlock Text="{x:Bind texture_load_instructions_count, Mode=OneWay}"/>
-                        <TextBlock Text="{x:Bind texture_normal_instructions_count, Mode=OneWay}"/>
+                    <StackPanel Orientation="Vertical" Visibility="{x:Bind is_loading, Converter={StaticResource bool_invert_converter}, Mode=OneWay}">
+                        <StackPanel.ChildrenTransitions>
+                            <RepositionThemeTransition/>
+                            <EntranceThemeTransition IsStaggeringEnabled="True" />
+                        </StackPanel.ChildrenTransitions>
+
+                        <NavigationViewItemSeparator/>
+
+                        <RelativePanel >
+                            <TextBlock x:Name="texture_name_label" FontWeight="Bold" Text="Texture name" />
+                            <TextBlock x:Name="texture_name" Text="{x:Bind texture_name, Mode=OneWay}" RelativePanel.RightOf="texture_name_label" />
+                        </RelativePanel>
+
+                        <RelativePanel >
+                            <TextBlock x:Name="file_name_label" FontWeight="Bold" Text="File name" />
+                            <TextBlock x:Name="texture_file_name" Text="{x:Bind file_name, Mode=OneWay}" RelativePanel.RightOf="file_name_label" />
+                        </RelativePanel>
+
+                        <NavigationViewItemSeparator/>
+
+                        <RelativePanel >
+                            <TextBlock x:Name="mip_levels_label" FontWeight="Bold" Text="Mip levels" />
+                            <TextBlock x:Name="mip_levels" Text="{x:Bind mip_levels, Mode=OneWay}" RelativePanel.RightOf="mip_levels_label" />
+                        </RelativePanel>
+
+                        <RelativePanel >
+                            <TextBlock x:Name="width_label" FontWeight="Bold" Text="Width" />
+                            <TextBlock x:Name="width" Text="{x:Bind width, Mode=OneWay}" RelativePanel.RightOf="width_label" />
+                        </RelativePanel>
+
+                        <RelativePanel >
+                            <TextBlock x:Name="height_label" FontWeight="Bold" Text="Height" />
+                            <TextBlock x:Name="height" Text="{x:Bind height, Mode=OneWay}" RelativePanel.RightOf="height_label" />
+                        </RelativePanel>
+
+                        <RelativePanel >
+                            <TextBlock x:Name="dimension_label" FontWeight="Bold" Text="Dimension" />
+                            <TextBlock x:Name="dimension" Text="{x:Bind dimension, Mode=OneWay}" RelativePanel.RightOf="dimension_label" />
+                        </RelativePanel>
+
+                        <RelativePanel >
+                            <TextBlock x:Name="row_pitch_label" FontWeight="Bold" Text="Row pitch" />
+                            <TextBlock x:Name="row_pitch" Text="{x:Bind row_pitch, Mode=OneWay}" RelativePanel.RightOf="row_pitch_label" />
+                        </RelativePanel>
+
+                        <RelativePanel >
+                            <TextBlock x:Name="slice_pitch_label" FontWeight="Bold" Text="Slice pitch" />
+                            <TextBlock x:Name="slice_pitch" Text="{x:Bind slice_pitch, Mode=OneWay}" RelativePanel.RightOf="slice_pitch_label" />
+                        </RelativePanel>
                     </StackPanel>
+                </StackPanel>
+            </ListViewItem>
+        </DataTemplate>
+
+        <DataTemplate x:Key="shader_reflection_attribute_template" x:DataType="graphics:generic_attribute">
+            <ListViewItem Margin="0,0,0,6" HorizontalContentAlignment="Stretch" HorizontalAlignment="Stretch">
+                <RelativePanel>
+                    <TextBlock x:Name="name" FontWeight="Bold" Text="{x:Bind attribute_name, Mode=OneWay}" Margin="0,2,0,0" />
+                    <Viewbox MaxWidth="12" MaxHeight="12" VerticalAlignment="Center" RelativePanel.AlignRightWithPanel="True" Margin="0,5,0,0">
+                        <SymbolIcon x:Name="description" Symbol="Help" ToolTipService.ToolTip="{x:Bind attribute_description, Mode=OneWay}" HorizontalAlignment="Right"/>
+                    </Viewbox>
+                    <TextBlock x:Name="value" Text="{x:Bind attribute_value, Mode=OneWay}" RelativePanel.Below="name" />
+                </RelativePanel>
+            </ListViewItem>
+        </DataTemplate>
+
+        <DataTemplate x:Key="shader_list_template" x:DataType="graphics:shader">
+
+            <ListViewItem >
+                <StackPanel Orientation="Horizontal">
+                    <StackPanel.ChildrenTransitions>
+                        <RepositionThemeTransition/>
+                        <EntranceThemeTransition IsStaggeringEnabled="True" />
+                    </StackPanel.ChildrenTransitions>
+
+                    <ProgressRing Margin="0,0,13,0" Visibility="{x:Bind is_loading, Mode=OneWay}" IsActive="{x:Bind is_loading, Mode=TwoWay}"/>
+                    <SymbolIcon Margin="0,0,13,0" x:Name="shader_type_icon" Symbol="{x:Bind type_glyph}"/>
+                    <TextBlock Margin="0,0,13,0" Text="{x:Bind shader_name, Mode=OneWay}" VerticalAlignment="Center"/>
+                    <TextBlock Text="Compilation failed." Visibility="{x:Bind is_error, Mode=OneWay}" Foreground="{StaticResource SystemControlErrorTextForegroundBrush}" VerticalAlignment="Center"/>
+
+                    <Button x:Name="shader_details" Content="Shader details" Visibility="{x:Bind is_error, Converter={StaticResource bool_invert_converter}, Mode=OneWay}">
+                        <Button.Flyout>
+                            <Flyout>
+                                <ListView
+                                    x:Name="shader_reflection_attributes_list"
+                                    MinWidth="200"
+                                    ItemTemplate="{StaticResource shader_reflection_attribute_template}"
+                                    ItemsSource="{x:Bind shader_reflection_data }">
+                                </ListView>
+                            </Flyout>
+                        </Button.Flyout>
+                    </Button>
+
+                    <Button x:Name="bound_resources" Content="Bound resources" Visibility="{x:Bind is_error, Converter={StaticResource bool_invert_converter}, Mode=OneWay}">
+                        <Button.Flyout>
+                            <Flyout>
+                                <ListView
+                                    MinWidth="200"
+                                    x:Name="shader_bound_resources"
+                                    ItemTemplate="{StaticResource shader_reflection_attribute_template}"
+                                    ItemsSource="{x:Bind shader_bound_resources }">
+                                </ListView>
+                            </Flyout>
+                        </Button.Flyout>
+                    </Button>
 
                 </StackPanel>
             </ListViewItem>
@@ -95,19 +149,49 @@
     </Page.Resources>
 
     <SplitView x:Name="split_pane" IsPaneOpen="False" DisplayMode="Inline" OpenPaneLength="800">
+
+        <VisualStateManager.VisualStateGroups>
+            <VisualStateGroup>
+                <VisualState x:Name="valid_texture_selected">
+                    <VisualState.Setters>
+                        <Setter Target="appbarbutton_delete_texture.IsEnabled" Value="True"/>
+                    </VisualState.Setters>
+                </VisualState>
+
+                <VisualState x:Name="valid_texture_not_selected">
+                    <VisualState.Setters>
+                        <Setter Target="appbarbutton_delete_texture.IsEnabled" Value="False"/>
+                    </VisualState.Setters>
+                </VisualState>
+
+                <VisualState x:Name="valid_shader_selected">
+                    <VisualState.Setters>
+                        <Setter Target="appbarbutton_delete_shader.IsEnabled" Value="True"/>
+                    </VisualState.Setters>
+                </VisualState>
+
+                <VisualState x:Name="valid_shader_not_selected">
+                    <VisualState.Setters>
+                        <Setter Target="appbarbutton_delete_shader.IsEnabled" Value="False"/>
+                    </VisualState.Setters>
+                </VisualState>
+            </VisualStateGroup>
+        </VisualStateManager.VisualStateGroups>
+
         <StackPanel>
             <Button x:Name="start_render" Click="render_onclick" Content="render"></Button>
+            <TextBox x:Name="billboard_count" Header="Number of billboards" Text="1"/>
 
             <Pivot x:Name="assets_pivot">
                 <PivotItem Header="Textures">
                     <StackPanel Orientation="Vertical">
                         <CommandBar x:Name="textures_cmd_bar" Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" HorizontalAlignment="Left">
-                            <AppBarButton Icon="Add" Label="Add" x:Name="textures_picker" Click="onclick_pick_texture"/>
-                            <AppBarButton Icon="Edit" Label="Edit"/>
-                            <AppBarButton Icon="Delete" Label="Delete" x:Name="menuflyout_clear_textures" Click="menuflyout_clear_textures_click"/>
+                            <AppBarButton x:Name="textures_picker" Icon="Add" Label="Add" Click="onclick_pick_texture"/>
+                            <AppBarButton x:Name="appbarbutton_delete_texture" Icon="Delete" Label="Delete" Click="delete_selected_texture" IsEnabled="False"/>
                         </CommandBar>
 
                         <ListView x:Name="textures_list" 
+                                  SelectionChanged="texture_selection_changed"
                                   HorizontalAlignment="Left"
                                   ItemTemplate="{StaticResource textures_list_template}"
                                   ItemsSource="{x:Bind texture_showcase_vm.textures}"
@@ -119,6 +203,7 @@
                                 <TransitionCollection>
                                     <AddDeleteThemeTransition />
                                     <RepositionThemeTransition />
+                                    <EntranceThemeTransition IsStaggeringEnabled="True" />
                                 </TransitionCollection>
                             </ListView.ItemContainerTransitions>
                             <ListView.Resources>
@@ -127,7 +212,7 @@
                                     <Setter Property="VerticalContentAlignment" Value="Stretch"></Setter>
                                     <Setter Property="MaxHeight" Value="1000"></Setter>
                                     <Setter Property="MaxWidth" Value="1000"></Setter>
-                                    <Setter Property="Width" Value="700"></Setter>
+                                    <Setter Property="Width" Value="*"></Setter>
                                 </Style>
                                 <Style TargetType="Image">
                                     <Setter Property="Width" Value="100"></Setter>
@@ -165,20 +250,30 @@
                                                 <KeyboardAccelerator Key="V" Modifiers="Shift"/>
                                             </MenuFlyoutItem.KeyboardAccelerators>
                                         </MenuFlyoutItem>
+
+                                        <MenuFlyoutItem x:Name="geometryShaderPicker" Click="onclick_geometryshader_picker">
+                                            <MenuFlyoutItem.Icon>
+                                                <SymbolIcon Symbol="Placeholder"></SymbolIcon>
+                                            </MenuFlyoutItem.Icon>
+                                            <MenuFlyoutItem.Text>Geometry</MenuFlyoutItem.Text>
+                                            <MenuFlyoutItem.KeyboardAccelerators>
+                                                <KeyboardAccelerator Key="G" Modifiers="Shift"/>
+                                            </MenuFlyoutItem.KeyboardAccelerators>
+                                        </MenuFlyoutItem>
+
                                     </MenuFlyout>
                                 </AppBarButton.Flyout>
                             </AppBarButton>
-                            <AppBarButton Icon="Edit" Label="Edit"/>
-                            <AppBarButton Icon="Delete" Label="Delete" x:Name="menuflyout_clear_shaders" Click="menuflyout_clear_shaders_click"/>
+                            <AppBarButton Icon="Delete" Label="Delete" x:Name="appbarbutton_delete_shader" Click="delete_selected_shader" />
                         </CommandBar>
-                        <ListView x:Name="shaders_list" 
-                                  HorizontalAlignment="Left"
-                                  ItemTemplate="{StaticResource shaders_list_template}"
-                                  ItemsSource="{x:Bind texture_showcase_vm.shaders}"
-                                  VerticalContentAlignment="Stretch"
-                                  HorizontalContentAlignment="Stretch"
-                                  Visibility="Visible" >
 
+                        <ListView
+                          SelectionChanged="shader_selection_changed"
+                          HorizontalAlignment="Left"
+                          x:Name="shaders_list"
+                          Visibility="Visible"
+                          ItemsSource="{x:Bind texture_showcase_vm.shaders}"
+                          ItemTemplate="{StaticResource shader_list_template}">
                             <ListView.ItemContainerTransitions>
                                 <TransitionCollection>
                                     <AddDeleteThemeTransition />
@@ -203,6 +298,7 @@
                                 </Style>
                             </ListView.Resources>
                         </ListView>
+
                     </StackPanel>
                 </PivotItem>
             </Pivot>

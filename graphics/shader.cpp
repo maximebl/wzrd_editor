@@ -16,6 +16,9 @@ namespace winrt::graphics::implementation
 		case shader_type::pixel:
 			m_type_glyph = L"SelectAll";
 			break;
+		case shader_type::geometry:
+			m_type_glyph = L"Placeholder";
+			break;
 		default:
 			break;
 		}
@@ -201,6 +204,19 @@ namespace winrt::graphics::implementation
 		return m_output_parameters_count;
 	}
 
+	void shader::shader_reflection_data(IObservableVector<Windows::Foundation::IInspectable> const & values)
+	{
+		for (auto & item : values)
+		{
+			m_shader_reflection_data.Append(item);
+		}
+	}
+
+	IObservableVector<Windows::Foundation::IInspectable> shader::shader_reflection_data()
+	{
+		return m_shader_reflection_data;
+	}
+
 	void shader::texture_gradient_instructions_count(uint64_t value)
 	{
 		update_value(L"texture_gradient_instructions_count", m_texture_gradient_instructions_count, value);
@@ -209,16 +225,6 @@ namespace winrt::graphics::implementation
 	uint64_t shader::texture_gradient_instructions_count()
 	{
 		return m_texture_gradient_instructions_count;
-	}
-
-	winrt::event_token shader::PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& handler)
-	{
-		return m_property_changed.add(handler);
-	}
-
-	void shader::PropertyChanged(winrt::event_token const& token) noexcept
-	{
-		m_property_changed.remove(token);
 	}
 
 	com_ptr<ID3DBlob> shader::byte_code()
@@ -231,4 +237,24 @@ namespace winrt::graphics::implementation
 		update_value(L"byte_code", m_byte_code, value);
 	}
 
+	IObservableVector<Windows::Foundation::IInspectable> shader::shader_bound_resources()
+	{
+		return m_shader_bound_resources;
+	}
+
+	void shader::shader_bound_resources(IObservableVector<Windows::Foundation::IInspectable> const & values)
+	{
+		//auto new_vector = winrt::single_threaded_observable_vector<Windows::Foundation::IInspectable>{values};
+		//m_shader_bound_resources.ReplaceAll()
+	}
+
+	winrt::event_token shader::PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& handler)
+	{
+		return m_property_changed.add(handler);
+	}
+
+	void shader::PropertyChanged(winrt::event_token const& token) noexcept
+	{
+		m_property_changed.remove(token);
+	}
 }

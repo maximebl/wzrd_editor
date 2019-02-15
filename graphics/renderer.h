@@ -84,6 +84,7 @@ namespace winrt::graphics::implementation
 		com_ptr<ID3D12PipelineState> m_points_pso = nullptr;
 		com_ptr<ID3D12PipelineState> m_triangles_pso = nullptr;
 		com_ptr<ID3D12PipelineState> m_lines_pso = nullptr;
+		com_ptr<ID3D12PipelineState> m_billboard_pso = nullptr;
 
 		com_ptr<ID3D12Resource> m_texture_upload_buffer = nullptr;
 
@@ -102,6 +103,7 @@ namespace winrt::graphics::implementation
 		void create_empty_rootsignature(std::vector<CD3DX12_STATIC_SAMPLER_DESC> samplers);
 		void create_texture_rootsignature(std::vector<CD3DX12_STATIC_SAMPLER_DESC> samplers);
 		void create_simple_triangle();
+		void create_point();
 		void create_texture_srv();
 		std::vector<UINT8> generate_texture_data(UINT texture_width, UINT texture_height, UINT texture_pixel_size);
 		std::vector<CD3DX12_STATIC_SAMPLER_DESC> get_static_samplers();
@@ -113,6 +115,7 @@ namespace winrt::graphics::implementation
 			com_ptr<ID3D10Blob> pixel_shader,
 			D3D12_PRIMITIVE_TOPOLOGY_TYPE topolgy_type,
 			com_ptr<ID3D12PipelineState>& m_pso);
+		void create_billboard_pso(com_ptr<ID3DBlob> vertex_shader, com_ptr<ID3DBlob> pixel_shader, com_ptr<ID3DBlob> geometry_shader, com_ptr<ID3D12PipelineState>& m_pso);
 		void reflect_shader(com_ptr<implementation::shader> target_shader);
 		D3D12_CPU_DESCRIPTOR_HANDLE current_backbuffer_view() const;
 		void create_crate_texture(std::vector<unsigned char> bytes, int file_size, hstring texture_name);

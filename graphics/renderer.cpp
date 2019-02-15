@@ -49,24 +49,28 @@ namespace winrt::graphics::implementation
 			version = "vs_5_0";
 			break;
 
+		case graphics::shader_type::geometry:
+			entry_point = "GS";
+			version = "gs_5_0";
+			break;
+
 		default:
 			break;
 		}
 
-		check_hresult(
-			D3DCompile(
-				&shader_file_bytes.front(),
-				shader_file_bytes.size(),
-				nullptr,
-				nullptr,
-				D3D_COMPILE_STANDARD_FILE_INCLUDE,
-				entry_point.c_str(),
-				version.c_str(),
-				compile_flags,
-				0,
-				byte_code.put(),
-				errors.put()
-			));
+		D3DCompile(
+			&shader_file_bytes.front(),
+			shader_file_bytes.size(),
+			nullptr,
+			nullptr,
+			D3D_COMPILE_STANDARD_FILE_INCLUDE,
+			entry_point.c_str(),
+			version.c_str(),
+			compile_flags,
+			0,
+			byte_code.put(),
+			errors.put()
+		);
 
 		if (errors != nullptr)
 		{
@@ -75,13 +79,15 @@ namespace winrt::graphics::implementation
 
 			result.status = graphics::compilation_status::error;
 			result.error_message = message;
+			return result;
 		}
 
-		auto impl_shader = new_shader.as<implementation::shader>();
 		result.status = graphics::compilation_status::success;
 		m_shaders[new_shader.shader_name()] = byte_code;
 
 		co_await m_ui_thread;
+
+		auto impl_shader = new_shader.as<implementation::shader>();
 		impl_shader->byte_code(byte_code);
 		reflect_shader(impl_shader);
 
@@ -139,7 +145,8 @@ namespace winrt::graphics::implementation
 		create_swapchain_xaml(target_swapchain);
 		create_render_targets();
 		create_texture_rootsignature(get_static_samplers());
-		create_simple_triangle();
+		create_point();
+		//create_simple_triangle();
 		//create_texture_srv();
 	}
 
@@ -225,7 +232,7 @@ namespace winrt::graphics::implementation
 	void renderer::render_2()
 	{
 		check_hresult(m_cmd_allocator->Reset());
-		check_hresult(m_graphics_cmdlist->Reset(m_cmd_allocator.get(), m_triangles_pso.get()));
+		check_hresult(m_graphics_cmdlist->Reset(m_cmd_allocator.get(), m_billboard_pso.get()));
 
 		m_screen_viewport.TopLeftX = 0;
 		m_screen_viewport.TopLeftY = 0;
@@ -251,8 +258,9 @@ namespace winrt::graphics::implementation
 
 		m_graphics_cmdlist->OMSetRenderTargets(1, &current_backbuffer_view(), true, &m_dsv_heap->GetCPUDescriptorHandleForHeapStart());
 
-		m_graphics_cmdlist->SetPipelineState(m_triangles_pso.get());
-		m_graphics_cmdlist->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP);
+		m_graphics_cmdlist->SetPipelineState(m_billboard_pso.get());
+		m_graphics_cmdlist->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
+		//select_primitive_topology();
 
 		m_graphics_cmdlist->SetGraphicsRootSignature(m_rootsig.get());
 
@@ -356,6 +364,7 @@ namespace winrt::graphics::implementation
 		{
 			//return new_software_bitmap;
 		}
+
 		new_texture.file_name(file.Name());
 		new_texture.texture_name(name);
 		m_textures[name] = new_texture;
@@ -656,6 +665,29 @@ namespace winrt::graphics::implementation
 			m_rootsig.put_void());
 	}
 
+	void renderer::create_point()
+	{
+		auto new_vertex = graphics::vertex(
+			0.f, 0.f, 0.f,
+			0.f, 0.f, 0.0f, 0.f,
+			0.f, 0.f
+		);
+
+		Windows::Foundation::Collections::IObservableVector<graphics::vertex> tmp_vec{ winrt::single_threaded_observable_vector<graphics::vertex>() };
+
+		tmp_vec.Append(new_vertex);
+
+		current_buffer(
+			graphics::buffer(
+				graphics::buffer_type::static_buffer,
+				tmp_vec,
+				tmp_vec.Size(),
+				0,
+				false
+			));
+
+	}
+
 	void renderer::create_simple_triangle()
 	{
 		auto new_vertex1 = graphics::vertex(
@@ -851,11 +883,13 @@ namespace winrt::graphics::implementation
 	{
 		auto vs = hstring(L"default_vs");
 		auto ps = hstring(L"default_ps");
+		auto gs = hstring(L"default_gs");
 
 		create_basic_input_layout();
 		create_pso(m_shaders[vs], m_shaders[ps], D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT, m_points_pso);
 		create_pso(m_shaders[vs], m_shaders[ps], D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE, m_triangles_pso);
 		create_pso(m_shaders[vs], m_shaders[ps], D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_LINE, m_lines_pso);
+		create_billboard_pso(m_shaders[vs], m_shaders[ps], m_shaders[gs], m_billboard_pso);
 	}
 
 	void renderer::execute_cmd_list()
@@ -943,56 +977,302 @@ namespace winrt::graphics::implementation
 		check_hresult(m_device->CreateGraphicsPipelineState(&pso_desc, guid_of<ID3D12PipelineState>(), m_pso.put_void()));
 	}
 
+	void renderer::create_billboard_pso(
+		com_ptr<ID3DBlob> vertex_shader,
+		com_ptr<ID3DBlob> pixel_shader,
+		com_ptr<ID3DBlob> geometry_shader,
+		com_ptr<ID3D12PipelineState>& m_pso)
+	{
+		D3D12_GRAPHICS_PIPELINE_STATE_DESC pso_desc = {};
+
+		pso_desc.InputLayout = { m_basic_input_layout.data(), static_cast<UINT>(m_basic_input_layout.size()) };
+		pso_desc.pRootSignature = m_rootsig.get();
+		pso_desc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+		pso_desc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+		pso_desc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
+		pso_desc.SampleMask = UINT_MAX;
+		pso_desc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE::D3D12_PRIMITIVE_TOPOLOGY_TYPE_POINT;
+		pso_desc.NumRenderTargets = 1;
+		pso_desc.RTVFormats[0] = m_backbuffer_format;
+		pso_desc.SampleDesc.Count = 1;
+		pso_desc.SampleDesc.Quality = 0;
+		pso_desc.DSVFormat = m_depthstencil_format;
+		pso_desc.RasterizerState.CullMode = D3D12_CULL_MODE::D3D12_CULL_MODE_NONE;
+
+		// shaders
+		pso_desc.VS =
+		{
+			reinterpret_cast<unsigned char*>(vertex_shader->GetBufferPointer()),
+			vertex_shader->GetBufferSize()
+		};
+
+		pso_desc.PS =
+		{
+			reinterpret_cast<unsigned char*>(pixel_shader->GetBufferPointer()),
+			pixel_shader->GetBufferSize()
+		};
+
+		pso_desc.GS =
+		{
+			reinterpret_cast<unsigned char*>(geometry_shader->GetBufferPointer()),
+			geometry_shader->GetBufferSize()
+		};
+
+		check_hresult(m_device->CreateGraphicsPipelineState(&pso_desc, guid_of<ID3D12PipelineState>(), m_pso.put_void()));
+	}
 	void renderer::reflect_shader(com_ptr<implementation::shader> target_shader)
 	{
 		auto shader_byte_code = target_shader->byte_code();
 
-		// reflect the shader
-		com_ptr<ID3D12ShaderReflection> shader_reflector;
-		check_hresult(D3DReflect(
-			shader_byte_code->GetBufferPointer(),
-			shader_byte_code->GetBufferSize(),
-			guid_of<ID3D12ShaderReflection>(),
-			shader_reflector.put_void()));
+		if (shader_byte_code)
+		{
 
-		// pixel shader description
-		D3D12_SHADER_DESC shader_desc = {};
-		check_hresult(shader_reflector->GetDesc(&shader_desc));
-		target_shader->compiler(to_hstring(shader_desc.Creator));
-		target_shader->instruction_count(shader_desc.InstructionCount);
-		target_shader->version(shader_desc.Version);
-		target_shader->input_parameters_count(shader_desc.InputParameters);
-		target_shader->output_parameters_count(shader_desc.OutputParameters);
-		target_shader->constant_buffer_count(shader_desc.ConstantBuffers);
-		target_shader->bound_resources_count(shader_desc.BoundResources);
-		target_shader->texture_load_instructions_count(shader_desc.TextureLoadInstructions);
-		target_shader->texture_normal_instructions_count(shader_desc.TextureNormalInstructions);
-		target_shader->texture_comparison_instructions_count(shader_desc.TextureCompInstructions);
-		target_shader->texture_bias_instructions_count(shader_desc.TextureBiasInstructions);
-		target_shader->texture_gradient_instructions_count(shader_desc.TextureGradientInstructions);
+			// reflect the shader
+			com_ptr<ID3D12ShaderReflection> shader_reflector;
+			check_hresult(D3DReflect(
+				shader_byte_code->GetBufferPointer(),
+				shader_byte_code->GetBufferSize(),
+				guid_of<ID3D12ShaderReflection>(),
+				shader_reflector.put_void()));
 
+			// pixel shader description
+			D3D12_SHADER_DESC shader_desc = {};
+			check_hresult(shader_reflector->GetDesc(&shader_desc));
 
+			auto new_reflection_attributes = single_threaded_observable_vector<IInspectable>();
 
-		// check if resources bound is greater than 0
+			{
+				target_shader->compiler(to_hstring(shader_desc.Creator));
+				graphics::generic_attribute new_shader_reflection_attribute;
+				new_shader_reflection_attribute.attribute_name(hstring{ L"Compiler" });
+				new_shader_reflection_attribute.attribute_value(to_hstring(shader_desc.Creator));
+				new_shader_reflection_attribute.attribute_description(hstring{ L"The name of the originating compiler of the shader." });
+				new_reflection_attributes.Append(box_value(new_shader_reflection_attribute));
 
-		// description of the resource at index 0
-		//D3D12_SHADER_INPUT_BIND_DESC shader_bind_desc = {};
-		//check_hresult(shader_reflector->GetResourceBindingDesc(0, &shader_bind_desc));
+			}
 
-		//D3D12_SHADER_INPUT_BIND_DESC shader_bind_desc2 = {};
-		//check_hresult(shader_reflector->GetResourceBindingDesc(1, &shader_bind_desc2));
+			{
+				target_shader->instruction_count(shader_desc.InstructionCount);
+				graphics::generic_attribute new_shader_reflection_attribute;
+				new_shader_reflection_attribute.attribute_name(hstring{ L"Instructions" });
+				new_shader_reflection_attribute.attribute_value(to_hstring(shader_desc.InstructionCount));
+				new_shader_reflection_attribute.attribute_description(hstring{ L"The number of intermediate-language instructions in the compiled shader." });
+				new_reflection_attributes.Append(box_value(new_shader_reflection_attribute));
+			}
 
-		// pixel shader input parameter at index 0
-		D3D12_SIGNATURE_PARAMETER_DESC signature_param_desc = {};
-		check_hresult(shader_reflector->GetInputParameterDesc(0, &signature_param_desc));
+			{
 
-		// pixel shader output parameters at index 0
-		D3D12_SIGNATURE_PARAMETER_DESC signature_output_param_desc = {};
-		check_hresult(shader_reflector->GetOutputParameterDesc(0, &signature_output_param_desc));
+				// Decode the shader program type and version
+				D3D12_SHADER_VERSION_TYPE shader_program_type = static_cast<D3D12_SHADER_VERSION_TYPE>((shader_desc.Version & 0xFFFF0000) >> 16);
+				hstring shader_major_version = to_hstring((shader_desc.Version & 0x000000F0) >> 4);
+				hstring shader_minor_version = to_hstring(shader_desc.Version & 0x0000000F);
+				hstring shader_program_type_string;
 
-		// instructions information
-		auto movc_instr_count = shader_reflector->GetMovcInstructionCount();
-		auto mov_instr_count = shader_reflector->GetMovInstructionCount();
-		auto num_interface_slots = shader_reflector->GetNumInterfaceSlots();
+				switch (shader_program_type)
+				{
+				case D3D12_SHVER_PIXEL_SHADER:
+					shader_program_type_string = L"Pixel";
+					break;
+				case D3D12_SHVER_VERTEX_SHADER:
+					shader_program_type_string = L"Vertex";
+					break;
+				case D3D12_SHVER_GEOMETRY_SHADER:
+					shader_program_type_string = L"Geometry";
+					break;
+				case D3D12_SHVER_HULL_SHADER:
+					shader_program_type_string = L"Hull";
+					break;
+				case D3D12_SHVER_DOMAIN_SHADER:
+					shader_program_type_string = L"Domain";
+					break;
+				case D3D12_SHVER_COMPUTE_SHADER:
+					shader_program_type_string = L"Compute";
+					break;
+				default:
+					shader_program_type_string = L"Unknown";
+					break;
+				}
+
+				hstring shader_version = shader_program_type_string + L" " + shader_major_version + L"." + shader_minor_version;
+
+				target_shader->version(shader_desc.Version);
+				graphics::generic_attribute new_shader_reflection_attribute;
+				new_shader_reflection_attribute.attribute_name(hstring{ L"Version" });
+				new_shader_reflection_attribute.attribute_value(shader_version);
+				new_shader_reflection_attribute.attribute_description(hstring{ L"The shader version" });
+				new_reflection_attributes.Append(box_value(new_shader_reflection_attribute));
+			}
+
+			{
+				target_shader->input_parameters_count(shader_desc.InputParameters);
+				graphics::generic_attribute new_shader_reflection_attribute;
+				new_shader_reflection_attribute.attribute_name(hstring{ L"Input parameters" });
+				new_shader_reflection_attribute.attribute_value(to_hstring(shader_desc.InputParameters));
+				new_shader_reflection_attribute.attribute_description(hstring{ L"The number of parameters in the input signature." });
+				new_reflection_attributes.Append(box_value(new_shader_reflection_attribute));
+			}
+
+			{
+				target_shader->output_parameters_count(shader_desc.OutputParameters);
+				graphics::generic_attribute new_shader_reflection_attribute;
+				new_shader_reflection_attribute.attribute_name(hstring{ L"Output parameters" });
+				new_shader_reflection_attribute.attribute_value(to_hstring(shader_desc.OutputParameters));
+				new_shader_reflection_attribute.attribute_description(hstring{ L"The number of parameters in the output signature." });
+				new_reflection_attributes.Append(box_value(new_shader_reflection_attribute));
+			}
+
+			{
+				target_shader->constant_buffer_count(shader_desc.ConstantBuffers);
+				graphics::generic_attribute new_shader_reflection_attribute;
+				new_shader_reflection_attribute.attribute_name(hstring{ L"Constant buffers" });
+				new_shader_reflection_attribute.attribute_value(to_hstring(shader_desc.ConstantBuffers));
+				new_shader_reflection_attribute.attribute_description(hstring{ L"The number of shader-constant buffers." });
+				new_reflection_attributes.Append(box_value(new_shader_reflection_attribute));
+			}
+
+			{
+				target_shader->bound_resources_count(shader_desc.BoundResources);
+				graphics::generic_attribute new_shader_reflection_attribute;
+				new_shader_reflection_attribute.attribute_name(hstring{ L"Bound resources" });
+				new_shader_reflection_attribute.attribute_value(to_hstring(shader_desc.BoundResources));
+				new_shader_reflection_attribute.attribute_description(hstring{ L"The number of resource (textures and buffers) bound to a shader." });
+				new_reflection_attributes.Append(box_value(new_shader_reflection_attribute));
+			}
+
+			{
+				target_shader->texture_load_instructions_count(shader_desc.TextureLoadInstructions);
+				graphics::generic_attribute new_shader_reflection_attribute;
+				new_shader_reflection_attribute.attribute_name(hstring{ L"Texture load instructions" });
+				new_shader_reflection_attribute.attribute_value(to_hstring(shader_desc.TextureLoadInstructions));
+				new_shader_reflection_attribute.attribute_description(hstring{ L"Number of texture load instructions" });
+				new_reflection_attributes.Append(box_value(new_shader_reflection_attribute));
+			}
+
+			{
+				target_shader->texture_normal_instructions_count(shader_desc.TextureNormalInstructions);
+				graphics::generic_attribute new_shader_reflection_attribute;
+				new_shader_reflection_attribute.attribute_name(hstring{ L"Texture normal instructions" });
+				new_shader_reflection_attribute.attribute_value(to_hstring(shader_desc.TextureNormalInstructions));
+				new_shader_reflection_attribute.attribute_description(hstring{ L"Number of non-categorized texture instructions." });
+				new_reflection_attributes.Append(box_value(new_shader_reflection_attribute));
+			}
+
+			{
+				target_shader->texture_comparison_instructions_count(shader_desc.TextureCompInstructions);
+				graphics::generic_attribute new_shader_reflection_attribute;
+				new_shader_reflection_attribute.attribute_name(hstring{ L"Texture comparison instructions" });
+				new_shader_reflection_attribute.attribute_value(to_hstring(shader_desc.TextureCompInstructions));
+				new_shader_reflection_attribute.attribute_description(hstring{ L"Number of texture comparison instructions" });
+				new_reflection_attributes.Append(box_value(new_shader_reflection_attribute));
+			}
+
+			{
+				target_shader->texture_bias_instructions_count(shader_desc.TextureBiasInstructions);
+				graphics::generic_attribute new_shader_reflection_attribute;
+				new_shader_reflection_attribute.attribute_name(hstring{ L"Texture bias instructions" });
+				new_shader_reflection_attribute.attribute_value(to_hstring(shader_desc.TextureBiasInstructions));
+				new_shader_reflection_attribute.attribute_description(hstring{ L"Number of texture bias instructions" });
+				new_reflection_attributes.Append(box_value(new_shader_reflection_attribute));
+			}
+
+			{
+				target_shader->texture_gradient_instructions_count(shader_desc.TextureGradientInstructions);
+				graphics::generic_attribute new_shader_reflection_attribute;
+				new_shader_reflection_attribute.attribute_name(hstring{ L"Texture gradient instructions" });
+				new_shader_reflection_attribute.attribute_value(to_hstring(shader_desc.TextureGradientInstructions));
+				new_shader_reflection_attribute.attribute_description(hstring{ L"Number of texture gradient instructions." });
+				new_reflection_attributes.Append(box_value(new_shader_reflection_attribute));
+			}
+
+			target_shader->shader_reflection_data(new_reflection_attributes);
+
+			// check if resources bound is greater than 0
+
+			if (shader_desc.BoundResources > 0)
+			{
+
+				for (size_t i = 0; i < shader_desc.BoundResources; ++i)
+				{
+					D3D12_SHADER_INPUT_BIND_DESC shader_bind_desc = {};
+					check_hresult(shader_reflector->GetResourceBindingDesc(i, &shader_bind_desc));
+
+					{
+						graphics::generic_attribute new_shader_bound_resource;
+						new_shader_bound_resource.attribute_name(hstring{ L"Resource name" });
+						new_shader_bound_resource.attribute_value(to_hstring(shader_bind_desc.Name));
+						new_shader_bound_resource.attribute_description(hstring{ L"Name of the shader resource." });
+						target_shader->shader_bound_resources().Append(new_shader_bound_resource);
+					}
+
+					{
+						graphics::generic_attribute new_shader_bound_resource;
+
+						hstring input_type;
+						hstring resource_type_description;
+
+						switch (shader_bind_desc.Type)
+						{
+						case _D3D_SHADER_INPUT_TYPE::D3D_SIT_SAMPLER:
+							input_type = L"Sampler";
+							resource_type_description = L"The shader resource is a sampler.";
+							break;
+						case _D3D_SHADER_INPUT_TYPE::D3D_SIT_CBUFFER:
+							input_type = L"Constant buffer";
+							resource_type_description = L"The shader resource is a constant buffer.";
+							break;
+						case _D3D_SHADER_INPUT_TYPE::D3D_SIT_TBUFFER:
+							input_type = L"Texture buffer";
+							resource_type_description = L"The shader resource is a texture buffer.";
+							break;
+						case _D3D_SHADER_INPUT_TYPE::D3D_SIT_TEXTURE:
+							input_type = L"Texture";
+							resource_type_description = L"The shader resource is a texture.";
+							break;
+						case _D3D_SHADER_INPUT_TYPE::D3D_SIT_UAV_RWTYPED:
+							input_type = L"Read-and-write buffer";
+							resource_type_description = L"Shader model 4 resources are read only. Shader model 5 implements a new corresponding set of read/write resources.";
+							break;
+						case _D3D_SHADER_INPUT_TYPE::D3D_SIT_STRUCTURED:
+							input_type = L"Structured buffer";
+							resource_type_description = L"A structured buffer is a buffer that contains elements of equal sizes. Use a structure with one or more member types to define an element.";
+							break;
+						case _D3D_SHADER_INPUT_TYPE::D3D_SIT_UAV_RWSTRUCTURED:
+							input_type = L"Read-and-write structured buffer";
+							resource_type_description = L"Shader model 4 resources are read only. Shader model 5 implements a new corresponding set of read/write resources. See structured buffer.";
+							break;
+						case _D3D_SHADER_INPUT_TYPE::D3D_SIT_BYTEADDRESS:
+							input_type = L"Byte-address buffer";
+							resource_type_description = L"Buffer that uses a byte value offset from the beginning of the buffer to access data instead of indexing per element using a stride.";
+							break;
+						case _D3D_SHADER_INPUT_TYPE::D3D_SIT_UAV_RWBYTEADDRESS:
+							input_type = L"Read-and-write byte-address buffer";
+							resource_type_description = L"Shader model 4 resources are read only. Shader model 5 implements a new corresponding set of read/write resources. See Byte-address buffers.";
+							break;
+						case _D3D_SHADER_INPUT_TYPE::D3D_SIT_UAV_APPEND_STRUCTURED:
+							input_type = L"Append-structured buffer";
+							resource_type_description = L"Output buffer that appears as a stream the shader may append to.";
+							break;
+						case _D3D_SHADER_INPUT_TYPE::D3D_SIT_UAV_CONSUME_STRUCTURED:
+							input_type = L"Consume-structured buffer";
+							resource_type_description = L"Input buffer that appears as a stream the shader may pull values from.";
+							break;
+						case _D3D_SHADER_INPUT_TYPE::D3D_SIT_UAV_RWSTRUCTURED_WITH_COUNTER:
+							input_type = L"Read-and-write structured buffer that uses the built-in counter to append or consume";
+							resource_type_description = L"Shader model 4 resources are read only. Shader model 5 implements a new corresponding set of read/write resources. See Consume-structured buffer.";
+							break;
+						default:
+							input_type = L"Unknown";
+							resource_type_description = L"";
+							break;
+						}
+
+						new_shader_bound_resource.attribute_name(hstring{ L"Resource type" });
+						new_shader_bound_resource.attribute_value(input_type);
+						new_shader_bound_resource.attribute_description(resource_type_description);
+						target_shader->shader_bound_resources().Append(new_shader_bound_resource);
+					}
+				}
+			}
+		}
 	}
 }

@@ -3,7 +3,8 @@ namespace graphics
 	enum shader_type
 	{
 		vertex = 0,
-		pixel = 1
+		pixel = 1,
+		geometry = 2
 	};
 
 	[bindable]
@@ -34,5 +35,8 @@ namespace graphics
 
 		UInt64 input_parameters_count;
 		UInt64 output_parameters_count;
+
+		IObservableVector<IInspectable> shader_reflection_data;
+		IObservableVector<IInspectable> shader_bound_resources;
 	}
 }

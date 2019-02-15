@@ -27,6 +27,24 @@ namespace winrt::graphics::implementation
 		Windows::UI::Xaml::Media::Imaging::SoftwareBitmapSource bitmap_source();
 		void bitmap_source(Windows::UI::Xaml::Media::Imaging::SoftwareBitmapSource const& value);
 
+        uint64_t mip_levels();
+        void mip_levels(uint64_t value);
+
+        uint64_t width();
+        void width(uint64_t value);
+
+        uint64_t height();
+        void height(uint64_t value);
+
+        hstring dimension();
+        void dimension(hstring const& value);
+
+        uint64_t row_pitch();
+        void row_pitch(uint64_t value);
+
+        uint64_t slice_pitch();
+        void slice_pitch(uint64_t value);
+
         winrt::event_token PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& handler);
         void PropertyChanged(winrt::event_token const& token) noexcept;
 
@@ -39,6 +57,13 @@ namespace winrt::graphics::implementation
 		hstring m_texture_name;
 		hstring m_file_name;
 		Windows::UI::Xaml::Media::Imaging::SoftwareBitmapSource m_bitmap_source;
+
+        uint64_t m_mip_levels;
+        uint64_t m_width;
+        uint64_t m_height;
+        hstring m_dimension;
+        uint64_t m_row_pitch;
+        uint64_t m_slice_pitch;
 
 		winrt::event<Windows::UI::Xaml::Data::PropertyChangedEventHandler> m_property_changed;
 

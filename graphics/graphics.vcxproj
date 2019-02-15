@@ -99,6 +99,10 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="d3dx12.h" />
+    <ClInclude Include="generic_attribute.h">
+      <DependentUpon>generic_attribute.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="pch.h" />
     <ClInclude Include="renderer.h">
       <DependentUpon>renderer.idl</DependentUpon>
@@ -124,6 +128,10 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="generic_attribute.cpp">
+      <DependentUpon>generic_attribute.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
@@ -155,6 +163,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Midl Include="generic_attribute.idl">
+      <SubType>Designer</SubType>
+    </Midl>
     <Midl Include="renderer.idl">
       <SubType>Designer</SubType>
     </Midl>

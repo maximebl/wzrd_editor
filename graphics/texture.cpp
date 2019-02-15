@@ -60,6 +60,66 @@ namespace winrt::graphics::implementation
 		update_value(L"bitmap_source", m_bitmap_source, value);
 	}
 
+    uint64_t texture::mip_levels()
+    {
+		return m_mip_levels;
+    }
+
+    void texture::mip_levels(uint64_t value)
+    {
+		update_value(L"mip_levels", m_mip_levels, value);
+    }
+
+    uint64_t texture::width()
+    {
+		return m_width;
+    }
+
+    void texture::width(uint64_t value)
+    {
+		update_value(L"width", m_width, value);
+    }
+
+    uint64_t texture::height()
+    {
+		return m_height;
+    }
+
+    void texture::height(uint64_t value)
+    {
+		update_value(L"height", m_height, value);
+    }
+
+    hstring texture::dimension()
+    {
+		return m_dimension;
+    }
+
+    void texture::dimension(hstring const& value)
+    {
+		update_value(L"dimension", m_dimension, value);
+    }
+
+    uint64_t texture::row_pitch()
+    {
+		return m_row_pitch;
+    }
+
+    void texture::row_pitch(uint64_t value)
+    {
+		update_value(L"row_pitch", m_row_pitch, value);
+    }
+
+    uint64_t texture::slice_pitch()
+    {
+		return m_slice_pitch;
+    }
+
+    void texture::slice_pitch(uint64_t value)
+    {
+		update_value(L"slice_pitch", m_slice_pitch, value);
+    }
+
 	winrt::event_token texture::PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& handler)
 	{
 		return m_property_changed.add(handler);

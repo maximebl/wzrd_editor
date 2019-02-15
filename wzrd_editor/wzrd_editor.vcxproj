@@ -120,6 +120,10 @@
       <DependentUpon>int_to_visibility.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
+    <ClInclude Include="ivector_to_bool.h">
+      <DependentUpon>ivector_to_bool.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="main_page.h">
       <DependentUpon>main_page.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -234,6 +238,10 @@
       <DependentUpon>int_to_visibility.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
+    <ClCompile Include="ivector_to_bool.cpp">
+      <DependentUpon>ivector_to_bool.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="main_page.cpp">
       <DependentUpon>main_page.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -300,6 +308,9 @@
     <Midl Include="Geometry.idl" />
     <Midl Include="GeometryViewModel.idl" />
     <Midl Include="int_to_visibility.idl">
+      <SubType>Designer</SubType>
+    </Midl>
+    <Midl Include="ivector_to_bool.idl">
       <SubType>Designer</SubType>
     </Midl>
     <Midl Include="MainPage.idl">

@@ -1,14 +1,21 @@
 namespace graphics
 {
-    [bindable]
+	[bindable]
 	[default_interface]
-    runtimeclass texture : Windows.UI.Xaml.Data.INotifyPropertyChanged
-    {
+	runtimeclass texture : Windows.UI.Xaml.Data.INotifyPropertyChanged
+	{
 		texture();
 		String texture_name;
 		String file_name;
 		Boolean is_loading;
-		Boolean is_error; 
+		Boolean is_error;
 		Windows.UI.Xaml.Media.Imaging.SoftwareBitmapSource bitmap_source;
-    }
+
+		UInt64 mip_levels;
+		UInt64 width;
+		UInt64 height;
+		String dimension;
+		UInt64 row_pitch;
+		UInt64 slice_pitch;
+	}
 }

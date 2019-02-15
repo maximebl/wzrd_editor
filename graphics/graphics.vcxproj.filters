@@ -40,5 +40,6 @@
     <Midl Include="renderer.idl" />
     <Midl Include="shader.idl" />
     <Midl Include="texture.idl" />
+    <Midl Include="generic_attribute.idl" />
   </ItemGroup>
 </Project>

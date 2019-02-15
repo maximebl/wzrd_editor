@@ -8,6 +8,9 @@
 
 namespace winrt::graphics::implementation
 {
+
+	using namespace Windows::Foundation::Collections;
+
 	struct shader : shaderT<shader>
 	{
 		shader() = delete;
@@ -54,6 +57,12 @@ namespace winrt::graphics::implementation
 		void output_parameters_count(uint64_t value);
 		uint64_t output_parameters_count();
 
+		IObservableVector<IInspectable> shader_reflection_data();
+		void shader_reflection_data(IObservableVector<IInspectable> const & values);
+
+		IObservableVector<IInspectable> shader_bound_resources();
+		void shader_bound_resources(IObservableVector<IInspectable> const & values);
+
 		winrt::event_token PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& handler);
 		void PropertyChanged(winrt::event_token const& token) noexcept;
 
@@ -83,6 +92,9 @@ namespace winrt::graphics::implementation
 		uint64_t m_texture_gradient_instructions_count;
 		uint64_t m_input_parameters_count;
 		uint64_t m_output_parameters_count;
+
+		IObservableVector<IInspectable> m_shader_reflection_data = single_threaded_observable_vector<IInspectable>();
+		IObservableVector<IInspectable> m_shader_bound_resources = single_threaded_observable_vector<IInspectable>();
 
 		com_ptr<ID3DBlob> m_byte_code;
 

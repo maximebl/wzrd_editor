@@ -1,0 +1,9 @@
+namespace wzrd_editor
+{
+    [bindable]
+    [default_interface]
+    runtimeclass ivector_to_bool : Windows.UI.Xaml.Data.IValueConverter
+    {
+        ivector_to_bool();
+    }
+}

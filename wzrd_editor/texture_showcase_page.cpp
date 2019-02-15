@@ -15,7 +15,9 @@ namespace winrt::wzrd_editor::implementation
 		m_spring_animation.Target(hstring{ L"Scale" });
 
 		m_renderer.enable_debug_layer();
+
 		m_renderer.initialize_textures_showcase(swapchain_panel());
+		VisualStateManager().GoToState(*this, L"valid_shader_not_selected", false);
 	}
 
 	wzrd_editor::texture_showcase_vm texture_showcase_page::texture_showcase_vm()
@@ -62,7 +64,7 @@ namespace winrt::wzrd_editor::implementation
 		{
 		case graphics::compilation_status::error:
 			new_shader.is_error(true);
-			co_await os_utilities::show_error_dialog(result.error_message, hstring{ L"Vertex shader compilation error" });
+			co_await os_utilities::show_error_dialog(result.error_message, hstring{ L"Pixel shader compilation error" });
 			break;
 
 		case graphics::compilation_status::cancelled:
@@ -75,7 +77,34 @@ namespace winrt::wzrd_editor::implementation
 		co_return;
 	}
 
-	IAsyncAction texture_showcase_page::menuflyout_clear_shaders_click(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	IAsyncAction texture_showcase_page::onclick_geometryshader_picker(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		auto new_shader = graphics::shader(hstring(L"default_gs"), graphics::shader_type::geometry);
+		texture_showcase_vm().shaders().Append(new_shader);
+
+		new_shader.is_loading(true);
+		auto result = co_await m_renderer.pick_and_compile_shader(new_shader);
+		new_shader.is_loading(false);
+
+		switch (result.status)
+		{
+		case graphics::compilation_status::error:
+			new_shader.is_error(true);
+			co_await os_utilities::show_error_dialog(result.error_message, hstring{ L"Geometry shader compilation error" });
+			break;
+
+		case graphics::compilation_status::cancelled:
+			texture_showcase_vm().shaders().RemoveAtEnd();
+			break;
+
+		default:
+			break;
+		}
+
+		co_return;
+	}
+
+	IAsyncAction texture_showcase_page::delete_selected_shader(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
 		auto _shaders_list = shaders_list();
 
@@ -86,10 +115,11 @@ namespace winrt::wzrd_editor::implementation
 
 		m_renderer.remove_shader(current_shader_selection.shader_name());
 		items_list.RemoveAt(selected_index);
+
 		co_return;
 	}
 
-	IAsyncAction texture_showcase_page::menuflyout_clear_textures_click(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	IAsyncAction texture_showcase_page::delete_selected_texture(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
 		auto _textures_list = textures_list();
 
@@ -101,6 +131,7 @@ namespace winrt::wzrd_editor::implementation
 
 		m_renderer.remove_texture(current_texture_selection.texture_name());
 		items_list.RemoveAt(selected_index);
+
 		co_return;
 	}
 
@@ -143,9 +174,34 @@ namespace winrt::wzrd_editor::implementation
 		co_return;
 	}
 
-	IAsyncAction texture_showcase_page::onclick_textures_list(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	IAsyncAction texture_showcase_page::shader_selection_changed(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		return IAsyncAction();
+		auto selected_items_count = unbox_value<Windows::UI::Xaml::Controls::ListView>(sender).SelectedItems().Size();
+
+		if (selected_items_count > 0)
+		{
+			VisualStateManager().GoToState(*this, L"valid_shader_selected", false);
+		}
+		else
+		{
+			VisualStateManager().GoToState(*this, L"valid_shader_not_selected", false);
+		}
+		co_return;
+	}
+
+	IAsyncAction texture_showcase_page::texture_selection_changed(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		auto selected_items_count = unbox_value<Windows::UI::Xaml::Controls::ListView>(sender).SelectedItems().Size();
+
+		if (selected_items_count > 0)
+		{
+			VisualStateManager().GoToState(*this, L"valid_texture_selected", false);
+		}
+		else
+		{
+			VisualStateManager().GoToState(*this, L"valid_texture_not_selected", false);
+		}
+		co_return;
 	}
 
 	IAsyncAction texture_showcase_page::render_onclick(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)

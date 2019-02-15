@@ -53,6 +53,9 @@
     <Midl Include="bool_invert.idl">
       <Filter>views\converters</Filter>
     </Midl>
+    <Midl Include="ivector_to_bool.idl">
+      <Filter>views\converters</Filter>
+    </Midl>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp" />
@@ -90,6 +93,7 @@
     <ClCompile Include="main_page.cpp" />
     <ClCompile Include="texture_showcase_page.cpp" />
     <ClCompile Include="texture_showcase_vm.cpp" />
+    <ClCompile Include="bool_invert.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -124,6 +128,7 @@
     <ClInclude Include="main_page.h" />
     <ClInclude Include="texture_showcase_page.h" />
     <ClInclude Include="texture_showcase_vm.h" />
+    <ClInclude Include="bool_invert.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Wide310x150Logo.scale-200.png">
