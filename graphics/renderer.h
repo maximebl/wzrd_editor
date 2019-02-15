@@ -118,7 +118,7 @@ namespace winrt::graphics::implementation
 		void create_billboard_pso(com_ptr<ID3DBlob> vertex_shader, com_ptr<ID3DBlob> pixel_shader, com_ptr<ID3DBlob> geometry_shader, com_ptr<ID3D12PipelineState>& m_pso);
 		void reflect_shader(com_ptr<implementation::shader> target_shader);
 		D3D12_CPU_DESCRIPTOR_HANDLE current_backbuffer_view() const;
-		void create_crate_texture(std::vector<unsigned char> bytes, int file_size, hstring texture_name);
+		void create_crate_texture(std::vector<unsigned char> bytes, uint32_t file_size, hstring texture_name, uint32_t width, uint32_t height, uint32_t pixel_size);
 		Windows::Foundation::IAsyncAction main_loop();
 
 		// synchronization

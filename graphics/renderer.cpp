@@ -112,7 +112,7 @@ namespace winrt::graphics::implementation
 	{
 		com_ptr<ID3D12Debug1> debug_controller;
 		check_hresult(
-			D3D12GetDebugInterface(__uuidof(ID3D12Debug1), debug_controller.put_void())
+			D3D12GetDebugInterface(winrt::guid_of<ID3D12Debug1>(), debug_controller.put_void())
 		);
 		debug_controller->EnableDebugLayer();
 		debug_controller->SetEnableGPUBasedValidation(true);
@@ -371,7 +371,7 @@ namespace winrt::graphics::implementation
 
 		auto texture_file_buffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
 		auto texture_file_bytes = co_await os_utilities::read_file_bytes(texture_file_buffer);
-		create_crate_texture(texture_file_bytes, texture_file_bytes.size(), name);
+		create_crate_texture(texture_file_bytes, texture_file_bytes.size(), name, 512, 512, 4);
 
 		Windows::Storage::Streams::IRandomAccessStream stream;
 		stream = co_await file.OpenAsync(Windows::Storage::FileAccessMode::Read);
@@ -388,7 +388,7 @@ namespace winrt::graphics::implementation
 		co_return m_textures[name].as<graphics::texture>();
 	}
 
-	void renderer::create_crate_texture(std::vector<unsigned char> bytes, int file_size, hstring texture_name)
+	void renderer::create_crate_texture(std::vector<unsigned char> bytes, uint32_t file_size, hstring texture_name, uint32_t width, uint32_t height, uint32_t pixel_size)
 	{
 		D3D12_RESOURCE_DESC texture_desc = {};
 		texture_desc.Alignment = 0;
@@ -396,21 +396,31 @@ namespace winrt::graphics::implementation
 		texture_desc.Dimension = D3D12_RESOURCE_DIMENSION::D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 		texture_desc.Flags = D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_NONE;
 		texture_desc.Format = DXGI_FORMAT::DXGI_FORMAT_BC3_UNORM;
-		texture_desc.Height = 512;
-		texture_desc.Width = 512;
+		texture_desc.Height = height;
+		texture_desc.Width = width;
 		texture_desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
 		texture_desc.MipLevels = 1;
 		texture_desc.SampleDesc.Count = 1;
 		texture_desc.SampleDesc.Quality = 0;
+
+		auto row_pitch =  width * pixel_size;
+		auto slice_pitch =  row_pitch * height;
+
+		m_textures[texture_name].mip_levels(texture_desc.MipLevels);
+		m_textures[texture_name].width(texture_desc.Width);
+		m_textures[texture_name].height(texture_desc.Height);
+		m_textures[texture_name].dimension(to_hstring(texture_desc.Dimension));
+		m_textures[texture_name].row_pitch(row_pitch);
+		m_textures[texture_name].slice_pitch(slice_pitch);
 
 		m_textures[texture_name].as<graphics::implementation::texture>()->texture_default_buffer = utilities::create_static_texture_resource(
 			renderer::g_device,
 			renderer::g_cmd_list,
 			texture_desc,
 			bytes.data(),
-			512,
-			512,
-			4,
+			width,
+			height,
+			pixel_size,
 			m_textures[texture_name].as<graphics::implementation::texture>()->texture_upload_buffer
 		);
 
@@ -429,7 +439,7 @@ namespace winrt::graphics::implementation
 	void renderer::create_factory()
 	{
 		check_hresult(
-			CreateDXGIFactory1(__uuidof(IDXGIFactory4), m_dxgi_factory.put_void())
+			CreateDXGIFactory1(guid_of<IDXGIFactory4>(), m_dxgi_factory.put_void())
 		);
 	}
 
@@ -439,7 +449,7 @@ namespace winrt::graphics::implementation
 			D3D12CreateDevice(
 				nullptr,
 				D3D_FEATURE_LEVEL::D3D_FEATURE_LEVEL_11_0,
-				__uuidof(ID3D12Device),
+				guid_of<ID3D12Device>(),
 				m_device.put_void())
 		);
 		g_device = m_device.get();
@@ -451,7 +461,7 @@ namespace winrt::graphics::implementation
 			m_device->CreateFence(
 				0,
 				D3D12_FENCE_FLAGS::D3D12_FENCE_FLAG_NONE,
-				__uuidof(ID3D12Fence),
+				guid_of<ID3D12Fence>(),
 				m_gpu_fence.put_void())
 		);
 	}
@@ -463,11 +473,11 @@ namespace winrt::graphics::implementation
 		cmd_queue_desc.Type = D3D12_COMMAND_LIST_TYPE::D3D12_COMMAND_LIST_TYPE_DIRECT;
 
 		check_hresult(
-			m_device->CreateCommandQueue(&cmd_queue_desc, __uuidof(ID3D12CommandQueue), m_cmd_queue.put_void())
+			m_device->CreateCommandQueue(&cmd_queue_desc, guid_of<ID3D12CommandQueue>(), m_cmd_queue.put_void())
 		);
 
 		check_hresult(
-			m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE::D3D12_COMMAND_LIST_TYPE_DIRECT, __uuidof(ID3D12CommandAllocator), m_cmd_allocator.put_void())
+			m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE::D3D12_COMMAND_LIST_TYPE_DIRECT, guid_of<ID3D12CommandAllocator>(), m_cmd_allocator.put_void())
 		);
 
 		check_hresult(
@@ -476,7 +486,7 @@ namespace winrt::graphics::implementation
 				D3D12_COMMAND_LIST_TYPE::D3D12_COMMAND_LIST_TYPE_DIRECT,
 				m_cmd_allocator.get(),
 				nullptr,
-				__uuidof(ID3D12GraphicsCommandList),
+				guid_of<ID3D12GraphicsCommandList>(),
 				m_graphics_cmdlist.put_void())
 		);
 		g_cmd_list = m_graphics_cmdlist.get();
@@ -491,7 +501,7 @@ namespace winrt::graphics::implementation
 		dsv_heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
 
 		check_hresult(
-			m_device->CreateDescriptorHeap(&dsv_heap_desc, __uuidof(ID3D12DescriptorHeap), m_dsv_heap.put_void())
+			m_device->CreateDescriptorHeap(&dsv_heap_desc, guid_of<ID3D12DescriptorHeap>(), m_dsv_heap.put_void())
 		);
 	}
 
@@ -504,7 +514,7 @@ namespace winrt::graphics::implementation
 		rtv_heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
 
 		check_hresult(
-			m_device->CreateDescriptorHeap(&rtv_heap_desc, __uuidof(ID3D12DescriptorHeap), m_rtv_heap.put_void())
+			m_device->CreateDescriptorHeap(&rtv_heap_desc, guid_of<ID3D12DescriptorHeap>(), m_rtv_heap.put_void())
 		);
 	}
 
@@ -517,7 +527,7 @@ namespace winrt::graphics::implementation
 		srv_heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 
 		check_hresult(
-			m_device->CreateDescriptorHeap(&srv_heap_desc, __uuidof(ID3D12DescriptorHeap), m_srv_heap.put_void())
+			m_device->CreateDescriptorHeap(&srv_heap_desc, guid_of<ID3D12DescriptorHeap>(), m_srv_heap.put_void())
 		);
 	}
 
@@ -548,7 +558,7 @@ namespace winrt::graphics::implementation
 				&depth_stencil_desc,
 				D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COMMON,
 				&clear_value,
-				__uuidof(ID3D12Resource),
+				guid_of<ID3D12Resource>(),
 				m_depthstencil_buffer.put_void()
 			)
 		);
@@ -608,7 +618,7 @@ namespace winrt::graphics::implementation
 		for (UINT i = 0; i < m_swapchain_buffer_count; i++)
 		{
 			check_hresult(
-				m_swapchain->GetBuffer(i, __uuidof(ID3D12Resource), m_swapchain_buffer[i].put_void())
+				m_swapchain->GetBuffer(i, guid_of<ID3D12Resource>(), m_swapchain_buffer[i].put_void())
 			);
 			m_device->CreateRenderTargetView(m_swapchain_buffer[i].get(), nullptr, rtv_heap_handle);
 			rtv_heap_handle.Offset(1, m_rtv_descriptor_size);
@@ -661,7 +671,7 @@ namespace winrt::graphics::implementation
 			0,
 			serialized_rootsig->GetBufferPointer(),
 			serialized_rootsig->GetBufferSize(),
-			__uuidof(ID3D12RootSignature),
+			guid_of<ID3D12RootSignature>(),
 			m_rootsig.put_void());
 	}
 
@@ -670,7 +680,7 @@ namespace winrt::graphics::implementation
 		auto new_vertex = graphics::vertex(
 			0.f, 0.f, 0.f,
 			0.f, 0.f, 0.0f, 0.f,
-			0.f, 0.f
+			0.5f, 0.f
 		);
 
 		Windows::Foundation::Collections::IObservableVector<graphics::vertex> tmp_vec{ winrt::single_threaded_observable_vector<graphics::vertex>() };
@@ -821,7 +831,7 @@ namespace winrt::graphics::implementation
 			0,
 			serialized_rootsig->GetBufferPointer(),
 			serialized_rootsig->GetBufferSize(),
-			__uuidof(ID3D12RootSignature),
+			guid_of<ID3D12RootSignature>(),
 			m_rootsig.put_void());
 	}
 

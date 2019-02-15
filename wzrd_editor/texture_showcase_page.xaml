@@ -47,44 +47,44 @@
 
                         <RelativePanel >
                             <TextBlock x:Name="texture_name_label" FontWeight="Bold" Text="Texture name" />
-                            <TextBlock x:Name="texture_name" Text="{x:Bind texture_name, Mode=OneWay}" RelativePanel.RightOf="texture_name_label" />
+                            <TextBlock x:Name="texture_name" Text="{x:Bind texture_name, Mode=OneWay}" RelativePanel.Below="texture_name_label" />
                         </RelativePanel>
 
                         <RelativePanel >
                             <TextBlock x:Name="file_name_label" FontWeight="Bold" Text="File name" />
-                            <TextBlock x:Name="texture_file_name" Text="{x:Bind file_name, Mode=OneWay}" RelativePanel.RightOf="file_name_label" />
+                            <TextBlock x:Name="texture_file_name" Text="{x:Bind file_name, Mode=OneWay}" RelativePanel.Below="file_name_label" />
                         </RelativePanel>
 
                         <NavigationViewItemSeparator/>
 
-                        <RelativePanel >
+                        <RelativePanel Margin="0,5,0,0" >
                             <TextBlock x:Name="mip_levels_label" FontWeight="Bold" Text="Mip levels" />
-                            <TextBlock x:Name="mip_levels" Text="{x:Bind mip_levels, Mode=OneWay}" RelativePanel.RightOf="mip_levels_label" />
+                            <TextBlock x:Name="mip_levels" Text="{x:Bind mip_levels, Mode=OneWay}" RelativePanel.Below="mip_levels_label" />
                         </RelativePanel>
 
-                        <RelativePanel >
+                        <RelativePanel Margin="0,5,0,0" >
                             <TextBlock x:Name="width_label" FontWeight="Bold" Text="Width" />
-                            <TextBlock x:Name="width" Text="{x:Bind width, Mode=OneWay}" RelativePanel.RightOf="width_label" />
+                            <TextBlock x:Name="width" Text="{x:Bind width, Mode=OneWay}" RelativePanel.Below="width_label" />
                         </RelativePanel>
 
-                        <RelativePanel >
+                        <RelativePanel Margin="0,5,0,0" >
                             <TextBlock x:Name="height_label" FontWeight="Bold" Text="Height" />
-                            <TextBlock x:Name="height" Text="{x:Bind height, Mode=OneWay}" RelativePanel.RightOf="height_label" />
+                            <TextBlock x:Name="height" Text="{x:Bind height, Mode=OneWay}" RelativePanel.Below="height_label" />
                         </RelativePanel>
 
-                        <RelativePanel >
+                        <RelativePanel Margin="0,5,0,0" >
                             <TextBlock x:Name="dimension_label" FontWeight="Bold" Text="Dimension" />
-                            <TextBlock x:Name="dimension" Text="{x:Bind dimension, Mode=OneWay}" RelativePanel.RightOf="dimension_label" />
+                            <TextBlock x:Name="dimension" Text="{x:Bind dimension, Mode=OneWay}" RelativePanel.Below="dimension_label" />
                         </RelativePanel>
 
-                        <RelativePanel >
+                        <RelativePanel Margin="0,5,0,0" >
                             <TextBlock x:Name="row_pitch_label" FontWeight="Bold" Text="Row pitch" />
-                            <TextBlock x:Name="row_pitch" Text="{x:Bind row_pitch, Mode=OneWay}" RelativePanel.RightOf="row_pitch_label" />
+                            <TextBlock x:Name="row_pitch" Text="{x:Bind row_pitch, Mode=OneWay}" RelativePanel.Below="row_pitch_label" />
                         </RelativePanel>
 
-                        <RelativePanel >
+                        <RelativePanel Margin="0,5,0,0" >
                             <TextBlock x:Name="slice_pitch_label" FontWeight="Bold" Text="Slice pitch" />
-                            <TextBlock x:Name="slice_pitch" Text="{x:Bind slice_pitch, Mode=OneWay}" RelativePanel.RightOf="slice_pitch_label" />
+                            <TextBlock x:Name="slice_pitch" Text="{x:Bind slice_pitch, Mode=OneWay}" RelativePanel.Below="slice_pitch_label" />
                         </RelativePanel>
                     </StackPanel>
                 </StackPanel>

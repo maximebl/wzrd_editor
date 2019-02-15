@@ -26,8 +26,7 @@ public:
 				&CD3DX12_RESOURCE_DESC::Buffer(m_element_byte_size*element_count),
 				D3D12_RESOURCE_STATE_GENERIC_READ,
 				nullptr,
-				//winrt::guid_of<ID3D12Resource>(),
-				__uuidof(ID3D12Resource),
+				winrt::guid_of<ID3D12Resource>(),
 				m_upload_buffer.put_void()
 			));
 

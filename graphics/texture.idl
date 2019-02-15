@@ -11,11 +11,11 @@ namespace graphics
 		Boolean is_error;
 		Windows.UI.Xaml.Media.Imaging.SoftwareBitmapSource bitmap_source;
 
-		UInt64 mip_levels;
-		UInt64 width;
-		UInt64 height;
+		UInt32 mip_levels;
+		UInt32 width;
+		UInt32 height;
 		String dimension;
-		UInt64 row_pitch;
-		UInt64 slice_pitch;
+		UInt32 row_pitch;
+		UInt32 slice_pitch;
 	}
 }
