@@ -16,7 +16,12 @@ namespace winrt::wzrd_editor::implementation
 
 		m_renderer.enable_debug_layer();
 
-		m_renderer.initialize_textures_showcase(swapchain_panel());
+		m_ui_items[hstring{ L"swapchain_panel" }] = box_value(swapchain_panel());
+		m_ui_control_values.Insert(hstring{ L"texcoord_u_slider" }, 0.0f);
+
+		auto ui_items = winrt::single_threaded_map<hstring, Windows::Foundation::IInspectable>(std::move(m_ui_items));
+		m_renderer.initialize_textures_showcase(ui_items, m_ui_control_values);
+
 		VisualStateManager().GoToState(*this, L"valid_shader_not_selected", false);
 	}
 
@@ -202,6 +207,17 @@ namespace winrt::wzrd_editor::implementation
 			VisualStateManager().GoToState(*this, L"valid_texture_not_selected", false);
 		}
 		co_return;
+	}
+
+	IAsyncAction texture_showcase_page::texcoord_u_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		m_ui_control_values.Insert(hstring{ L"texcoord_u_slider" }, (float)texcoord_u().Value());
+		co_return;
+	}
+
+	IAsyncAction texture_showcase_page::texcoord_v_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		return IAsyncAction();
 	}
 
 	IAsyncAction texture_showcase_page::render_onclick(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)

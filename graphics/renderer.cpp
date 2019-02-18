@@ -132,8 +132,15 @@ namespace winrt::graphics::implementation
 		create_empty_rootsignature(get_static_samplers());
 	}
 
-	void renderer::initialize_textures_showcase(Windows::UI::Xaml::Controls::SwapChainPanel const& target_swapchain)
+	void renderer::initialize_textures_showcase(Windows::Foundation::Collections::IMap<hstring, Windows::Foundation::IInspectable> const& ui_items, Windows::Foundation::Collections::IMap<hstring, float> const& ui_item_values)
 	{
+		auto boxed_swapchain_panel = ui_items.Lookup(hstring{ L"swapchain_panel" });
+		m_swapchain_panel = unbox_value<Windows::UI::Xaml::Controls::SwapChainPanel>(boxed_swapchain_panel);
+
+		m_ui_item_values = ui_item_values;
+		//auto boxed_texcoord_u_slider = ui_items.Lookup(hstring{ L"texcoord_u_slider" });
+		//m_texcoord_u_slider = unbox_value<Windows::UI::Xaml::Controls::Slider>(boxed_texcoord_u_slider);
+
 		create_factory();
 		create_device();
 		create_fence();
@@ -142,10 +149,11 @@ namespace winrt::graphics::implementation
 		create_rtv_heap();
 		create_srv_heap();
 		create_depthstencil_buffer();
-		create_swapchain_xaml(target_swapchain);
+		create_swapchain_xaml(m_swapchain_panel);
 		create_render_targets();
 		create_texture_rootsignature(get_static_samplers());
 		create_point();
+		create_cb_texcoord();
 		//create_simple_triangle();
 		//create_texture_srv();
 	}
@@ -231,6 +239,14 @@ namespace winrt::graphics::implementation
 
 	void renderer::render_2()
 	{
+		auto res = m_ui_item_values.Lookup(hstring{ L"texcoord_u_slider" });
+		DirectX::XMFLOAT4 new_data = XMFLOAT4(res, 0.0f, 0.0f, 0.0f);
+
+		std::memcpy(
+			reinterpret_cast<void*>(m_mapped_texcoord_data),
+			reinterpret_cast<void*>(&new_data),
+			sizeof(DirectX::XMFLOAT4));
+
 		check_hresult(m_cmd_allocator->Reset());
 		check_hresult(m_graphics_cmdlist->Reset(m_cmd_allocator.get(), m_billboard_pso.get()));
 
@@ -258,11 +274,12 @@ namespace winrt::graphics::implementation
 
 		m_graphics_cmdlist->OMSetRenderTargets(1, &current_backbuffer_view(), true, &m_dsv_heap->GetCPUDescriptorHandleForHeapStart());
 
-		m_graphics_cmdlist->SetPipelineState(m_billboard_pso.get());
 		m_graphics_cmdlist->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY::D3D_PRIMITIVE_TOPOLOGY_POINTLIST);
-		//select_primitive_topology();
 
 		m_graphics_cmdlist->SetGraphicsRootSignature(m_rootsig.get());
+		m_graphics_cmdlist->SetGraphicsRootConstantBufferView(1, m_cb_texcoord_upload_buffer->GetGPUVirtualAddress());
+
+		m_graphics_cmdlist->SetPipelineState(m_billboard_pso.get());
 
 		ID3D12DescriptorHeap* heaps[] = { m_srv_heap.get() };
 		m_graphics_cmdlist->SetDescriptorHeaps(_countof(heaps), heaps);
@@ -403,8 +420,8 @@ namespace winrt::graphics::implementation
 		texture_desc.SampleDesc.Count = 1;
 		texture_desc.SampleDesc.Quality = 0;
 
-		auto row_pitch =  width * pixel_size;
-		auto slice_pitch =  row_pitch * height;
+		auto row_pitch = width * pixel_size;
+		auto slice_pitch = row_pitch * height;
 
 		m_textures[texture_name].mip_levels(texture_desc.MipLevels);
 		m_textures[texture_name].width(texture_desc.Width);
@@ -630,8 +647,10 @@ namespace winrt::graphics::implementation
 		CD3DX12_DESCRIPTOR_RANGE range = {};
 		range.Init(D3D12_DESCRIPTOR_RANGE_TYPE::D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
 
-		CD3DX12_ROOT_PARAMETER root_parameter = {};
-		root_parameter.InitAsDescriptorTable(1, &range, D3D12_SHADER_VISIBILITY::D3D12_SHADER_VISIBILITY_PIXEL);
+		CD3DX12_ROOT_PARAMETER root_parameter[2];
+
+		root_parameter[0].InitAsDescriptorTable(1, &range, D3D12_SHADER_VISIBILITY::D3D12_SHADER_VISIBILITY_PIXEL);
+		root_parameter[1].InitAsConstantBufferView(0);
 
 		D3D12_STATIC_SAMPLER_DESC sampler = {};
 		sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
@@ -649,8 +668,8 @@ namespace winrt::graphics::implementation
 		sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 		CD3DX12_ROOT_SIGNATURE_DESC rootsig_desc(
-			1,
-			&root_parameter,
+			2,
+			root_parameter,
 			(UINT)samplers.size(),
 			&samplers[0],
 			//1,
@@ -770,6 +789,42 @@ namespace winrt::graphics::implementation
 		srv_desc.Format = texture_desc.Format;
 
 		m_device->CreateShaderResourceView(m_checkerboard_texture.get(), &srv_desc, m_srv_heap->GetCPUDescriptorHandleForHeapStart());
+	}
+
+	void renderer::create_cb_texcoord()
+	{
+		D3D12_HEAP_PROPERTIES heap_props = {};
+		heap_props.Type = D3D12_HEAP_TYPE::D3D12_HEAP_TYPE_UPLOAD;
+		heap_props.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY::D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
+		heap_props.MemoryPoolPreference = D3D12_MEMORY_POOL::D3D12_MEMORY_POOL_UNKNOWN;
+		heap_props.VisibleNodeMask = 0;
+
+		D3D12_RESOURCE_DESC cb_res_desc = {};
+		cb_res_desc.Alignment = 0;
+		cb_res_desc.DepthOrArraySize = 1;
+		cb_res_desc.Dimension = D3D12_RESOURCE_DIMENSION::D3D12_RESOURCE_DIMENSION_BUFFER;
+		cb_res_desc.Flags = D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_NONE;
+		cb_res_desc.Format = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
+		cb_res_desc.Height = 1;
+		cb_res_desc.Width = (sizeof(DirectX::XMFLOAT4) + 255) & ~255;
+		cb_res_desc.Layout = D3D12_TEXTURE_LAYOUT::D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+		cb_res_desc.MipLevels = 1;
+		cb_res_desc.SampleDesc.Count = 1;
+		cb_res_desc.SampleDesc.Quality = 0;
+
+		m_device->CreateCommittedResource(
+			&heap_props,
+			D3D12_HEAP_FLAGS::D3D12_HEAP_FLAG_NONE,
+			&cb_res_desc,
+			D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ,
+			nullptr,
+			guid_of<ID3D12Resource>(),
+			m_cb_texcoord_upload_buffer.put_void()
+		);
+
+		m_cb_texcoord_upload_buffer->SetName(hstring{ L"cb_texcoord" }.c_str());
+
+		m_cb_texcoord_upload_buffer->Map(0, nullptr, reinterpret_cast<void**>(&m_mapped_texcoord_data));
 	}
 
 	std::vector<UINT8> renderer::generate_texture_data(UINT texture_width, UINT texture_height, UINT texture_pixel_size)
@@ -971,7 +1026,6 @@ namespace winrt::graphics::implementation
 		pso_desc.SampleDesc.Quality = 0;
 		pso_desc.DSVFormat = m_depthstencil_format;
 
-		// shaders
 		pso_desc.VS =
 		{
 			reinterpret_cast<unsigned char*>(vertex_shader->GetBufferPointer()),
@@ -1009,7 +1063,6 @@ namespace winrt::graphics::implementation
 		pso_desc.DSVFormat = m_depthstencil_format;
 		pso_desc.RasterizerState.CullMode = D3D12_CULL_MODE::D3D12_CULL_MODE_NONE;
 
-		// shaders
 		pso_desc.VS =
 		{
 			reinterpret_cast<unsigned char*>(vertex_shader->GetBufferPointer()),
@@ -1037,7 +1090,6 @@ namespace winrt::graphics::implementation
 		if (shader_byte_code)
 		{
 
-			// reflect the shader
 			com_ptr<ID3D12ShaderReflection> shader_reflector;
 			check_hresult(D3DReflect(
 				shader_byte_code->GetBufferPointer(),
@@ -1045,7 +1097,6 @@ namespace winrt::graphics::implementation
 				guid_of<ID3D12ShaderReflection>(),
 				shader_reflector.put_void()));
 
-			// pixel shader description
 			D3D12_SHADER_DESC shader_desc = {};
 			check_hresult(shader_reflector->GetDesc(&shader_desc));
 
@@ -1195,8 +1246,6 @@ namespace winrt::graphics::implementation
 			}
 
 			target_shader->shader_reflection_data(new_reflection_attributes);
-
-			// check if resources bound is greater than 0
 
 			if (shader_desc.BoundResources > 0)
 			{

@@ -29,10 +29,10 @@ namespace interop_test_app
         async Task test_abi_calls()
         {
             //tester = Customer.Customers();
-            graphics.renderer renderer = new graphics.renderer();
-            renderer.enable_debug_layer();
-            renderer.initialize_textures_showcase(swapChainPanel);
-            renderer.start_render_loop();
+            //graphics.renderer renderer = new graphics.renderer();
+            //renderer.enable_debug_layer();
+            //renderer.initialize_textures_showcase(swapChainPanel);
+            //renderer.start_render_loop();
 
             //graphics.shader new_shader = new graphics.shader("default_vs", shader_type.vertex);
             //new_shader.is_loading = true;

@@ -30,10 +30,14 @@ namespace winrt::wzrd_editor::implementation
 		IAsyncAction onmouseexit_textures_list(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
 		IAsyncAction shader_selection_changed(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
 		IAsyncAction texture_selection_changed(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
+		IAsyncAction texcoord_u_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
+		IAsyncAction texcoord_v_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
 
 		wzrd_editor::texture_showcase_vm texture_showcase_vm();
 
 	private:
+		std::map<hstring, Windows::Foundation::IInspectable> m_ui_items = {};
+		Windows::Foundation::Collections::IMap<hstring, float> m_ui_control_values = winrt::single_threaded_map<hstring, float>();
 		graphics::renderer m_renderer;
 		Windows::UI::Composition::SpringVector3NaturalMotionAnimation m_spring_animation = nullptr;
 		void play_spring_animation(float target_value, IInspectable const & sender);

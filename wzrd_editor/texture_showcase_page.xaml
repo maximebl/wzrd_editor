@@ -222,6 +222,9 @@
                                 </Style>
                             </ListView.Resources>
                         </ListView>
+
+                        <Slider x:Name="texcoord_u" ValueChanged="texcoord_u_valuechanged" Header="U" Width="100" Minimum="-1.0" Maximum="1.0" StepFrequency="0.1" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="Outside" HorizontalAlignment="Left"/>
+                        <Slider x:Name="texcoord_v" ValueChanged="texcoord_v_valuechanged" Header="V" Height="100" IsDirectionReversed="True" Orientation="Vertical" Minimum="-1.0" Maximum="1.0" StepFrequency="0.1"  TickFrequency="0.1" TickPlacement="Outside" HorizontalAlignment="Left"/>
                     </StackPanel>
                 </PivotItem>
                 <PivotItem Header="Shaders">

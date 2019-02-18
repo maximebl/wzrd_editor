@@ -22,7 +22,7 @@ namespace winrt::graphics::implementation
 
 		void enable_debug_layer();
 		void initialize_buffers_showcase(Windows::UI::Xaml::Controls::SwapChainPanel const& target_swapchain);
-		void initialize_textures_showcase(Windows::UI::Xaml::Controls::SwapChainPanel const& target_swapchain);
+		void initialize_textures_showcase(Windows::Foundation::Collections::IMap<hstring, Windows::Foundation::IInspectable> const& ui_items, Windows::Foundation::Collections::IMap<hstring, float> const& ui_item_values);
 		void start_render_loop();
 		void stop_render_loop();
 		void clear_shaders();
@@ -42,7 +42,10 @@ namespace winrt::graphics::implementation
 		static ID3D12GraphicsCommandList* g_cmd_list;
 
 	private:
+		Windows::UI::Xaml::Controls::SwapChainPanel m_swapchain_panel;
+		Windows::Foundation::Collections::IMap<hstring, float> m_ui_item_values = nullptr;
 		winrt::apartment_context m_ui_thread;
+
 		bool m_is_rendering = false;
 		com_ptr<buffer> m_current_buffer = nullptr;
 		constexpr static int m_swapchain_buffer_count = 2;
@@ -87,6 +90,8 @@ namespace winrt::graphics::implementation
 		com_ptr<ID3D12PipelineState> m_billboard_pso = nullptr;
 
 		com_ptr<ID3D12Resource> m_texture_upload_buffer = nullptr;
+		com_ptr<ID3D12Resource> m_cb_texcoord_upload_buffer = nullptr;
+		unsigned char* m_mapped_texcoord_data = nullptr;
 
 		std::vector<D3D12_INPUT_ELEMENT_DESC> m_basic_input_layout;
 
@@ -105,6 +110,7 @@ namespace winrt::graphics::implementation
 		void create_simple_triangle();
 		void create_point();
 		void create_texture_srv();
+		void create_cb_texcoord();
 		std::vector<UINT8> generate_texture_data(UINT texture_width, UINT texture_height, UINT texture_pixel_size);
 		std::vector<CD3DX12_STATIC_SAMPLER_DESC> get_static_samplers();
 		void init_psos();

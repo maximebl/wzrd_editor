@@ -107,8 +107,8 @@ winrt::com_ptr<ID3D12Resource> Utilities::create_default_buffer(
 			&CD3DX12_RESOURCE_DESC::Buffer(byteSize),
 			D3D12_RESOURCE_STATE_COMMON,
 			nullptr,
-			//winrt::guid_of<ID3D12Resource>(),
-			__uuidof(ID3D12Resource),
+			winrt::guid_of<ID3D12Resource>(),
+			//__uuidof(ID3D12Resource),
 			default_buffer.put_void()));
 
 	winrt::check_hresult(
@@ -118,8 +118,8 @@ winrt::com_ptr<ID3D12Resource> Utilities::create_default_buffer(
 			&CD3DX12_RESOURCE_DESC::Buffer(byteSize),
 			D3D12_RESOURCE_STATE_GENERIC_READ,
 			nullptr,
-			//winrt::guid_of<ID3D12Resource>(),
-			__uuidof(ID3D12Resource),
+			winrt::guid_of<ID3D12Resource>(),
+			//__uuidof(ID3D12Resource),
 			uploadBuffer.put_void()));
 
 	D3D12_SUBRESOURCE_DATA subresource_data = {};
