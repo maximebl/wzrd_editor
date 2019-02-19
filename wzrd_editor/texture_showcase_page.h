@@ -30,8 +30,18 @@ namespace winrt::wzrd_editor::implementation
 		IAsyncAction onmouseexit_textures_list(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
 		IAsyncAction shader_selection_changed(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
 		IAsyncAction texture_selection_changed(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
-		IAsyncAction texcoord_u_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
-		IAsyncAction texcoord_v_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
+
+		IAsyncAction topleft_u_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
+		IAsyncAction topleft_v_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
+
+		IAsyncAction topright_u_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
+		IAsyncAction topright_v_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
+
+		IAsyncAction bottomleft_u_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
+		IAsyncAction bottomleft_v_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
+
+		IAsyncAction bottomright_u_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
+		IAsyncAction bottomright_v_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
 
 		wzrd_editor::texture_showcase_vm texture_showcase_vm();
 

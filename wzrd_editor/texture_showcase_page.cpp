@@ -17,7 +17,18 @@ namespace winrt::wzrd_editor::implementation
 		m_renderer.enable_debug_layer();
 
 		m_ui_items[hstring{ L"swapchain_panel" }] = box_value(swapchain_panel());
-		m_ui_control_values.Insert(hstring{ L"texcoord_u_slider" }, 0.0f);
+
+		m_ui_control_values.Insert(hstring{ L"topleft_u" }, 0.0f);
+		m_ui_control_values.Insert(hstring{ L"topleft_v" }, 0.0f);
+
+		m_ui_control_values.Insert(hstring{ L"topright_u" }, 1.0f);
+		m_ui_control_values.Insert(hstring{ L"topright_v" }, 0.0f);
+
+		m_ui_control_values.Insert(hstring{ L"bottomleft_u" }, 0.0f);
+		m_ui_control_values.Insert(hstring{ L"bottomleft_v" }, 1.0f);
+
+		m_ui_control_values.Insert(hstring{ L"bottomright_u" }, 1.0f);
+		m_ui_control_values.Insert(hstring{ L"bottomright_v" }, 1.0f);
 
 		auto ui_items = winrt::single_threaded_map<hstring, Windows::Foundation::IInspectable>(std::move(m_ui_items));
 		m_renderer.initialize_textures_showcase(ui_items, m_ui_control_values);
@@ -209,15 +220,51 @@ namespace winrt::wzrd_editor::implementation
 		co_return;
 	}
 
-	IAsyncAction texture_showcase_page::texcoord_u_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	IAsyncAction texture_showcase_page::topleft_u_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		m_ui_control_values.Insert(hstring{ L"texcoord_u_slider" }, (float)texcoord_u().Value());
+		m_ui_control_values.Insert(hstring{ L"topleft_u" }, (float)topleft_u().Value());
 		co_return;
 	}
 
-	IAsyncAction texture_showcase_page::texcoord_v_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	IAsyncAction texture_showcase_page::topleft_v_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		return IAsyncAction();
+		m_ui_control_values.Insert(hstring{ L"topleft_v" }, (float)topleft_v().Value());
+		co_return;
+	}
+
+	IAsyncAction texture_showcase_page::topright_u_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		m_ui_control_values.Insert(hstring{ L"topright_u" }, (float)topright_u().Value());
+		co_return;
+	}
+
+	IAsyncAction texture_showcase_page::topright_v_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		m_ui_control_values.Insert(hstring{ L"topright_v" }, (float)topright_v().Value());
+		co_return;
+	}
+
+	IAsyncAction texture_showcase_page::bottomleft_u_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		m_ui_control_values.Insert(hstring{ L"bottomleft_u" }, (float)bottomleft_u().Value());
+		co_return;
+	}
+	IAsyncAction texture_showcase_page::bottomleft_v_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		m_ui_control_values.Insert(hstring{ L"bottomleft_v" }, (float)bottomleft_v().Value());
+		co_return;
+	}
+
+	IAsyncAction texture_showcase_page::bottomright_u_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		m_ui_control_values.Insert(hstring{ L"bottomright_u" }, (float)bottomright_u().Value());
+		co_return;
+	}
+
+	IAsyncAction texture_showcase_page::bottomright_v_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		m_ui_control_values.Insert(hstring{ L"bottomright_v" }, (float)bottomright_v().Value());
+		co_return;
 	}
 
 	IAsyncAction texture_showcase_page::render_onclick(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)

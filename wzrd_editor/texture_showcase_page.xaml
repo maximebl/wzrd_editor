@@ -155,12 +155,14 @@
                 <VisualState x:Name="valid_texture_selected">
                     <VisualState.Setters>
                         <Setter Target="appbarbutton_delete_texture.IsEnabled" Value="True"/>
+                        <Setter Target="texture_coords_sliders.Visibility" Value="Visible"/>
                     </VisualState.Setters>
                 </VisualState>
 
                 <VisualState x:Name="valid_texture_not_selected">
                     <VisualState.Setters>
                         <Setter Target="appbarbutton_delete_texture.IsEnabled" Value="False"/>
+                        <Setter Target="texture_coords_sliders.Visibility" Value="Collapsed"/>
                     </VisualState.Setters>
                 </VisualState>
 
@@ -180,7 +182,6 @@
 
         <StackPanel>
             <Button x:Name="start_render" Click="render_onclick" Content="render"></Button>
-            <TextBox x:Name="billboard_count" Header="Number of billboards" Text="1"/>
 
             <Pivot x:Name="assets_pivot">
                 <PivotItem Header="Textures">
@@ -223,8 +224,55 @@
                             </ListView.Resources>
                         </ListView>
 
-                        <Slider x:Name="texcoord_u" ValueChanged="texcoord_u_valuechanged" Header="U" Width="100" Minimum="-1.0" Maximum="1.0" StepFrequency="0.1" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="Outside" HorizontalAlignment="Left"/>
-                        <Slider x:Name="texcoord_v" ValueChanged="texcoord_v_valuechanged" Header="V" Height="100" IsDirectionReversed="True" Orientation="Vertical" Minimum="-1.0" Maximum="1.0" StepFrequency="0.1"  TickFrequency="0.1" TickPlacement="Outside" HorizontalAlignment="Left"/>
+                        <StackPanel x:Name="texture_coords_sliders" Orientation="Vertical" Visibility="Collapsed">
+                            <Grid BorderThickness="3" BorderBrush="{ThemeResource SystemControlBackgroundListMediumRevealBorderBrush}" Padding="3,3,3,3" Width="auto">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="auto"/>
+                                    <ColumnDefinition Width="auto"/>
+                                </Grid.ColumnDefinitions>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="auto"/>
+                                    <RowDefinition Height="auto"/>
+                                </Grid.RowDefinitions>
+
+                                <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="0">
+                                    <TextBlock FontWeight="ExtraBlack" Text="Top left"></TextBlock>
+                                    <RelativePanel>
+                                        <Slider x:Name="topleft_v" ValueChanged="topleft_v_valuechanged" Header="v" Height="100" Orientation="Vertical" Value="0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.1"  TickFrequency="0.1" TickPlacement="None" HorizontalAlignment="Left"
+                                    RelativePanel.RightOf="topleft_u" />
+                                        <Slider x:Name="topleft_u" ValueChanged="topleft_u_valuechanged" Header="u" Width="100" Orientation="Horizontal" Value="0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.1"  TickFrequency="0.1" TickPlacement="None" HorizontalAlignment="Left"/>
+                                    </RelativePanel>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="0">
+                                    <TextBlock FontWeight="ExtraBlack" Text="Top right"></TextBlock>
+                                    <RelativePanel>
+                                        <Slider x:Name="topright_v" ValueChanged="topright_v_valuechanged" Header="v" Height="100"  Orientation="Vertical" Value="0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.1" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" HorizontalAlignment="Left"
+                                    RelativePanel.RightOf="topright_u" />
+                                        <Slider x:Name="topright_u" ValueChanged="topright_u_valuechanged" Header="u" Width="100" Orientation="Horizontal" Value="1.0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.1" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" HorizontalAlignment="Left"/>
+                                    </RelativePanel>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="1">
+                                    <TextBlock FontWeight="ExtraBlack" Text="Bottom left"></TextBlock>
+                                    <RelativePanel>
+                                        <Slider x:Name="bottomleft_v" ValueChanged="bottomleft_v_valuechanged" Header="v" Height="100" Orientation="Vertical" Value="1.0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.1" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" HorizontalAlignment="Left"
+                                    RelativePanel.RightOf="bottomleft_u" />
+                                        <Slider x:Name="bottomleft_u" ValueChanged="bottomleft_u_valuechanged" Header="u" Width="100" Orientation="Horizontal" Value="0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.1" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" HorizontalAlignment="Left"/>
+                                    </RelativePanel>
+                                </StackPanel>
+
+                                <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="1">
+                                    <TextBlock FontWeight="ExtraBlack" Text="Bottom right"></TextBlock>
+                                    <RelativePanel>
+                                        <Slider x:Name="bottomright_v" ValueChanged="bottomright_v_valuechanged" Header="v" Height="100" Orientation="Vertical" Value="1.0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.1" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" HorizontalAlignment="Left"
+                                    RelativePanel.RightOf="bottomright_u"/>
+                                        <Slider x:Name="bottomright_u" ValueChanged="bottomright_u_valuechanged" Header="u" Width="100" Orientation="Horizontal" Value="1.0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.1" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" HorizontalAlignment="Left"/>
+                                    </RelativePanel>
+                                </StackPanel>
+                            </Grid>
+
+                        </StackPanel>
                     </StackPanel>
                 </PivotItem>
                 <PivotItem Header="Shaders">
@@ -267,7 +315,7 @@
                                     </MenuFlyout>
                                 </AppBarButton.Flyout>
                             </AppBarButton>
-                            <AppBarButton Icon="Delete" Label="Delete" x:Name="appbarbutton_delete_shader" Click="delete_selected_shader" />
+                            <AppBarButton Icon="Delete" Label="Delete" IsEnabled="False" x:Name="appbarbutton_delete_shader" Click="delete_selected_shader" />
                         </CommandBar>
 
                         <ListView

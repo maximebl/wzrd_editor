@@ -237,15 +237,33 @@ namespace winrt::graphics::implementation
 		m_current_backbuffer = (m_current_backbuffer + 1) % m_swapchain_buffer_count;
 	}
 
+	struct gs_texcoord
+	{
+		DirectX::XMFLOAT2 topleft;
+		DirectX::XMFLOAT2 topright;
+		DirectX::XMFLOAT2 bottomleft;
+		DirectX::XMFLOAT2 bottomright;
+	};
+
 	void renderer::render_2()
 	{
-		auto res = m_ui_item_values.Lookup(hstring{ L"texcoord_u_slider" });
-		DirectX::XMFLOAT4 new_data = XMFLOAT4(res, 0.0f, 0.0f, 0.0f);
+		gs_texcoord texcoords;
+		texcoords.topleft.x = m_ui_item_values.Lookup(hstring{ L"topleft_u" });
+		texcoords.topleft.y = m_ui_item_values.Lookup(hstring{ L"topleft_v" });
+
+		texcoords.topright.x = m_ui_item_values.Lookup(hstring{ L"topright_u" });
+		texcoords.topright.y = m_ui_item_values.Lookup(hstring{ L"topright_v" });
+
+		texcoords.bottomleft.x = m_ui_item_values.Lookup(hstring{ L"bottomleft_u" });
+		texcoords.bottomleft.y = m_ui_item_values.Lookup(hstring{ L"bottomleft_v" });
+
+		texcoords.bottomright.x = m_ui_item_values.Lookup(hstring{ L"bottomright_u" });
+		texcoords.bottomright.y = m_ui_item_values.Lookup(hstring{ L"bottomright_v" });
 
 		std::memcpy(
 			reinterpret_cast<void*>(m_mapped_texcoord_data),
-			reinterpret_cast<void*>(&new_data),
-			sizeof(DirectX::XMFLOAT4));
+			reinterpret_cast<void*>(&texcoords),
+			sizeof(gs_texcoord));
 
 		check_hresult(m_cmd_allocator->Reset());
 		check_hresult(m_graphics_cmdlist->Reset(m_cmd_allocator.get(), m_billboard_pso.get()));
@@ -672,8 +690,6 @@ namespace winrt::graphics::implementation
 			root_parameter,
 			(UINT)samplers.size(),
 			&samplers[0],
-			//1,
-			//&sampler,
 			D3D12_ROOT_SIGNATURE_FLAGS::D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
 		com_ptr<ID3DBlob> serialized_rootsig = nullptr;
@@ -806,7 +822,7 @@ namespace winrt::graphics::implementation
 		cb_res_desc.Flags = D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_NONE;
 		cb_res_desc.Format = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
 		cb_res_desc.Height = 1;
-		cb_res_desc.Width = (sizeof(DirectX::XMFLOAT4) + 255) & ~255;
+		cb_res_desc.Width = (sizeof(gs_texcoord) + 255) & ~255;
 		cb_res_desc.Layout = D3D12_TEXTURE_LAYOUT::D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
 		cb_res_desc.MipLevels = 1;
 		cb_res_desc.SampleDesc.Count = 1;

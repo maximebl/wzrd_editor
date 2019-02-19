@@ -1,7 +1,9 @@
-
 cbuffer cb_texcoords : register(b0)
 {
-    float4 tex_coord;
+    float2 topleft;
+    float2 topright;
+    float2 bottomleft;
+    float2 bottomright;
 };
 
 struct vs_in
@@ -40,35 +42,33 @@ void GS(
 )
 {
     gs_out geo_out;
-    geo_out.tex_coord.x = tex_coord.x;
 
     geo_out.position.z = 0.0f;
     geo_out.position.w = 1.0f;
-    //geo_out.tex_coord.x = tex_coord.x;
 
-// upper left
+// top left
     geo_out.position.x = -0.3f;
     geo_out.position.y = 0.3f;
-    geo_out.tex_coord.x = tex_coord.x;
-    geo_out.tex_coord.y = 0.0f;
+    geo_out.tex_coord.x = topleft.x;
+    geo_out.tex_coord.y = topleft.y;
     tri_stream.Append(geo_out);
-// upper right
+// top right
     geo_out.position.x = 0.3f;
     geo_out.position.y = 0.3f;
-    geo_out.tex_coord.x = 1.0f;
-    geo_out.tex_coord.y = 0.0f;
+    geo_out.tex_coord.x = topright.x;
+    geo_out.tex_coord.y = topright.y;;
     tri_stream.Append(geo_out);
-// lower left
+// bottom left
     geo_out.position.x = -0.3f;
     geo_out.position.y = -0.3;
-    geo_out.tex_coord.x = 0.0f;
-    geo_out.tex_coord.y = 1.0f;
+    geo_out.tex_coord.x = bottomleft.x;
+    geo_out.tex_coord.y = bottomleft.y;;
     tri_stream.Append(geo_out);
-// lower right
+// bottom right
     geo_out.position.x = 0.3f;
     geo_out.position.y = -0.3;
-    geo_out.tex_coord.x = 1.0f;
-    geo_out.tex_coord.y = 1.0f;
+    geo_out.tex_coord.x = bottomright.x;
+    geo_out.tex_coord.y = bottomright.y;
     tri_stream.Append(geo_out);
 }
 
