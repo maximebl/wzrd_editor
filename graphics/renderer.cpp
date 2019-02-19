@@ -148,6 +148,7 @@ namespace winrt::graphics::implementation
 		create_dsv_heap();
 		create_rtv_heap();
 		create_srv_heap();
+		create_sampler_heap();
 		create_depthstencil_buffer();
 		create_swapchain_xaml(m_swapchain_panel);
 		create_render_targets();
@@ -299,9 +300,12 @@ namespace winrt::graphics::implementation
 
 		m_graphics_cmdlist->SetPipelineState(m_billboard_pso.get());
 
-		ID3D12DescriptorHeap* heaps[] = { m_srv_heap.get() };
+		ID3D12DescriptorHeap* heaps[] = { m_srv_heap.get(), m_sampler_heap.get() };
 		m_graphics_cmdlist->SetDescriptorHeaps(_countof(heaps), heaps);
 		m_graphics_cmdlist->SetGraphicsRootDescriptorTable(0, m_srv_heap->GetGPUDescriptorHandleForHeapStart());
+
+		m_graphics_cmdlist->SetGraphicsRootDescriptorTable(2, m_sampler_heap->GetGPUDescriptorHandleForHeapStart());
+		m_device->CreateSampler(&m_sampler_desc, m_sampler_heap->GetCPUDescriptorHandleForHeapStart());
 
 		m_graphics_cmdlist->IASetVertexBuffers(0, 1, (D3D12_VERTEX_BUFFER_VIEW*)& m_current_buffer->get_view());
 		m_graphics_cmdlist->DrawInstanced(m_current_buffer->current_size(), 1, 0, 0);
@@ -566,6 +570,19 @@ namespace winrt::graphics::implementation
 		);
 	}
 
+	void renderer::create_sampler_heap()
+	{
+		D3D12_DESCRIPTOR_HEAP_DESC sampler_heap_desc = {};
+		sampler_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAGS::D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+		sampler_heap_desc.NodeMask = 0;
+		sampler_heap_desc.NumDescriptors = 1;
+		sampler_heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_SAMPLER;
+
+		check_hresult(
+			m_device->CreateDescriptorHeap(&sampler_heap_desc, guid_of<ID3D12DescriptorHeap>(), m_sampler_heap.put_void())
+		);
+	}
+
 	void renderer::create_depthstencil_buffer()
 	{
 		D3D12_RESOURCE_DESC depth_stencil_desc = {};
@@ -662,34 +679,63 @@ namespace winrt::graphics::implementation
 
 	void renderer::create_texture_rootsignature(std::vector<CD3DX12_STATIC_SAMPLER_DESC> samplers)
 	{
-		CD3DX12_DESCRIPTOR_RANGE range = {};
-		range.Init(D3D12_DESCRIPTOR_RANGE_TYPE::D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
+		//recreate the texture's range
+		D3D12_DESCRIPTOR_RANGE textures_range = {};
+		textures_range.BaseShaderRegister = 0;
+		textures_range.NumDescriptors = 1;
+		textures_range.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+		textures_range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE::D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+		textures_range.RegisterSpace = 0;
 
-		CD3DX12_ROOT_PARAMETER root_parameter[2];
+		D3D12_DESCRIPTOR_RANGE samplers_range = {};
+		samplers_range.BaseShaderRegister = 0;
+		samplers_range.NumDescriptors = 1;
+		samplers_range.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+		samplers_range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE::D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
+		samplers_range.RegisterSpace = 0;
 
-		root_parameter[0].InitAsDescriptorTable(1, &range, D3D12_SHADER_VISIBILITY::D3D12_SHADER_VISIBILITY_PIXEL);
+		//D3D12_STATIC_SAMPLER_DESC sampler = {};
+		//sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
+		//sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+		//sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+		//sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+		//sampler.MipLODBias = 0;
+		//sampler.MaxAnisotropy = 0;
+		//sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+		//sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+		//sampler.MinLOD = 0.0f;
+		//sampler.MaxLOD = D3D12_FLOAT32_MAX;
+		//sampler.ShaderRegister = 0;
+		//sampler.RegisterSpace = 0;
+		//sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+		FLOAT color_arr[4] = { 1.0f,0.2f,0.2f,0.0f };
+		m_sampler_desc.Filter = D3D12_FILTER::D3D12_FILTER_MIN_MAG_MIP_POINT;
+		m_sampler_desc.AddressU = D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+		m_sampler_desc.AddressV = D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+		m_sampler_desc.AddressW = D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+		m_sampler_desc.MipLODBias = 0;
+		m_sampler_desc.MaxAnisotropy = 0;
+		m_sampler_desc.ComparisonFunc = D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_NEVER;
+		m_sampler_desc.MinLOD = 0.0f;
+		m_sampler_desc.MaxLOD = D3D12_FLOAT32_MAX;
+		memcpy(m_sampler_desc.BorderColor, color_arr, sizeof(FLOAT) * 4);
+
+
+		//CD3DX12_DESCRIPTOR_RANGE range = {};
+		//range.Init(D3D12_DESCRIPTOR_RANGE_TYPE::D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
+
+		CD3DX12_ROOT_PARAMETER root_parameter[3];
+		root_parameter[0].InitAsDescriptorTable(1, &textures_range, D3D12_SHADER_VISIBILITY::D3D12_SHADER_VISIBILITY_PIXEL);
 		root_parameter[1].InitAsConstantBufferView(0);
-
-		D3D12_STATIC_SAMPLER_DESC sampler = {};
-		sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
-		sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
-		sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
-		sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
-		sampler.MipLODBias = 0;
-		sampler.MaxAnisotropy = 0;
-		sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
-		sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
-		sampler.MinLOD = 0.0f;
-		sampler.MaxLOD = D3D12_FLOAT32_MAX;
-		sampler.ShaderRegister = 0;
-		sampler.RegisterSpace = 0;
-		sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+		root_parameter[2].InitAsDescriptorTable(1, &samplers_range, D3D12_SHADER_VISIBILITY::D3D12_SHADER_VISIBILITY_PIXEL);
 
 		CD3DX12_ROOT_SIGNATURE_DESC rootsig_desc(
-			2,
+			3,
 			root_parameter,
-			(UINT)samplers.size(),
-			&samplers[0],
+			0,
+			nullptr,
+			//(UINT)samplers.size(),
+			//&samplers[0],
 			D3D12_ROOT_SIGNATURE_FLAGS::D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
 		com_ptr<ID3DBlob> serialized_rootsig = nullptr;

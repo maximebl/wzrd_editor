@@ -75,6 +75,10 @@ namespace winrt::graphics::implementation
 		com_ptr<ID3D12DescriptorHeap> m_rtv_heap = nullptr;
 		com_ptr<ID3D12DescriptorHeap> m_dsv_heap = nullptr;
 		com_ptr<ID3D12DescriptorHeap> m_srv_heap = nullptr;
+
+		com_ptr<ID3D12DescriptorHeap> m_sampler_heap = nullptr;
+		D3D12_SAMPLER_DESC m_sampler_desc = {};
+
 		com_ptr<ID3D12Resource> m_swapchain_buffer[m_swapchain_buffer_count];
 		com_ptr<ID3D12Resource> m_depthstencil_buffer;
 		com_ptr<ID3D12Resource> m_checkerboard_texture = nullptr;
@@ -102,6 +106,7 @@ namespace winrt::graphics::implementation
 		void create_dsv_heap();
 		void create_rtv_heap();
 		void create_srv_heap();
+		void create_sampler_heap();
 		void create_depthstencil_buffer();
 		void create_swapchain_xaml(Windows::UI::Xaml::Controls::SwapChainPanel target_swapchain);
 		void create_render_targets();

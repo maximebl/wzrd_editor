@@ -27,6 +27,7 @@ struct gs_out
 Texture2D g_texture : register(t0);
 SamplerState g_sampler : register(s0);
 
+
 vs_out VS(vs_in vin)
 {
     vs_out vout;
