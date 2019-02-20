@@ -30,6 +30,14 @@ namespace winrt::wzrd_editor::implementation
 		m_ui_control_values.Insert(hstring{ L"bottomright_u" }, 1.0f);
 		m_ui_control_values.Insert(hstring{ L"bottomright_v" }, 1.0f);
 
+		m_ui_control_values.Insert(hstring{ L"sampler_bordercolor_r" }, 0.0f);
+		m_ui_control_values.Insert(hstring{ L"sampler_bordercolor_g" }, 0.0f);
+		m_ui_control_values.Insert(hstring{ L"sampler_bordercolor_b" }, 0.0f);
+		m_ui_control_values.Insert(hstring{ L"sampler_bordercolor_a" }, 0.0f);
+
+		m_ui_control_values.Insert(hstring{ L"sampler_minLOD" }, 0.0f);
+		m_ui_control_values.Insert(hstring{ L"sampler_maxLOD" }, D3D12_FLOAT32_MAX);
+
 		auto ui_items = winrt::single_threaded_map<hstring, Windows::Foundation::IInspectable>(std::move(m_ui_items));
 		m_renderer.initialize_textures_showcase(ui_items, m_ui_control_values);
 
@@ -264,6 +272,44 @@ namespace winrt::wzrd_editor::implementation
 	IAsyncAction texture_showcase_page::bottomright_v_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
 		m_ui_control_values.Insert(hstring{ L"bottomright_v" }, (float)bottomright_v().Value());
+		co_return;
+	}
+
+	IAsyncAction texture_showcase_page::sampler_maxLOD_changed(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		m_ui_control_values.Insert(hstring{ L"sampler_maxLOD" }, sampler_maxLOD().Value());
+		co_return;
+	}
+
+	IAsyncAction texture_showcase_page::sampler_minLOD_changed(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		m_ui_control_values.Insert(hstring{ L"sampler_minLOD" }, (float)sampler_minLOD().Value());
+		return IAsyncAction();
+	}
+
+	IAsyncAction texture_showcase_page::sampler_addressmode_u_changed(IInspectable const & sender, winrt::Windows::UI::Xaml::Controls::SelectionChangedEventArgs const & args)
+	{
+		return IAsyncAction();
+	}
+
+	IAsyncAction texture_showcase_page::sampler_addressmode_v_changed(IInspectable const & sender, winrt::Windows::UI::Xaml::Controls::SelectionChangedEventArgs const & args)
+	{
+		return IAsyncAction();
+	}
+
+	IAsyncAction texture_showcase_page::sampler_bordercolor_changed(IInspectable const & sender, winrt::Windows::UI::Xaml::Controls::ColorChangedEventArgs const args)
+	{
+		auto selected_color = sampler_bordercolor().Color();
+
+		auto color_r = static_cast<float>(selected_color.R) / 255;
+		auto color_g = static_cast<float>(selected_color.G) / 255;
+		auto color_b = static_cast<float>(selected_color.B) / 255;
+		auto color_a = static_cast<float>(selected_color.A) / 255;
+
+		m_ui_control_values.Insert(hstring{ L"sampler_bordercolor_r" }, color_r);
+		m_ui_control_values.Insert(hstring{ L"sampler_bordercolor_g" }, color_g);
+		m_ui_control_values.Insert(hstring{ L"sampler_bordercolor_b" }, color_b);
+		m_ui_control_values.Insert(hstring{ L"sampler_bordercolor_a" }, color_a);
 		co_return;
 	}
 

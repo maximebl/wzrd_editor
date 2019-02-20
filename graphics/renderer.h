@@ -136,6 +136,7 @@ namespace winrt::graphics::implementation
 		com_ptr<ID3D12Fence> m_gpu_fence;
 		UINT64 m_cpu_fence = 0;
 		void flush_cmd_queue();
+		void update_samplers();
 
 		void render_1();
 		void render_2();

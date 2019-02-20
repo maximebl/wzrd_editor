@@ -94,6 +94,7 @@
     <ClCompile Include="texture_showcase_page.cpp" />
     <ClCompile Include="texture_showcase_vm.cpp" />
     <ClCompile Include="bool_invert.cpp" />
+    <ClCompile Include="ivector_to_bool.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -129,6 +130,7 @@
     <ClInclude Include="texture_showcase_page.h" />
     <ClInclude Include="texture_showcase_vm.h" />
     <ClInclude Include="bool_invert.h" />
+    <ClInclude Include="ivector_to_bool.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Wide310x150Logo.scale-200.png">

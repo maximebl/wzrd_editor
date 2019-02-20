@@ -246,6 +246,27 @@ namespace winrt::graphics::implementation
 		DirectX::XMFLOAT2 bottomright;
 	};
 
+	void renderer::update_samplers()
+	{
+		auto r = m_ui_item_values.Lookup(hstring{ L"sampler_bordercolor_r" });
+		auto g = m_ui_item_values.Lookup(hstring{ L"sampler_bordercolor_g" });
+		auto b = m_ui_item_values.Lookup(hstring{ L"sampler_bordercolor_b" });
+		auto a = m_ui_item_values.Lookup(hstring{ L"sampler_bordercolor_a" });
+
+		float border_color[4] = { r,g,b,a };
+		memcpy(m_sampler_desc.BorderColor, border_color, sizeof(FLOAT) * 4);
+
+		m_sampler_desc.AddressU = D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_WRAP;
+		m_sampler_desc.AddressV = D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+		m_sampler_desc.AddressW = D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+		m_sampler_desc.ComparisonFunc = D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_NEVER;
+		m_sampler_desc.Filter = D3D12_FILTER::D3D12_FILTER_MIN_MAG_MIP_POINT;
+		m_sampler_desc.MinLOD = m_ui_item_values.Lookup(hstring{ L"sampler_minLOD" });
+		m_sampler_desc.MaxLOD = m_ui_item_values.Lookup(hstring{ L"sampler_maxLOD" });
+
+		m_device->CreateSampler(&m_sampler_desc, m_sampler_heap->GetCPUDescriptorHandleForHeapStart());
+	}
+
 	void renderer::render_2()
 	{
 		gs_texcoord texcoords;
@@ -303,9 +324,9 @@ namespace winrt::graphics::implementation
 		ID3D12DescriptorHeap* heaps[] = { m_srv_heap.get(), m_sampler_heap.get() };
 		m_graphics_cmdlist->SetDescriptorHeaps(_countof(heaps), heaps);
 		m_graphics_cmdlist->SetGraphicsRootDescriptorTable(0, m_srv_heap->GetGPUDescriptorHandleForHeapStart());
-
 		m_graphics_cmdlist->SetGraphicsRootDescriptorTable(2, m_sampler_heap->GetGPUDescriptorHandleForHeapStart());
-		m_device->CreateSampler(&m_sampler_desc, m_sampler_heap->GetCPUDescriptorHandleForHeapStart());
+
+		update_samplers();
 
 		m_graphics_cmdlist->IASetVertexBuffers(0, 1, (D3D12_VERTEX_BUFFER_VIEW*)& m_current_buffer->get_view());
 		m_graphics_cmdlist->DrawInstanced(m_current_buffer->current_size(), 1, 0, 0);

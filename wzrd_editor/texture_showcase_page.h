@@ -43,6 +43,14 @@ namespace winrt::wzrd_editor::implementation
 		IAsyncAction bottomright_u_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
 		IAsyncAction bottomright_v_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
 
+		IAsyncAction sampler_maxLOD_changed(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
+		IAsyncAction sampler_minLOD_changed(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
+
+		IAsyncAction sampler_addressmode_u_changed(IInspectable const & sender, winrt::Windows::UI::Xaml::Controls::SelectionChangedEventArgs const & args);
+		IAsyncAction sampler_addressmode_v_changed(IInspectable const & sender, winrt::Windows::UI::Xaml::Controls::SelectionChangedEventArgs const & args);
+
+		IAsyncAction sampler_bordercolor_changed(IInspectable const & sender, const winrt::Windows::UI::Xaml::Controls::ColorChangedEventArgs args);
+
 		wzrd_editor::texture_showcase_vm texture_showcase_vm();
 
 	private:
