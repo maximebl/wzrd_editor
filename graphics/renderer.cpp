@@ -132,14 +132,15 @@ namespace winrt::graphics::implementation
 		create_empty_rootsignature(get_static_samplers());
 	}
 
-	void renderer::initialize_textures_showcase(Windows::Foundation::Collections::IMap<hstring, Windows::Foundation::IInspectable> const& ui_items, Windows::Foundation::Collections::IMap<hstring, float> const& ui_item_values)
+	void renderer::initialize_textures_showcase(
+		Windows::Foundation::Collections::IMap<hstring,
+		Windows::Foundation::IInspectable> const& ui_items,
+		Windows::Foundation::Collections::IMap<hstring, float> const& ui_item_values)
 	{
 		auto boxed_swapchain_panel = ui_items.Lookup(hstring{ L"swapchain_panel" });
 		m_swapchain_panel = unbox_value<Windows::UI::Xaml::Controls::SwapChainPanel>(boxed_swapchain_panel);
 
 		m_ui_item_values = ui_item_values;
-		//auto boxed_texcoord_u_slider = ui_items.Lookup(hstring{ L"texcoord_u_slider" });
-		//m_texcoord_u_slider = unbox_value<Windows::UI::Xaml::Controls::Slider>(boxed_texcoord_u_slider);
 
 		create_factory();
 		create_device();

@@ -26,6 +26,16 @@ namespace winrt::wzrd_editor::implementation
 		update_value(L"shaders", m_shaders, value);
 	}
 
+	IObservableVector<IInspectable> texture_showcase_vm::address_modes()
+	{
+		return m_address_modes;
+	}
+
+	void texture_showcase_vm::address_modes(IObservableVector<IInspectable> const & value)
+	{
+		update_value(L"address_modes", m_address_modes, value);
+	}
+
 	winrt::event_token texture_showcase_vm::PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& handler)
 	{
 		return m_property_changed.add(handler);

@@ -1,4 +1,6 @@
 #pragma once
+#include "generic_attribute.h"
+
 class utilities
 {
 public:

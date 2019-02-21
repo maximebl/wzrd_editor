@@ -48,7 +48,7 @@ namespace winrt::graphics::implementation
 
 namespace winrt::graphics::factory_implementation
 {
-	struct generic_attribute : generic_attributeT<generic_attribute, implementation::generic_attribute>
-	{
-	};
+    struct generic_attribute : generic_attributeT<generic_attribute, implementation::generic_attribute>
+    {
+    };
 }

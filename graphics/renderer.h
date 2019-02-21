@@ -22,7 +22,10 @@ namespace winrt::graphics::implementation
 
 		void enable_debug_layer();
 		void initialize_buffers_showcase(Windows::UI::Xaml::Controls::SwapChainPanel const& target_swapchain);
-		void initialize_textures_showcase(Windows::Foundation::Collections::IMap<hstring, Windows::Foundation::IInspectable> const& ui_items, Windows::Foundation::Collections::IMap<hstring, float> const& ui_item_values);
+		void initialize_textures_showcase(
+			Windows::Foundation::Collections::IMap<hstring,
+			Windows::Foundation::IInspectable> const& ui_items,
+			Windows::Foundation::Collections::IMap<hstring, float> const& ui_item_values);
 		void start_render_loop();
 		void stop_render_loop();
 		void clear_shaders();

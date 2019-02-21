@@ -19,12 +19,15 @@ namespace winrt::wzrd_editor::implementation
 		void textures(IObservableVector<IInspectable> const& value);
 		IObservableVector<IInspectable> shaders();
 		void shaders(IObservableVector<IInspectable> const& value);
+		IObservableVector<IInspectable> address_modes();
+		void address_modes(IObservableVector<IInspectable> const& value);
 		winrt::event_token PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& handler);
 		void PropertyChanged(winrt::event_token const& token) noexcept;
 
 	private:
 		IObservableVector<IInspectable> m_textures = winrt::single_threaded_observable_vector<IInspectable>();
 		IObservableVector<IInspectable> m_shaders = winrt::single_threaded_observable_vector<IInspectable>();
+		IObservableVector<IInspectable> m_address_modes = winrt::single_threaded_observable_vector<IInspectable>();
 
 		winrt::event<Windows::UI::Xaml::Data::PropertyChangedEventHandler> m_property_changed;
 

@@ -3,6 +3,7 @@
 #include <d3d12.h>
 #include "winrt/Windows.Foundation.h"
 #include "MathHelper.h"
+#include "winrt/graphics.h"
 
 namespace winrt::wzrd_editor::data
 {
@@ -193,5 +194,6 @@ public:
 	static void wait(DWORD duration);
 	static ID3D12Device* device;
 	static ID3D12GraphicsCommandList* cmd_list;
+	static void generate_address_modes_attributes(winrt::Windows::Foundation::Collections::IObservableVector<winrt::Windows::Foundation::IInspectable> & address_modes);
 };
 

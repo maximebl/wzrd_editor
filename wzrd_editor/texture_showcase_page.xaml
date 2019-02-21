@@ -275,12 +275,12 @@
                                     <Slider x:Name="sampler_maxLOD" ValueChanged="sampler_maxLOD_changed" Header="Max LOD" Width="100" Orientation="Horizontal" Value="100.0" Minimum="0" StepFrequency="0.1" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" HorizontalAlignment="Left"/>
                                     <Slider x:Name="sampler_minLOD" ValueChanged="sampler_minLOD_changed" Header="Min LOD" Width="100" Orientation="Horizontal" Value="0" Minimum="0" Maximum="1.0" StepFrequency="0.1" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" HorizontalAlignment="Left"/>
 
-                                    <ComboBox SelectionChanged="sampler_addressmode_u_changed" Header="Address Mode U" PlaceholderText="U addressing mode" Width="200" ItemsSource="{x:Bind texture_showcase_vm.shaders}" DisplayMemberPath="shader_name">
+                                    <ComboBox SelectionChanged="sampler_addressmode_u_changed" Header="Address Mode U" PlaceholderText="U addressing mode" Width="200"
+                                              ItemsSource="{x:Bind texture_showcase_vm.address_modes}" DisplayMemberPath="attribute_name">
                                     </ComboBox>
 
-                                    <ComboBox SelectionChanged="sampler_addressmode_v_changed" Header="Address Mode V" PlaceholderText="V addressing mode" Width="200">
-                                        <x:String>Blue</x:String>
-                                        <x:String>Red</x:String>
+                                    <ComboBox SelectionChanged="sampler_addressmode_v_changed" Header="Address Mode V" PlaceholderText="V addressing mode" Width="200"
+                                              ItemsSource="{x:Bind texture_showcase_vm.address_modes}" DisplayMemberPath="attribute_name">
                                     </ComboBox>
                                 </StackPanel>
                             </Grid>

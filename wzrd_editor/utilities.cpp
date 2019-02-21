@@ -1,6 +1,9 @@
 #include "pch.h"
 #include "utilities.h"
 
+using winrt::Windows::Foundation::Collections::IObservableVector;
+using winrt::Windows::Foundation::IInspectable;
+
 Utilities::Utilities()
 {
 }
@@ -207,3 +210,56 @@ void Utilities::wait(DWORD duration)
 	CloseHandle(event_handle);
 }
 
+void Utilities::generate_address_modes_attributes(IObservableVector<IInspectable> & address_modes)
+{
+
+#define get_name(var)  #var 
+
+	auto set_values = [address_modes](winrt::hstring name, winrt::hstring value, winrt::hstring description) {
+
+		winrt::graphics::generic_attribute new_attribute;
+		new_attribute.attribute_name(name);
+		new_attribute.attribute_description(description);
+		new_attribute.attribute_value(value);
+		address_modes.Append(new_attribute);
+	};
+
+	winrt::hstring description;
+	winrt::hstring value;
+	winrt::hstring name;
+
+	{
+		name = winrt::to_hstring(get_name(D3D12_TEXTURE_ADDRESS_MODE_WRAP));
+		description = L"Tile the texture at every (u,v) integer junction. For example, for u values between -1 and 3, the texture is repeated three times.";
+		value = winrt::to_hstring(D3D12_TEXTURE_ADDRESS_MODE_WRAP);
+		set_values(name, value, description);
+	}
+
+	{
+		name = winrt::to_hstring(get_name(D3D12_TEXTURE_ADDRESS_MODE_MIRROR));
+		description = L"Flip the texture at every (u,v) integer junction. For u values between -1 and 1, for example, the texture is addressed normally; between 1 and 2, the texture is flipped (mirrored); between 2 and 3, the texture is normal again; and so on.";
+		value = winrt::to_hstring(D3D12_TEXTURE_ADDRESS_MODE_MIRROR);
+		set_values(name, value, description);
+	}
+
+	{
+		name = winrt::to_hstring(get_name(D3D12_TEXTURE_ADDRESS_MODE_CLAMP));
+		description = L"Texture coordinates outside the range [-1.0, 1.0] are set to the texture color at 0.0 or 1.0, respectively.";
+		value = winrt::to_hstring(D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+		set_values(name, value, description);
+	}
+
+	{
+		name = winrt::to_hstring(get_name(D3D12_TEXTURE_ADDRESS_MODE_BORDER));
+		description = L"Texture coordinates outside the range [-1.0, 1.0] are set to the border color specified in D3D12_SAMPLER_DESC or HLSL code.";
+		value = winrt::to_hstring(D3D12_TEXTURE_ADDRESS_MODE_BORDER);
+		set_values(name, value, description);
+	}
+
+	{
+		name = winrt::to_hstring(get_name(D3D12_TEXTURE_ADDRESS_MODE_MIRROR_ONCE));
+		description = L"Similar to D3D12_TEXTURE_ADDRESS_MODE_MIRROR and D3D12_TEXTURE_ADDRESS_MODE_CLAMP. Takes the absolute value of the texture coordinate (thus, mirroring around -1), and then clamps to the maximum value.";
+		value = winrt::to_hstring(D3D12_TEXTURE_ADDRESS_MODE_MIRROR_ONCE);
+		set_values(name, value, description);
+	}
+}
