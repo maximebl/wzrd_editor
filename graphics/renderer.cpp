@@ -135,7 +135,7 @@ namespace winrt::graphics::implementation
 	void renderer::initialize_textures_showcase(
 		Windows::Foundation::Collections::IMap<hstring,
 		Windows::Foundation::IInspectable> const& ui_items,
-		Windows::Foundation::Collections::IMap<hstring, float> const& ui_item_values)
+		Windows::Foundation::Collections::IMap<hstring, Windows::Foundation::IInspectable> const& ui_item_values)
 	{
 		auto boxed_swapchain_panel = ui_items.Lookup(hstring{ L"swapchain_panel" });
 		m_swapchain_panel = unbox_value<Windows::UI::Xaml::Controls::SwapChainPanel>(boxed_swapchain_panel);
@@ -249,21 +249,32 @@ namespace winrt::graphics::implementation
 
 	void renderer::update_samplers()
 	{
-		auto r = m_ui_item_values.Lookup(hstring{ L"sampler_bordercolor_r" });
-		auto g = m_ui_item_values.Lookup(hstring{ L"sampler_bordercolor_g" });
-		auto b = m_ui_item_values.Lookup(hstring{ L"sampler_bordercolor_b" });
-		auto a = m_ui_item_values.Lookup(hstring{ L"sampler_bordercolor_a" });
+		auto r = unbox_value<float>(m_ui_item_values.Lookup(hstring{ L"sampler_bordercolor_r" }));
+		auto g = unbox_value<float>(m_ui_item_values.Lookup(hstring{ L"sampler_bordercolor_g" }));
+		auto b = unbox_value<float>(m_ui_item_values.Lookup(hstring{ L"sampler_bordercolor_b" }));
+		auto a = unbox_value<float>(m_ui_item_values.Lookup(hstring{ L"sampler_bordercolor_a" }));
 
 		float border_color[4] = { r,g,b,a };
 		memcpy(m_sampler_desc.BorderColor, border_color, sizeof(FLOAT) * 4);
 
-		m_sampler_desc.AddressU = D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_WRAP;
-		m_sampler_desc.AddressV = D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_BORDER;
-		m_sampler_desc.AddressW = D3D12_TEXTURE_ADDRESS_MODE::D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+
+
+		IInspectable boxed_addressmode_u = m_ui_item_values.Lookup(hstring{ L"sampler_addressmode_u" });
+		hstring addressmode_u = unbox_value_or<hstring>(boxed_addressmode_u, L"1");
+		m_sampler_desc.AddressU = static_cast<D3D12_TEXTURE_ADDRESS_MODE>(std::stoi(addressmode_u.c_str()));
+
+		IInspectable boxed_addressmode_v = m_ui_item_values.Lookup(hstring{ L"sampler_addressmode_v" });
+		hstring addressmode_v = unbox_value_or<hstring>(boxed_addressmode_v, L"1");
+		m_sampler_desc.AddressV = static_cast<D3D12_TEXTURE_ADDRESS_MODE>(std::stoi(addressmode_v.c_str()));
+
+		IInspectable boxed_addressmode_w = m_ui_item_values.Lookup(hstring{ L"sampler_addressmode_w" });
+		hstring addressmode_w = unbox_value_or<hstring>(boxed_addressmode_w, L"1");
+		m_sampler_desc.AddressW = static_cast<D3D12_TEXTURE_ADDRESS_MODE>(std::stoi(addressmode_w.c_str()));
+
 		m_sampler_desc.ComparisonFunc = D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_NEVER;
 		m_sampler_desc.Filter = D3D12_FILTER::D3D12_FILTER_MIN_MAG_MIP_POINT;
-		m_sampler_desc.MinLOD = m_ui_item_values.Lookup(hstring{ L"sampler_minLOD" });
-		m_sampler_desc.MaxLOD = m_ui_item_values.Lookup(hstring{ L"sampler_maxLOD" });
+		m_sampler_desc.MinLOD = unbox_value<float>(m_ui_item_values.Lookup(hstring{ L"sampler_minLOD" }));
+		m_sampler_desc.MaxLOD = unbox_value<float>(m_ui_item_values.Lookup(hstring{ L"sampler_maxLOD" }));
 
 		m_device->CreateSampler(&m_sampler_desc, m_sampler_heap->GetCPUDescriptorHandleForHeapStart());
 	}
@@ -271,17 +282,17 @@ namespace winrt::graphics::implementation
 	void renderer::render_2()
 	{
 		gs_texcoord texcoords;
-		texcoords.topleft.x = m_ui_item_values.Lookup(hstring{ L"topleft_u" });
-		texcoords.topleft.y = m_ui_item_values.Lookup(hstring{ L"topleft_v" });
+		texcoords.topleft.x = unbox_value<float>(m_ui_item_values.Lookup(hstring{ L"topleft_u" }));
+		texcoords.topleft.y = unbox_value<float>(m_ui_item_values.Lookup(hstring{ L"topleft_v" }));
 
-		texcoords.topright.x = m_ui_item_values.Lookup(hstring{ L"topright_u" });
-		texcoords.topright.y = m_ui_item_values.Lookup(hstring{ L"topright_v" });
+		texcoords.topright.x = unbox_value<float>(m_ui_item_values.Lookup(hstring{ L"topright_u" }));
+		texcoords.topright.y = unbox_value<float>(m_ui_item_values.Lookup(hstring{ L"topright_v" }));
 
-		texcoords.bottomleft.x = m_ui_item_values.Lookup(hstring{ L"bottomleft_u" });
-		texcoords.bottomleft.y = m_ui_item_values.Lookup(hstring{ L"bottomleft_v" });
+		texcoords.bottomleft.x = unbox_value<float>(m_ui_item_values.Lookup(hstring{ L"bottomleft_u" }));
+		texcoords.bottomleft.y = unbox_value<float>(m_ui_item_values.Lookup(hstring{ L"bottomleft_v" }));
 
-		texcoords.bottomright.x = m_ui_item_values.Lookup(hstring{ L"bottomright_u" });
-		texcoords.bottomright.y = m_ui_item_values.Lookup(hstring{ L"bottomright_v" });
+		texcoords.bottomright.x = unbox_value<float>(m_ui_item_values.Lookup(hstring{ L"bottomright_u" }));
+		texcoords.bottomright.y = unbox_value<float>(m_ui_item_values.Lookup(hstring{ L"bottomright_v" }));
 
 		std::memcpy(
 			reinterpret_cast<void*>(m_mapped_texcoord_data),

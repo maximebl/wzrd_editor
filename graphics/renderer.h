@@ -25,7 +25,7 @@ namespace winrt::graphics::implementation
 		void initialize_textures_showcase(
 			Windows::Foundation::Collections::IMap<hstring,
 			Windows::Foundation::IInspectable> const& ui_items,
-			Windows::Foundation::Collections::IMap<hstring, float> const& ui_item_values);
+			Windows::Foundation::Collections::IMap<hstring, Windows::Foundation::IInspectable> const& ui_item_values);
 		void start_render_loop();
 		void stop_render_loop();
 		void clear_shaders();
@@ -46,7 +46,7 @@ namespace winrt::graphics::implementation
 
 	private:
 		Windows::UI::Xaml::Controls::SwapChainPanel m_swapchain_panel;
-		Windows::Foundation::Collections::IMap<hstring, float> m_ui_item_values = nullptr;
+		Windows::Foundation::Collections::IMap<hstring, IInspectable> m_ui_item_values = nullptr;
 		winrt::apartment_context m_ui_thread;
 
 		bool m_is_rendering = false;

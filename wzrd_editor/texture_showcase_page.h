@@ -47,6 +47,7 @@ namespace winrt::wzrd_editor::implementation
 
 		IAsyncAction sampler_addressmode_u_changed(Windows::Foundation::IInspectable const & sender, winrt::Windows::UI::Xaml::Controls::SelectionChangedEventArgs const & args);
 		IAsyncAction sampler_addressmode_v_changed(Windows::Foundation::IInspectable const & sender, winrt::Windows::UI::Xaml::Controls::SelectionChangedEventArgs const & args);
+		IAsyncAction sampler_addressmode_w_changed(Windows::Foundation::IInspectable const & sender, winrt::Windows::UI::Xaml::Controls::SelectionChangedEventArgs const & args);
 
 		IAsyncAction sampler_bordercolor_changed(Windows::Foundation::IInspectable const & sender, const winrt::Windows::UI::Xaml::Controls::ColorChangedEventArgs args);
 
@@ -54,7 +55,7 @@ namespace winrt::wzrd_editor::implementation
 
 	private:
 		std::map<hstring, Windows::Foundation::IInspectable> m_ui_items = {};
-		Windows::Foundation::Collections::IMap<hstring, float> m_ui_control_values = winrt::single_threaded_map<hstring, float>();
+		Windows::Foundation::Collections::IMap<hstring, IInspectable> m_ui_control_values = winrt::single_threaded_map<hstring, IInspectable>();
 		graphics::renderer m_renderer;
 		Windows::UI::Composition::SpringVector3NaturalMotionAnimation m_spring_animation = nullptr;
 		void play_spring_animation(float target_value, Windows::Foundation::IInspectable const & sender);

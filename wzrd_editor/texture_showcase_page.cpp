@@ -19,25 +19,29 @@ namespace winrt::wzrd_editor::implementation
 
 		m_ui_items[hstring{ L"swapchain_panel" }] = box_value(swapchain_panel());
 
-		m_ui_control_values.Insert(hstring{ L"topleft_u" }, 0.0f);
-		m_ui_control_values.Insert(hstring{ L"topleft_v" }, 0.0f);
+		m_ui_control_values.Insert(hstring{ L"topleft_u" }, box_value(0.0f));
+		m_ui_control_values.Insert(hstring{ L"topleft_v" }, box_value(0.0f));
 
-		m_ui_control_values.Insert(hstring{ L"topright_u" }, 1.0f);
-		m_ui_control_values.Insert(hstring{ L"topright_v" }, 0.0f);
+		m_ui_control_values.Insert(hstring{ L"topright_u" }, box_value(1.0f));
+		m_ui_control_values.Insert(hstring{ L"topright_v" }, box_value(0.0f));
 
-		m_ui_control_values.Insert(hstring{ L"bottomleft_u" }, 0.0f);
-		m_ui_control_values.Insert(hstring{ L"bottomleft_v" }, 1.0f);
+		m_ui_control_values.Insert(hstring{ L"bottomleft_u" }, box_value(0.0f));
+		m_ui_control_values.Insert(hstring{ L"bottomleft_v" }, box_value(1.0f));
 
-		m_ui_control_values.Insert(hstring{ L"bottomright_u" }, 1.0f);
-		m_ui_control_values.Insert(hstring{ L"bottomright_v" }, 1.0f);
+		m_ui_control_values.Insert(hstring{ L"bottomright_u" }, box_value(1.0f));
+		m_ui_control_values.Insert(hstring{ L"bottomright_v" }, box_value(1.0f));
 
-		m_ui_control_values.Insert(hstring{ L"sampler_bordercolor_r" }, 0.0f);
-		m_ui_control_values.Insert(hstring{ L"sampler_bordercolor_g" }, 0.0f);
-		m_ui_control_values.Insert(hstring{ L"sampler_bordercolor_b" }, 0.0f);
-		m_ui_control_values.Insert(hstring{ L"sampler_bordercolor_a" }, 0.0f);
+		m_ui_control_values.Insert(hstring{ L"sampler_bordercolor_r" }, box_value(0.0f));
+		m_ui_control_values.Insert(hstring{ L"sampler_bordercolor_g" }, box_value(0.0f));
+		m_ui_control_values.Insert(hstring{ L"sampler_bordercolor_b" }, box_value(0.0f));
+		m_ui_control_values.Insert(hstring{ L"sampler_bordercolor_a" }, box_value(0.0f));
 
-		m_ui_control_values.Insert(hstring{ L"sampler_minLOD" }, 0.0f);
-		m_ui_control_values.Insert(hstring{ L"sampler_maxLOD" }, D3D12_FLOAT32_MAX);
+		m_ui_control_values.Insert(hstring{ L"sampler_minLOD" }, box_value(0.0f));
+		m_ui_control_values.Insert(hstring{ L"sampler_maxLOD" }, box_value(D3D12_FLOAT32_MAX));
+
+		m_ui_control_values.Insert(hstring{ L"sampler_addressmode_u" }, nullptr);
+		m_ui_control_values.Insert(hstring{ L"sampler_addressmode_v" }, nullptr);
+		m_ui_control_values.Insert(hstring{ L"sampler_addressmode_w" }, nullptr);
 
 		auto ui_items = winrt::single_threaded_map<hstring, IInspectable>(std::move(m_ui_items));
 
@@ -235,60 +239,60 @@ namespace winrt::wzrd_editor::implementation
 
 	IAsyncAction texture_showcase_page::topleft_u_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		m_ui_control_values.Insert(hstring{ L"topleft_u" }, (float)topleft_u().Value());
+		m_ui_control_values.Insert(hstring{ L"topleft_u" }, box_value(static_cast<float>(topleft_u().Value())));
 		co_return;
 	}
 
 	IAsyncAction texture_showcase_page::topleft_v_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		m_ui_control_values.Insert(hstring{ L"topleft_v" }, (float)topleft_v().Value());
+		m_ui_control_values.Insert(hstring{ L"topleft_v" }, box_value(static_cast<float>(topleft_v().Value())));
 		co_return;
 	}
 
 	IAsyncAction texture_showcase_page::topright_u_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		m_ui_control_values.Insert(hstring{ L"topright_u" }, (float)topright_u().Value());
+		m_ui_control_values.Insert(hstring{ L"topright_u" }, box_value(static_cast<float>(topright_u().Value())));
 		co_return;
 	}
 
 	IAsyncAction texture_showcase_page::topright_v_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		m_ui_control_values.Insert(hstring{ L"topright_v" }, (float)topright_v().Value());
+		m_ui_control_values.Insert(hstring{ L"topright_v" }, box_value(static_cast<float>(topright_v().Value())));
 		co_return;
 	}
 
 	IAsyncAction texture_showcase_page::bottomleft_u_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		m_ui_control_values.Insert(hstring{ L"bottomleft_u" }, (float)bottomleft_u().Value());
+		m_ui_control_values.Insert(hstring{ L"bottomleft_u" }, box_value(static_cast<float>(bottomleft_u().Value())));
 		co_return;
 	}
 	IAsyncAction texture_showcase_page::bottomleft_v_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		m_ui_control_values.Insert(hstring{ L"bottomleft_v" }, (float)bottomleft_v().Value());
+		m_ui_control_values.Insert(hstring{ L"bottomleft_v" }, box_value(static_cast<float>(bottomleft_v().Value())));
 		co_return;
 	}
 
 	IAsyncAction texture_showcase_page::bottomright_u_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		m_ui_control_values.Insert(hstring{ L"bottomright_u" }, (float)bottomright_u().Value());
+		m_ui_control_values.Insert(hstring{ L"bottomright_u" }, box_value(static_cast<float>(bottomright_u().Value())));
 		co_return;
 	}
 
 	IAsyncAction texture_showcase_page::bottomright_v_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		m_ui_control_values.Insert(hstring{ L"bottomright_v" }, (float)bottomright_v().Value());
+		m_ui_control_values.Insert(hstring{ L"bottomright_v" }, box_value(static_cast<float>(bottomright_v().Value())));
 		co_return;
 	}
 
 	IAsyncAction texture_showcase_page::sampler_maxLOD_changed(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		m_ui_control_values.Insert(hstring{ L"sampler_maxLOD" }, sampler_maxLOD().Value());
+		m_ui_control_values.Insert(hstring{ L"sampler_maxLOD" }, box_value(static_cast<float>(sampler_maxLOD().Value())));
 		co_return;
 	}
 
 	IAsyncAction texture_showcase_page::sampler_minLOD_changed(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		m_ui_control_values.Insert(hstring{ L"sampler_minLOD" }, sampler_minLOD().Value());
+		m_ui_control_values.Insert(hstring{ L"sampler_minLOD" }, box_value(static_cast<float>(sampler_minLOD().Value())));
 		return IAsyncAction();
 	}
 
@@ -296,6 +300,7 @@ namespace winrt::wzrd_editor::implementation
 	{
 		auto current_combobox = unbox_value<Windows::UI::Xaml::Controls::ComboBox>(sender);
 		auto selected_addressmode = unbox_value<graphics::generic_attribute>(current_combobox.SelectedItem());
+		m_ui_control_values.Insert(hstring{ L"sampler_addressmode_u" }, box_value(selected_addressmode.attribute_value()));
 		co_return;
 	}
 
@@ -303,17 +308,25 @@ namespace winrt::wzrd_editor::implementation
 	{
 		auto current_combobox = unbox_value<Windows::UI::Xaml::Controls::ComboBox>(sender);
 		auto selected_addressmode = unbox_value<graphics::generic_attribute>(current_combobox.SelectedItem());
+		m_ui_control_values.Insert(hstring{ L"sampler_addressmode_v" }, box_value(selected_addressmode.attribute_value()));
+		co_return;
+	}
+
+	IAsyncAction texture_showcase_page::sampler_addressmode_w_changed(IInspectable const & sender, winrt::Windows::UI::Xaml::Controls::SelectionChangedEventArgs const & args)
+	{
+		auto current_combobox = unbox_value<Windows::UI::Xaml::Controls::ComboBox>(sender);
+		auto selected_addressmode = unbox_value<graphics::generic_attribute>(current_combobox.SelectedItem());
+		m_ui_control_values.Insert(hstring{ L"sampler_addressmode_w" }, box_value(selected_addressmode.attribute_value()));
 		co_return;
 	}
 
 	IAsyncAction texture_showcase_page::sampler_bordercolor_changed(IInspectable const & sender, winrt::Windows::UI::Xaml::Controls::ColorChangedEventArgs const args)
 	{
 		auto selected_color = sampler_bordercolor().Color();
-
-		auto color_r = static_cast<float>(selected_color.R) / 255;
-		auto color_g = static_cast<float>(selected_color.G) / 255;
-		auto color_b = static_cast<float>(selected_color.B) / 255;
-		auto color_a = static_cast<float>(selected_color.A) / 255;
+		auto color_r = box_value(static_cast<float>(selected_color.R) / 255.f);
+		auto color_g = box_value(static_cast<float>(selected_color.G) / 255.f);
+		auto color_b = box_value(static_cast<float>(selected_color.B) / 255.f);
+		auto color_a = box_value(static_cast<float>(selected_color.A) / 255.f);
 
 		m_ui_control_values.Insert(hstring{ L"sampler_bordercolor_r" }, color_r);
 		m_ui_control_values.Insert(hstring{ L"sampler_bordercolor_g" }, color_g);

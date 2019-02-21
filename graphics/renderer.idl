@@ -33,7 +33,7 @@ namespace graphics
 
 		void enable_debug_layer();
 		void initialize_buffers_showcase(Windows.UI.Xaml.Controls.SwapChainPanel target_swapchain);
-		void initialize_textures_showcase(Windows.Foundation.Collections.IMap<String, Object> ui_items, Windows.Foundation.Collections.IMap<String, Single> ui_item_values);
+		void initialize_textures_showcase(Windows.Foundation.Collections.IMap<String, Object> ui_items, Windows.Foundation.Collections.IMap<String, Object> ui_item_values);
 		void clear_shaders();
 		void clear_textures();
 		void remove_texture(String name);

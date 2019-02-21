@@ -160,9 +160,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="wzrd_editor_TemporaryKey.pfx" />
-    <None Include="packages.config" />
     <None Include="wzrd_editor.vcxproj.maxim.nvuser" />
     <None Include="wzrd_editor.aps" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Assets">
