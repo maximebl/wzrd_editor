@@ -257,8 +257,6 @@ namespace winrt::graphics::implementation
 		float border_color[4] = { r,g,b,a };
 		memcpy(m_sampler_desc.BorderColor, border_color, sizeof(FLOAT) * 4);
 
-
-
 		IInspectable boxed_addressmode_u = m_ui_item_values.Lookup(hstring{ L"sampler_addressmode_u" });
 		hstring addressmode_u = unbox_value_or<hstring>(boxed_addressmode_u, L"1");
 		m_sampler_desc.AddressU = static_cast<D3D12_TEXTURE_ADDRESS_MODE>(std::stoi(addressmode_u.c_str()));
@@ -271,8 +269,8 @@ namespace winrt::graphics::implementation
 		hstring addressmode_w = unbox_value_or<hstring>(boxed_addressmode_w, L"1");
 		m_sampler_desc.AddressW = static_cast<D3D12_TEXTURE_ADDRESS_MODE>(std::stoi(addressmode_w.c_str()));
 
-		m_sampler_desc.ComparisonFunc = D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_NEVER;
-		m_sampler_desc.Filter = D3D12_FILTER::D3D12_FILTER_MIN_MAG_MIP_POINT;
+		m_sampler_desc.ComparisonFunc = D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_ALWAYS;
+		m_sampler_desc.Filter = D3D12_FILTER::D3D12_FILTER_MIN_MAG_MIP_LINEAR;
 		m_sampler_desc.MinLOD = unbox_value<float>(m_ui_item_values.Lookup(hstring{ L"sampler_minLOD" }));
 		m_sampler_desc.MaxLOD = unbox_value<float>(m_ui_item_values.Lookup(hstring{ L"sampler_maxLOD" }));
 
@@ -464,14 +462,14 @@ namespace winrt::graphics::implementation
 	{
 		D3D12_RESOURCE_DESC texture_desc = {};
 		texture_desc.Alignment = 0;
-		texture_desc.DepthOrArraySize = 1;
+		texture_desc.DepthOrArraySize = 2;
 		texture_desc.Dimension = D3D12_RESOURCE_DIMENSION::D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 		texture_desc.Flags = D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_NONE;
 		texture_desc.Format = DXGI_FORMAT::DXGI_FORMAT_BC3_UNORM;
 		texture_desc.Height = height;
 		texture_desc.Width = width;
-		texture_desc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-		texture_desc.MipLevels = 1;
+		texture_desc.Layout = D3D12_TEXTURE_LAYOUT::D3D12_TEXTURE_LAYOUT_UNKNOWN;
+		texture_desc.MipLevels = 10;
 		texture_desc.SampleDesc.Count = 1;
 		texture_desc.SampleDesc.Quality = 0;
 
