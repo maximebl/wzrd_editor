@@ -31,7 +31,7 @@
 #include <d3d12.h>
 #include <dxgidebug.h>
 #include <windows.ui.xaml.media.dxinterop.h>
-#include "d3dx12.h"
+#include "../graphics/d3dx12.h"
 #include "winrt/Windows.System.Threading.h"
 #include "winrt/Windows.Storage.Pickers.h"
 #include "winrt/Windows.Storage.Streams.h"

@@ -256,16 +256,16 @@ std::unique_ptr<winrt::wzrd_editor::data::Texture> GraphicsResources::create_tex
 	Microsoft::WRL::ComPtr<ID3D12Resource> tmpResource = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12Resource> tmpUploadHeap = nullptr;
 
-	winrt::check_hresult(
-		DirectX::CreateDDSTextureFromMemory12(
-			m_device.get(),
-			m_graphics_cmdlist.get(),
-			&bytes.front(),
-			file_size,
-			tmpResource,
-			tmpUploadHeap
-		)
-	);
+	//winrt::check_hresult(
+	//	DirectX::CreateDDSTextureFromMemory12(
+	//		m_device.get(),
+	//		m_graphics_cmdlist.get(),
+	//		&bytes.front(),
+	//		file_size,
+	//		tmpResource,
+	//		tmpUploadHeap
+	//	)
+	//);
 
 	woodcrate_texture->Resource.copy_from(tmpResource.Get());
 	woodcrate_texture->UploadHeap.copy_from(tmpUploadHeap.Get());

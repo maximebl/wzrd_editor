@@ -1,6 +1,6 @@
 #pragma once
 #include "utilities.h"
-#include "DDSTextureLoader.h"
+#include "../graphics/DDSTextureLoader.h"
 #include "FrameResource.h"
 #include "Vertex.h"
 #include "vertex_buffer.h"

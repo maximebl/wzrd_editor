@@ -6,7 +6,8 @@
 #include "utilities.h"
 #include "texture.h"
 #include "shader.h"
-#include "../wzrd_editor/DDSTextureLoader.h"
+#include <DDSTextureLoader.h>
+#include <WRL.h>
 
 namespace winrt::graphics::implementation
 {
@@ -98,7 +99,15 @@ namespace winrt::graphics::implementation
 
 		com_ptr<ID3D12Resource> m_texture_upload_buffer = nullptr;
 		com_ptr<ID3D12Resource> m_cb_texcoord_upload_buffer = nullptr;
+		com_ptr<ID3D12Resource> m_cb_position_upload_buffer = nullptr;
+
 		unsigned char* m_mapped_texcoord_data = nullptr;
+		unsigned char* m_mapped_position_data = nullptr;
+
+		Microsoft::WRL::ComPtr<ID3D12Resource> tmpResource = nullptr;
+		Microsoft::WRL::ComPtr<ID3D12Resource> tmpUploadHeap = nullptr;
+		com_ptr<ID3D12Resource> gpu_tex_resource = nullptr;
+		com_ptr<ID3D12Resource> intermediate_upload_resource = nullptr;
 
 		std::vector<D3D12_INPUT_ELEMENT_DESC> m_basic_input_layout;
 
@@ -119,6 +128,7 @@ namespace winrt::graphics::implementation
 		void create_point();
 		void create_texture_srv();
 		void create_cb_texcoord();
+		void create_cb_billboard_pos();
 		std::vector<UINT8> generate_texture_data(UINT texture_width, UINT texture_height, UINT texture_pixel_size);
 		std::vector<CD3DX12_STATIC_SAMPLER_DESC> get_static_samplers();
 		void init_psos();
@@ -146,6 +156,8 @@ namespace winrt::graphics::implementation
 
 		std::unordered_map<hstring, com_ptr<ID3DBlob>> m_shaders;
 		std::unordered_map<hstring, graphics::texture> m_textures;
+
+
 	};
 }
 

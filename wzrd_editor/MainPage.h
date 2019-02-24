@@ -6,7 +6,7 @@
 
 #include "MainPage.g.h"
 #include "utilities.h"
-#include "DDSTextureLoader.h"
+#include "../graphics/DDSTextureLoader.h"
 #include "FrameResource.h"
 #include "GraphicsResources.h"
 #include "GeometryViewModel.h"

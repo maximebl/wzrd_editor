@@ -21,15 +21,21 @@ namespace winrt::wzrd_editor::implementation
 
 		m_ui_control_values.Insert(hstring{ L"topleft_u" }, box_value(0.0f));
 		m_ui_control_values.Insert(hstring{ L"topleft_v" }, box_value(0.0f));
-
 		m_ui_control_values.Insert(hstring{ L"topright_u" }, box_value(1.0f));
 		m_ui_control_values.Insert(hstring{ L"topright_v" }, box_value(0.0f));
-
 		m_ui_control_values.Insert(hstring{ L"bottomleft_u" }, box_value(0.0f));
 		m_ui_control_values.Insert(hstring{ L"bottomleft_v" }, box_value(1.0f));
-
 		m_ui_control_values.Insert(hstring{ L"bottomright_u" }, box_value(1.0f));
 		m_ui_control_values.Insert(hstring{ L"bottomright_v" }, box_value(1.0f));
+
+		m_ui_control_values.Insert(hstring{ L"topleft_x" }, box_value(-0.3f));
+		m_ui_control_values.Insert(hstring{ L"topleft_y" }, box_value(0.3f));
+		m_ui_control_values.Insert(hstring{ L"topright_x" }, box_value(0.3f));
+		m_ui_control_values.Insert(hstring{ L"topright_y" }, box_value(0.3f));
+		m_ui_control_values.Insert(hstring{ L"bottomleft_x" }, box_value(-0.3f));
+		m_ui_control_values.Insert(hstring{ L"bottomleft_y" }, box_value(-0.3f));
+		m_ui_control_values.Insert(hstring{ L"bottomright_x" }, box_value(0.3f));
+		m_ui_control_values.Insert(hstring{ L"bottomright_y" }, box_value(-0.3f));
 
 		m_ui_control_values.Insert(hstring{ L"sampler_bordercolor_r" }, box_value(0.0f));
 		m_ui_control_values.Insert(hstring{ L"sampler_bordercolor_g" }, box_value(0.0f));
@@ -266,6 +272,7 @@ namespace winrt::wzrd_editor::implementation
 		m_ui_control_values.Insert(hstring{ L"bottomleft_u" }, box_value(static_cast<float>(bottomleft_u().Value())));
 		co_return;
 	}
+
 	IAsyncAction texture_showcase_page::bottomleft_v_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
 		m_ui_control_values.Insert(hstring{ L"bottomleft_v" }, box_value(static_cast<float>(bottomleft_v().Value())));
@@ -281,6 +288,54 @@ namespace winrt::wzrd_editor::implementation
 	IAsyncAction texture_showcase_page::bottomright_v_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
 		m_ui_control_values.Insert(hstring{ L"bottomright_v" }, box_value(static_cast<float>(bottomright_v().Value())));
+		co_return;
+	}
+
+	IAsyncAction texture_showcase_page::topleft_x_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		m_ui_control_values.Insert(hstring{ L"topleft_x" }, box_value(static_cast<float>(topleft_x().Value())));
+		co_return;
+	}
+
+	IAsyncAction texture_showcase_page::topleft_y_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		m_ui_control_values.Insert(hstring{ L"topleft_y" }, box_value(static_cast<float>(topleft_y().Value())));
+		co_return;
+	}
+
+	IAsyncAction texture_showcase_page::topright_x_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		m_ui_control_values.Insert(hstring{ L"topright_x" }, box_value(static_cast<float>(topright_x().Value())));
+		co_return;
+	}
+
+	IAsyncAction texture_showcase_page::topright_y_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		m_ui_control_values.Insert(hstring{ L"topright_y" }, box_value(static_cast<float>(topright_y().Value())));
+		co_return;
+	}
+
+	IAsyncAction texture_showcase_page::bottomleft_x_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		m_ui_control_values.Insert(hstring{ L"bottomleft_x" }, box_value(static_cast<float>(bottomleft_x().Value())));
+		co_return;
+	}
+
+	IAsyncAction texture_showcase_page::bottomleft_y_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		m_ui_control_values.Insert(hstring{ L"bottomleft_y" }, box_value(static_cast<float>(bottomleft_y().Value())));
+		co_return;
+	}
+
+	IAsyncAction texture_showcase_page::bottomright_x_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		m_ui_control_values.Insert(hstring{ L"bottomright_x" }, box_value(static_cast<float>(bottomright_x().Value())));
+		co_return;
+	}
+
+	IAsyncAction texture_showcase_page::bottomright_y_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		m_ui_control_values.Insert(hstring{ L"bottomright_y" }, box_value(static_cast<float>(bottomright_y().Value())));
 		co_return;
 	}
 

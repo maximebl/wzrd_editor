@@ -81,12 +81,6 @@
     <ClCompile Include="Vertex.cpp" />
     <ClCompile Include="buffer_size_select_dialog.cpp" />
     <ClCompile Include="Generated Files\module.g.cpp" />
-    <ClCompile Include="DDSTextureLoader.h">
-      <Filter>external_libraries</Filter>
-    </ClCompile>
-    <ClCompile Include="DDSTextureLoader.cpp">
-      <Filter>external_libraries</Filter>
-    </ClCompile>
     <ClCompile Include="int_to_visibility.cpp" />
     <ClCompile Include="vertex_buffer.cpp" />
     <ClCompile Include="vertex2.cpp" />
@@ -120,9 +114,6 @@
     <ClInclude Include="Vertex.h" />
     <ClInclude Include="buffer_size_select_dialog.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="d3dx12.h">
-      <Filter>external_libraries</Filter>
-    </ClInclude>
     <ClInclude Include="int_to_visibility.h" />
     <ClInclude Include="vertex_buffer.h" />
     <ClInclude Include="vertex2.h" />
@@ -170,9 +161,6 @@
     </Filter>
     <Filter Include="views">
       <UniqueIdentifier>{4070b2eb-2179-4235-87ba-2b5a78f74d25}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="external_libraries">
-      <UniqueIdentifier>{49c3e225-620d-4e76-96bc-9f62878330ad}</UniqueIdentifier>
     </Filter>
     <Filter Include="views\converters">
       <UniqueIdentifier>{1e1d06dd-bdc0-42bf-88dc-f10515b4f30b}</UniqueIdentifier>

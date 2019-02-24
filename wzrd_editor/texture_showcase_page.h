@@ -32,15 +32,21 @@ namespace winrt::wzrd_editor::implementation
 
 		IAsyncAction topleft_u_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
 		IAsyncAction topleft_v_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
-
 		IAsyncAction topright_u_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
 		IAsyncAction topright_v_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
-
 		IAsyncAction bottomleft_u_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
 		IAsyncAction bottomleft_v_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
-
 		IAsyncAction bottomright_u_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
 		IAsyncAction bottomright_v_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
+
+		IAsyncAction topleft_x_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
+		IAsyncAction topleft_y_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
+		IAsyncAction topright_x_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
+		IAsyncAction topright_y_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
+		IAsyncAction bottomleft_x_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
+		IAsyncAction bottomleft_y_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
+		IAsyncAction bottomright_x_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
+		IAsyncAction bottomright_y_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
 
 		IAsyncAction sampler_maxLOD_changed(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
 		IAsyncAction sampler_minLOD_changed(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);

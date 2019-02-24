@@ -222,76 +222,86 @@
                             </ListView.Resources>
                         </ListView>
 
-                        <StackPanel x:Name="texture_coords_sliders" Orientation="Vertical">
-                            <Grid BorderThickness="3" BorderBrush="{ThemeResource SystemControlBackgroundListMediumRevealBorderBrush}" Padding="3,3,3,3" Width="auto">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="auto"/>
-                                    <ColumnDefinition Width="auto"/>
-                                    <ColumnDefinition Width="auto"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="auto"/>
-                                    <RowDefinition Height="auto"/>
-                                </Grid.RowDefinitions>
+                        <Grid Width="600" HorizontalAlignment="Left">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
 
-                                <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="0">
-                                    <TextBlock FontWeight="ExtraBlack" Text="Top left"></TextBlock>
-                                    <RelativePanel>
-                                        <Slider x:Name="topleft_v" ValueChanged="topleft_v_valuechanged" Header="v" Height="100" Orientation="Vertical" Value="0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.1"  TickFrequency="0.1" TickPlacement="None" HorizontalAlignment="Left"
-                                            RelativePanel.RightOf="topleft_u" />
-                                        <Slider x:Name="topleft_u" ValueChanged="topleft_u_valuechanged" Header="u" Width="100" Orientation="Horizontal" Value="0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.1"  TickFrequency="0.1" TickPlacement="None" HorizontalAlignment="Left"/>
-                                    </RelativePanel>
-                                </StackPanel>
+                            <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="0">
+                                <TextBlock FontWeight="ExtraBlack" Text="Top left"/>
+                                <Border BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundListMediumRevealBorderBrush}" Padding="3,3,3,3">
+                                    <StackPanel Orientation="Vertical">
+                                        <Slider x:Name="topleft_u" ValueChanged="topleft_u_valuechanged" Header="texture u" Width="auto" Orientation="Horizontal" Value="0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05"  TickFrequency="0.05" TickPlacement="None" />
+                                        <Slider x:Name="topleft_v" ValueChanged="topleft_v_valuechanged" Header="texture v" Width="auto" Orientation="Horizontal" Value="0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05"  TickFrequency="0.05" TickPlacement="None" />
+                                        <Slider x:Name="topleft_x" ValueChanged="topleft_x_valuechanged" Header="vertex x" Width="auto" Orientation="Horizontal" Value="0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05"  TickFrequency="0.05" TickPlacement="None" />
+                                        <Slider x:Name="topleft_y" ValueChanged="topleft_y_valuechanged" Header="vertex y" Width="auto" Orientation="Horizontal" Value="0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05"  TickFrequency="0.05" TickPlacement="None" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
 
-                                <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="0">
-                                    <TextBlock FontWeight="ExtraBlack" Text="Top right"></TextBlock>
-                                    <RelativePanel>
-                                        <Slider x:Name="topright_v" ValueChanged="topright_v_valuechanged" Header="v" Height="100"  Orientation="Vertical" Value="0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.1" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" HorizontalAlignment="Left"
-                                            RelativePanel.RightOf="topright_u" />
-                                        <Slider x:Name="topright_u" ValueChanged="topright_u_valuechanged" Header="u" Width="100" Orientation="Horizontal" Value="1.0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.1" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" HorizontalAlignment="Left"/>
-                                    </RelativePanel>
-                                </StackPanel>
+                            <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="0">
+                                <TextBlock FontWeight="ExtraBlack" Text="Top right"/>
+                                <Border BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundListMediumRevealBorderBrush}" Padding="3,3,3,3">
+                                    <StackPanel Orientation="Vertical">
+                                        <Slider x:Name="topright_u" ValueChanged="topright_u_valuechanged" Header="texture u" Width="auto" Orientation="Horizontal" Value="1.0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" />
+                                        <Slider x:Name="topright_v" ValueChanged="topright_v_valuechanged" Header="texture v" Width="auto"  Orientation="Horizontal" Value="0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" />
+                                        <Slider x:Name="topright_x" ValueChanged="topright_x_valuechanged" Header="vertex x" Width="auto" Orientation="Horizontal" Value="1.0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" />
+                                        <Slider x:Name="topright_y" ValueChanged="topright_y_valuechanged" Header="vertex y" Width="auto"  Orientation="Horizontal" Value="0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
 
-                                <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="1">
-                                    <TextBlock FontWeight="ExtraBlack" Text="Bottom left"></TextBlock>
-                                    <RelativePanel>
-                                        <Slider x:Name="bottomleft_v" ValueChanged="bottomleft_v_valuechanged" Header="v" Height="100" Orientation="Vertical" Value="1.0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.1" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" HorizontalAlignment="Left"
-                                            RelativePanel.RightOf="bottomleft_u" />
-                                        <Slider x:Name="bottomleft_u" ValueChanged="bottomleft_u_valuechanged" Header="u" Width="100" Orientation="Horizontal" Value="0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.1" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" HorizontalAlignment="Left"/>
-                                    </RelativePanel>
-                                </StackPanel>
+                            <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="1">
+                                <TextBlock FontWeight="ExtraBlack" Text="Bottom left"/>
+                                <Border BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundListMediumRevealBorderBrush}" Padding="3,3,3,3">
+                                    <StackPanel Orientation="Vertical">
+                                        <Slider x:Name="bottomleft_u" ValueChanged="bottomleft_u_valuechanged" Header="texture u" Width="auto" Orientation="Horizontal" Value="0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" />
+                                        <Slider x:Name="bottomleft_v" ValueChanged="bottomleft_v_valuechanged" Header="texture v" Width="auto" Orientation="Horizontal" Value="1.0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" />
+                                        <Slider x:Name="bottomleft_x" ValueChanged="bottomleft_x_valuechanged" Header="vertex x" Width="auto" Orientation="Horizontal" Value="0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" />
+                                        <Slider x:Name="bottomleft_y" ValueChanged="bottomleft_y_valuechanged" Header="vertex y" Width="auto" Orientation="Horizontal" Value="1.0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
 
-                                <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="1">
-                                    <TextBlock FontWeight="ExtraBlack" Text="Bottom right"></TextBlock>
-                                    <RelativePanel>
-                                        <Slider x:Name="bottomright_v" ValueChanged="bottomright_v_valuechanged" Header="v" Height="100" Orientation="Vertical" Value="1.0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.1" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" HorizontalAlignment="Left"
-                                            RelativePanel.RightOf="bottomright_u"/>
-                                        <Slider x:Name="bottomright_u" ValueChanged="bottomright_u_valuechanged" Header="u" Width="100" Orientation="Horizontal" Value="1.0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.1" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" HorizontalAlignment="Left"/>
-                                    </RelativePanel>
-                                </StackPanel>
+                            <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="1">
+                                <TextBlock FontWeight="ExtraBlack" Text="Bottom right"/>
+                                <Border BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundListMediumRevealBorderBrush}" Padding="3,3,3,3">
+                                    <StackPanel Orientation="Vertical">
+                                        <Slider x:Name="bottomright_u" ValueChanged="bottomright_u_valuechanged" Header="texture u" Width="auto" Orientation="Horizontal" Value="1.0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None"/>
+                                        <Slider x:Name="bottomright_v" ValueChanged="bottomright_v_valuechanged" Header="texture v" Width="auto" Orientation="Horizontal" Value="1.0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" />
+                                        <Slider x:Name="bottomright_x" ValueChanged="bottomright_x_valuechanged" Header="vertex x" Width="auto" Orientation="Horizontal" Value="1.0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None"/>
+                                        <Slider x:Name="bottomright_y" ValueChanged="bottomright_y_valuechanged" Header="vertex y" Width="auto" Orientation="Horizontal" Value="1.0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" />
+                                    </StackPanel>
+                                </Border>
+                            </StackPanel>
+                        </Grid>
 
-                                <StackPanel Orientation="Vertical" Grid.Column="2" Grid.Row="0" Grid.RowSpan="2" >
-                                    <ColorPicker x:Name="sampler_bordercolor" ColorChanged="sampler_bordercolor_changed" IsColorSliderVisible="False" IsColorChannelTextInputVisible="False" IsAlphaEnabled="True" IsAlphaSliderVisible="True" />
-                                    <Slider x:Name="sampler_maxLOD" ValueChanged="sampler_maxLOD_changed" Header="Max LOD" Width="100" Orientation="Horizontal" Value="100.0" Minimum="{Binding Value, ElementName=sampler_minLOD}" 
-                                            StepFrequency="0.1" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" HorizontalAlignment="Left">
-                                    </Slider>
-                                    <Slider x:Name="sampler_minLOD" ValueChanged="sampler_minLOD_changed" Header="Min LOD" Width="100" Orientation="Horizontal" Value="0" Minimum="0" Maximum="1.0" 
-                                            StepFrequency="0.1" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" HorizontalAlignment="Left"/>
+                        <RelativePanel>
+                            <ColorPicker x:Name="sampler_bordercolor" ColorChanged="sampler_bordercolor_changed" IsColorSliderVisible="False" IsColorChannelTextInputVisible="False" IsAlphaEnabled="True" IsAlphaSliderVisible="True" 
+                                            RelativePanel.RightOf="texture_coords_sliders" />
 
-                                    <ComboBox SelectionChanged="sampler_addressmode_u_changed" Header="Address Mode U" PlaceholderText="U addressing mode" Width="auto"
+                            <StackPanel x:Name="texture_coords_sliders" Orientation="Vertical" Width="300">
+                                <Slider x:Name="sampler_maxLOD" ValueChanged="sampler_maxLOD_changed" Header="Max LOD" Width="auto" Orientation="Horizontal" Value="10" Maximum="10" Minimum="{Binding Value, ElementName=sampler_minLOD}" 
+                                            StepFrequency="0.1" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" />
+
+                                <Slider x:Name="sampler_minLOD" ValueChanged="sampler_minLOD_changed" Header="Min LOD" Width="auto" Orientation="Horizontal" Value="0" Minimum="0" Maximum="10.0" 
+                                            StepFrequency="0.1" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" />
+
+                                <ComboBox SelectionChanged="sampler_addressmode_u_changed" Header="Address Mode U" PlaceholderText="U addressing mode" Width="auto"
                                               ItemsSource="{x:Bind texture_showcase_vm.address_modes, Mode=OneWay}" DisplayMemberPath="attribute_name" SelectedIndex="0"/>
 
-                                    <ComboBox SelectionChanged="sampler_addressmode_v_changed" Header="Address Mode V" PlaceholderText="V addressing mode" Width="auto"
+                                <ComboBox SelectionChanged="sampler_addressmode_v_changed" Header="Address Mode V" PlaceholderText="V addressing mode" Width="auto"
                                               ItemsSource="{x:Bind texture_showcase_vm.address_modes, Mode=OneWay}" DisplayMemberPath="attribute_name" SelectedIndex="0"/>
 
-                                    <ComboBox SelectionChanged="sampler_addressmode_w_changed" Header="Address Mode W" PlaceholderText="W addressing mode" Width="auto"
+                                <ComboBox SelectionChanged="sampler_addressmode_w_changed" Header="Address Mode W" PlaceholderText="W addressing mode" Width="auto"
                                               ItemsSource="{x:Bind texture_showcase_vm.address_modes, Mode=OneWay}" DisplayMemberPath="attribute_name" SelectedIndex="0"/>
-
-                                </StackPanel>
-                            </Grid>
-
-
-                        </StackPanel>
+                            </StackPanel>
+                        </RelativePanel>
                     </StackPanel>
                 </PivotItem>
                 <PivotItem Header="Shaders">
