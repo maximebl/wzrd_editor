@@ -10,6 +10,7 @@
 #include "../os_utilities/os_utilities.h"
 #include "bool_invert.h"
 #include "ivector_to_bool.h"
+#include "float_to_int.h"
 #include "utilities.h"
 
 namespace winrt::wzrd_editor::implementation
@@ -30,32 +31,9 @@ namespace winrt::wzrd_editor::implementation
 		IAsyncAction shader_selection_changed(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
 		IAsyncAction texture_selection_changed(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
 
-		IAsyncAction topleft_u_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
-		IAsyncAction topleft_v_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
-		IAsyncAction topright_u_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
-		IAsyncAction topright_v_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
-		IAsyncAction bottomleft_u_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
-		IAsyncAction bottomleft_v_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
-		IAsyncAction bottomright_u_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
-		IAsyncAction bottomright_v_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
-
-		IAsyncAction topleft_x_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
-		IAsyncAction topleft_y_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
-		IAsyncAction topright_x_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
-		IAsyncAction topright_y_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
-		IAsyncAction bottomleft_x_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
-		IAsyncAction bottomleft_y_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
-		IAsyncAction bottomright_x_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
-		IAsyncAction bottomright_y_valuechanged(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
-
-		IAsyncAction sampler_maxLOD_changed(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
-		IAsyncAction sampler_minLOD_changed(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
-
 		IAsyncAction sampler_addressmode_u_changed(Windows::Foundation::IInspectable const & sender, winrt::Windows::UI::Xaml::Controls::SelectionChangedEventArgs const & args);
 		IAsyncAction sampler_addressmode_v_changed(Windows::Foundation::IInspectable const & sender, winrt::Windows::UI::Xaml::Controls::SelectionChangedEventArgs const & args);
 		IAsyncAction sampler_addressmode_w_changed(Windows::Foundation::IInspectable const & sender, winrt::Windows::UI::Xaml::Controls::SelectionChangedEventArgs const & args);
-
-		IAsyncAction sampler_bordercolor_changed(Windows::Foundation::IInspectable const & sender, const winrt::Windows::UI::Xaml::Controls::ColorChangedEventArgs args);
 
 		wzrd_editor::texture_showcase_vm texture_showcase_vm();
 

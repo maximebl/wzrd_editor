@@ -1,0 +1,16 @@
+namespace graphics
+{
+    [bindable]
+    [default_interface]
+    runtimeclass subresource : Windows.UI.Xaml.Data.INotifyPropertyChanged
+    {
+        subresource();
+
+		Windows.UI.Xaml.Media.Imaging.SoftwareBitmapSource mipmap_bitmap_source;
+		UInt8 mip_level;
+		UInt64 width;
+		UInt64 height;
+		UInt64 row_pitch;
+		UInt64 slice_pitch;
+    }
+}

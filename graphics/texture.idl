@@ -1,3 +1,5 @@
+import "subresource.idl";
+
 namespace graphics
 {
 	[bindable]
@@ -5,6 +7,7 @@ namespace graphics
 	runtimeclass texture : Windows.UI.Xaml.Data.INotifyPropertyChanged
 	{
 		texture();
+
 		String texture_name;
 		String file_name;
 		Boolean is_loading;
@@ -17,5 +20,31 @@ namespace graphics
 		String dimension;
 		UInt32 row_pitch;
 		UInt32 slice_pitch;
+		Single current_lod;
+		Single scale;
+		Windows.UI.Color sampler_border_color;
+		Single sampler_minLOD;
+		Single sampler_maxLOD;
+		IObservableVector<IInspectable> mipmaps;
+
+		Single topleft_u;
+		Single topleft_v;
+		Single topleft_x;
+		Single topleft_y;
+
+		Single topright_u;
+		Single topright_v;
+		Single topright_x;
+		Single topright_y;
+
+		Single bottomleft_u;
+		Single bottomleft_v;
+		Single bottomleft_x;
+		Single bottomleft_y;
+
+		Single bottomright_u;
+		Single bottomright_v;
+		Single bottomright_x;
+		Single bottomright_y;
 	}
 }

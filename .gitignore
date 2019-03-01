@@ -1,4 +1,7 @@
 wzrd_editor/Generated Files/
+graphics/Generated Files/
+data_grid/obj/
+interop_test_app/obj/
 x64/
 ARM/
 wzrd_editor/Debug/

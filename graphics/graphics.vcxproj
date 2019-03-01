@@ -113,6 +113,10 @@
       <DependentUpon>shader.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
+    <ClInclude Include="subresource.h">
+      <DependentUpon>subresource.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="texture.h">
       <DependentUpon>texture.idl</DependentUpon>
       <SubType>Code</SubType>
@@ -145,6 +149,10 @@
       <DependentUpon>shader.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
+    <ClCompile Include="subresource.cpp">
+      <DependentUpon>subresource.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="texture.cpp">
       <DependentUpon>texture.idl</DependentUpon>
       <SubType>Code</SubType>
@@ -171,6 +179,9 @@
       <SubType>Designer</SubType>
     </Midl>
     <Midl Include="shader.idl">
+      <SubType>Designer</SubType>
+    </Midl>
+    <Midl Include="subresource.idl">
       <SubType>Designer</SubType>
     </Midl>
     <Midl Include="texture.idl">

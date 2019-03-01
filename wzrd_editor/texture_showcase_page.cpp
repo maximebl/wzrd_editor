@@ -19,35 +19,11 @@ namespace winrt::wzrd_editor::implementation
 
 		m_ui_items[hstring{ L"swapchain_panel" }] = box_value(swapchain_panel());
 
-		m_ui_control_values.Insert(hstring{ L"topleft_u" }, box_value(0.0f));
-		m_ui_control_values.Insert(hstring{ L"topleft_v" }, box_value(0.0f));
-		m_ui_control_values.Insert(hstring{ L"topright_u" }, box_value(1.0f));
-		m_ui_control_values.Insert(hstring{ L"topright_v" }, box_value(0.0f));
-		m_ui_control_values.Insert(hstring{ L"bottomleft_u" }, box_value(0.0f));
-		m_ui_control_values.Insert(hstring{ L"bottomleft_v" }, box_value(1.0f));
-		m_ui_control_values.Insert(hstring{ L"bottomright_u" }, box_value(1.0f));
-		m_ui_control_values.Insert(hstring{ L"bottomright_v" }, box_value(1.0f));
-
-		m_ui_control_values.Insert(hstring{ L"topleft_x" }, box_value(-0.3f));
-		m_ui_control_values.Insert(hstring{ L"topleft_y" }, box_value(0.3f));
-		m_ui_control_values.Insert(hstring{ L"topright_x" }, box_value(0.3f));
-		m_ui_control_values.Insert(hstring{ L"topright_y" }, box_value(0.3f));
-		m_ui_control_values.Insert(hstring{ L"bottomleft_x" }, box_value(-0.3f));
-		m_ui_control_values.Insert(hstring{ L"bottomleft_y" }, box_value(-0.3f));
-		m_ui_control_values.Insert(hstring{ L"bottomright_x" }, box_value(0.3f));
-		m_ui_control_values.Insert(hstring{ L"bottomright_y" }, box_value(-0.3f));
-
-		m_ui_control_values.Insert(hstring{ L"sampler_bordercolor_r" }, box_value(0.0f));
-		m_ui_control_values.Insert(hstring{ L"sampler_bordercolor_g" }, box_value(0.0f));
-		m_ui_control_values.Insert(hstring{ L"sampler_bordercolor_b" }, box_value(0.0f));
-		m_ui_control_values.Insert(hstring{ L"sampler_bordercolor_a" }, box_value(0.0f));
-
-		m_ui_control_values.Insert(hstring{ L"sampler_minLOD" }, box_value(0.0f));
-		m_ui_control_values.Insert(hstring{ L"sampler_maxLOD" }, box_value(D3D12_FLOAT32_MAX));
-
 		m_ui_control_values.Insert(hstring{ L"sampler_addressmode_u" }, nullptr);
 		m_ui_control_values.Insert(hstring{ L"sampler_addressmode_v" }, nullptr);
 		m_ui_control_values.Insert(hstring{ L"sampler_addressmode_w" }, nullptr);
+
+		m_ui_control_values.Insert(hstring{ L"scale" }, box_value(1.0f));
 
 		auto ui_items = winrt::single_threaded_map<hstring, IInspectable>(std::move(m_ui_items));
 
@@ -177,11 +153,19 @@ namespace winrt::wzrd_editor::implementation
 	IAsyncAction texture_showcase_page::onclick_pick_texture(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
 		auto new_texture = graphics::texture();
+
+		texture_showcase_vm().current_texture(new_texture);
 		texture_showcase_vm().textures().Append(new_texture);
 
 		new_texture.is_loading(true);
 		new_texture = co_await m_renderer.pick_texture(new_texture, hstring{ L"default_texture" });
 		new_texture.is_loading(false);
+
+		auto new_mipmaps = new_texture.mipmaps();
+		for (auto mipmap : new_mipmaps)
+		{
+			texture_showcase_vm().mipmaps().Append(box_value(mipmap));
+		}
 		co_return;
 	}
 
@@ -242,115 +226,6 @@ namespace winrt::wzrd_editor::implementation
 		}
 		co_return;
 	}
-
-	IAsyncAction texture_showcase_page::topleft_u_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
-	{
-		m_ui_control_values.Insert(hstring{ L"topleft_u" }, box_value(static_cast<float>(topleft_u().Value())));
-		co_return;
-	}
-
-	IAsyncAction texture_showcase_page::topleft_v_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
-	{
-		m_ui_control_values.Insert(hstring{ L"topleft_v" }, box_value(static_cast<float>(topleft_v().Value())));
-		co_return;
-	}
-
-	IAsyncAction texture_showcase_page::topright_u_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
-	{
-		m_ui_control_values.Insert(hstring{ L"topright_u" }, box_value(static_cast<float>(topright_u().Value())));
-		co_return;
-	}
-
-	IAsyncAction texture_showcase_page::topright_v_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
-	{
-		m_ui_control_values.Insert(hstring{ L"topright_v" }, box_value(static_cast<float>(topright_v().Value())));
-		co_return;
-	}
-
-	IAsyncAction texture_showcase_page::bottomleft_u_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
-	{
-		m_ui_control_values.Insert(hstring{ L"bottomleft_u" }, box_value(static_cast<float>(bottomleft_u().Value())));
-		co_return;
-	}
-
-	IAsyncAction texture_showcase_page::bottomleft_v_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
-	{
-		m_ui_control_values.Insert(hstring{ L"bottomleft_v" }, box_value(static_cast<float>(bottomleft_v().Value())));
-		co_return;
-	}
-
-	IAsyncAction texture_showcase_page::bottomright_u_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
-	{
-		m_ui_control_values.Insert(hstring{ L"bottomright_u" }, box_value(static_cast<float>(bottomright_u().Value())));
-		co_return;
-	}
-
-	IAsyncAction texture_showcase_page::bottomright_v_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
-	{
-		m_ui_control_values.Insert(hstring{ L"bottomright_v" }, box_value(static_cast<float>(bottomright_v().Value())));
-		co_return;
-	}
-
-	IAsyncAction texture_showcase_page::topleft_x_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
-	{
-		m_ui_control_values.Insert(hstring{ L"topleft_x" }, box_value(static_cast<float>(topleft_x().Value())));
-		co_return;
-	}
-
-	IAsyncAction texture_showcase_page::topleft_y_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
-	{
-		m_ui_control_values.Insert(hstring{ L"topleft_y" }, box_value(static_cast<float>(topleft_y().Value())));
-		co_return;
-	}
-
-	IAsyncAction texture_showcase_page::topright_x_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
-	{
-		m_ui_control_values.Insert(hstring{ L"topright_x" }, box_value(static_cast<float>(topright_x().Value())));
-		co_return;
-	}
-
-	IAsyncAction texture_showcase_page::topright_y_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
-	{
-		m_ui_control_values.Insert(hstring{ L"topright_y" }, box_value(static_cast<float>(topright_y().Value())));
-		co_return;
-	}
-
-	IAsyncAction texture_showcase_page::bottomleft_x_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
-	{
-		m_ui_control_values.Insert(hstring{ L"bottomleft_x" }, box_value(static_cast<float>(bottomleft_x().Value())));
-		co_return;
-	}
-
-	IAsyncAction texture_showcase_page::bottomleft_y_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
-	{
-		m_ui_control_values.Insert(hstring{ L"bottomleft_y" }, box_value(static_cast<float>(bottomleft_y().Value())));
-		co_return;
-	}
-
-	IAsyncAction texture_showcase_page::bottomright_x_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
-	{
-		m_ui_control_values.Insert(hstring{ L"bottomright_x" }, box_value(static_cast<float>(bottomright_x().Value())));
-		co_return;
-	}
-
-	IAsyncAction texture_showcase_page::bottomright_y_valuechanged(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
-	{
-		m_ui_control_values.Insert(hstring{ L"bottomright_y" }, box_value(static_cast<float>(bottomright_y().Value())));
-		co_return;
-	}
-
-	IAsyncAction texture_showcase_page::sampler_maxLOD_changed(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
-	{
-		m_ui_control_values.Insert(hstring{ L"sampler_maxLOD" }, box_value(static_cast<float>(sampler_maxLOD().Value())));
-		co_return;
-	}
-
-	IAsyncAction texture_showcase_page::sampler_minLOD_changed(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
-	{
-		m_ui_control_values.Insert(hstring{ L"sampler_minLOD" }, box_value(static_cast<float>(sampler_minLOD().Value())));
-		return IAsyncAction();
-	}
-
 	IAsyncAction texture_showcase_page::sampler_addressmode_u_changed(IInspectable const & sender, winrt::Windows::UI::Xaml::Controls::SelectionChangedEventArgs const & args)
 	{
 		auto current_combobox = unbox_value<Windows::UI::Xaml::Controls::ComboBox>(sender);
@@ -372,21 +247,6 @@ namespace winrt::wzrd_editor::implementation
 		auto current_combobox = unbox_value<Windows::UI::Xaml::Controls::ComboBox>(sender);
 		auto selected_addressmode = unbox_value<graphics::generic_attribute>(current_combobox.SelectedItem());
 		m_ui_control_values.Insert(hstring{ L"sampler_addressmode_w" }, box_value(selected_addressmode.attribute_value()));
-		co_return;
-	}
-
-	IAsyncAction texture_showcase_page::sampler_bordercolor_changed(IInspectable const & sender, winrt::Windows::UI::Xaml::Controls::ColorChangedEventArgs const args)
-	{
-		auto selected_color = sampler_bordercolor().Color();
-		auto color_r = box_value(static_cast<float>(selected_color.R) / 255.f);
-		auto color_g = box_value(static_cast<float>(selected_color.G) / 255.f);
-		auto color_b = box_value(static_cast<float>(selected_color.B) / 255.f);
-		auto color_a = box_value(static_cast<float>(selected_color.A) / 255.f);
-
-		m_ui_control_values.Insert(hstring{ L"sampler_bordercolor_r" }, color_r);
-		m_ui_control_values.Insert(hstring{ L"sampler_bordercolor_g" }, color_g);
-		m_ui_control_values.Insert(hstring{ L"sampler_bordercolor_b" }, color_b);
-		m_ui_control_values.Insert(hstring{ L"sampler_bordercolor_a" }, color_a);
 		co_return;
 	}
 

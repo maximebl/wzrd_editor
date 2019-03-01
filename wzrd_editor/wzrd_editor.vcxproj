@@ -102,12 +102,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="attribute_slider.h">
+      <DependentUpon>attribute_slider.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="bool_invert.h">
       <DependentUpon>bool_invert.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
     <ClInclude Include="buffer_size_select_dialog.h">
       <DependentUpon>buffer_size_select_dialog.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
+    <ClInclude Include="float_to_int.h">
+      <DependentUpon>float_to_int.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
     <ClInclude Include="FrameResource.h" />
@@ -172,6 +180,9 @@
     <ApplicationDefinition Include="App.xaml">
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Page Include="attribute_slider.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="buffer_size_select_dialog.xaml">
       <SubType>Designer</SubType>
     </Page>
@@ -204,12 +215,20 @@
     <Image Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="attribute_slider.cpp">
+      <DependentUpon>attribute_slider.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="bool_invert.cpp">
       <DependentUpon>bool_invert.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
     <ClCompile Include="buffer_size_select_dialog.cpp">
       <DependentUpon>buffer_size_select_dialog.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
+    <ClCompile Include="float_to_int.cpp">
+      <DependentUpon>float_to_int.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
     <ClCompile Include="GameTimer.cpp">
@@ -285,12 +304,19 @@
     <Midl Include="App.idl">
       <DependentUpon>App.xaml</DependentUpon>
     </Midl>
+    <Midl Include="attribute_slider.idl">
+      <DependentUpon>attribute_slider.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Midl>
     <Midl Include="bool_invert.idl">
       <SubType>Designer</SubType>
     </Midl>
     <Midl Include="buffer_size_select_dialog.idl">
       <DependentUpon>buffer_size_select_dialog.xaml</DependentUpon>
       <SubType>Code</SubType>
+    </Midl>
+    <Midl Include="float_to_int.idl">
+      <SubType>Designer</SubType>
     </Midl>
     <Midl Include="Geometry.idl" />
     <Midl Include="GeometryViewModel.idl" />

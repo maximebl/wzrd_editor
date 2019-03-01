@@ -1,0 +1,13 @@
+namespace wzrd_editor
+{
+	[bindable]
+	[default_interface]
+	runtimeclass attribute_slider : Windows.UI.Xaml.Controls.UserControl, Windows.UI.Xaml.Data.INotifyPropertyChanged
+	{
+		attribute_slider();
+		static Windows.UI.Xaml.DependencyProperty LabelProperty{ get; };
+		static Windows.UI.Xaml.DependencyProperty value_property{ get; set; };
+        String Label;
+		Single value_prop;
+	}
+}

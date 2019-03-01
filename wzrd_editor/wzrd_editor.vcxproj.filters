@@ -13,6 +13,9 @@
     <Page Include="texture_showcase_page.xaml">
       <Filter>views</Filter>
     </Page>
+    <Page Include="attribute_slider.xaml">
+      <Filter>views</Filter>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="App.idl" />
@@ -54,6 +57,9 @@
       <Filter>views\converters</Filter>
     </Midl>
     <Midl Include="ivector_to_bool.idl">
+      <Filter>views\converters</Filter>
+    </Midl>
+    <Midl Include="float_to_int.idl">
       <Filter>views\converters</Filter>
     </Midl>
   </ItemGroup>

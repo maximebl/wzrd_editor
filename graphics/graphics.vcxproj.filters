@@ -43,5 +43,6 @@
     <Midl Include="shader.idl" />
     <Midl Include="texture.idl" />
     <Midl Include="generic_attribute.idl" />
+    <Midl Include="subresource.idl" />
   </ItemGroup>
 </Project>

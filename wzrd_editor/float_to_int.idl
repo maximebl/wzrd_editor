@@ -1,0 +1,9 @@
+namespace wzrd_editor
+{
+    [bindable]
+    [default_interface]
+    runtimeclass float_to_int : Windows.UI.Xaml.Data.IValueConverter
+    {
+        float_to_int();
+    }
+}

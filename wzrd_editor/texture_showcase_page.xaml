@@ -13,6 +13,16 @@
 
         <converters:bool_invert x:Key="bool_invert_converter"/>
         <converters:ivector_to_bool x:Key="ivector_to_bool_converter"/>
+        <converters:float_to_int x:Key="float_to_int_converter"/>
+
+        <DataTemplate x:Key="mipmaps_template" x:DataType="graphics:subresource">
+            <StackPanel>
+                <TextBlock Text="{x:Bind mip_level, Mode=OneWay}"></TextBlock>
+                <TextBlock Text="{x:Bind row_pitch, Mode=OneWay}"></TextBlock>
+                <TextBlock Text="{x:Bind slice_pitch, Mode=OneWay}"></TextBlock>
+                <!--<Image Source="" />-->
+            </StackPanel>
+        </DataTemplate>
 
         <DataTemplate x:Key="textures_list_template" x:DataType="graphics:texture" >
             <ListViewItem
@@ -124,7 +134,7 @@
                                     x:Name="shader_reflection_attributes_list"
                                     MinWidth="200"
                                     ItemTemplate="{StaticResource shader_reflection_attribute_template}"
-                                    ItemsSource="{x:Bind shader_reflection_data }">
+                                    ItemsSource="{x:Bind shader_reflection_data, Mode=OneTime}">
                                 </ListView>
                             </Flyout>
                         </Button.Flyout>
@@ -137,7 +147,7 @@
                                     MinWidth="200"
                                     x:Name="shader_bound_resources"
                                     ItemTemplate="{StaticResource shader_reflection_attribute_template}"
-                                    ItemsSource="{x:Bind shader_bound_resources }">
+                                    ItemsSource="{x:Bind shader_bound_resources, Mode=OneTime}">
                                 </ListView>
                             </Flyout>
                         </Button.Flyout>
@@ -222,6 +232,18 @@
                             </ListView.Resources>
                         </ListView>
 
+                        <!--<FlipView MaxWidth="400" Height="270" 
+                                  ItemTemplate="{StaticResource mipmaps_template}" 
+                                  SelectedIndex="{x:Bind texture_showcase_vm.current_texture.current_lod, Converter={StaticResource float_to_int_converter} ,Mode=OneWay}" 
+                                  ItemsSource="{x:Bind texture_showcase_vm.current_texture.mipmaps}"/>-->
+
+                        <ListView
+                            x:Name="mipmaps"
+                            Width="200"
+                            ItemsSource="{x:Bind texture_showcase_vm.mipmaps, Mode=OneWay}"
+                            ItemTemplate="{StaticResource mipmaps_template}"
+                            />
+
                         <Grid Width="600" HorizontalAlignment="Left">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -236,10 +258,10 @@
                                 <TextBlock FontWeight="ExtraBlack" Text="Top left"/>
                                 <Border BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundListMediumRevealBorderBrush}" Padding="3,3,3,3">
                                     <StackPanel Orientation="Vertical">
-                                        <Slider x:Name="topleft_u" ValueChanged="topleft_u_valuechanged" Header="texture u" Width="auto" Orientation="Horizontal" Value="0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05"  TickFrequency="0.05" TickPlacement="None" />
-                                        <Slider x:Name="topleft_v" ValueChanged="topleft_v_valuechanged" Header="texture v" Width="auto" Orientation="Horizontal" Value="0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05"  TickFrequency="0.05" TickPlacement="None" />
-                                        <Slider x:Name="topleft_x" ValueChanged="topleft_x_valuechanged" Header="vertex x" Width="auto" Orientation="Horizontal" Value="0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05"  TickFrequency="0.05" TickPlacement="None" />
-                                        <Slider x:Name="topleft_y" ValueChanged="topleft_y_valuechanged" Header="vertex y" Width="auto" Orientation="Horizontal" Value="0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05"  TickFrequency="0.05" TickPlacement="None" />
+                                        <Slider x:Name="topleft_u" Header="texture u" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture.topleft_u, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01"  TickFrequency="0.01" TickPlacement="None" />
+                                        <Slider x:Name="topleft_v" Header="texture v" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture.topleft_v, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01"  TickFrequency="0.01" TickPlacement="None" />
+                                        <Slider x:Name="topleft_x" Header="vertex x" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture.topleft_x, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01"  TickFrequency="0.01" TickPlacement="None" />
+                                        <Slider x:Name="topleft_y" Header="vertex y" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture.topleft_y, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01"  TickFrequency="0.01" TickPlacement="None" />
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
@@ -248,10 +270,10 @@
                                 <TextBlock FontWeight="ExtraBlack" Text="Top right"/>
                                 <Border BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundListMediumRevealBorderBrush}" Padding="3,3,3,3">
                                     <StackPanel Orientation="Vertical">
-                                        <Slider x:Name="topright_u" ValueChanged="topright_u_valuechanged" Header="texture u" Width="auto" Orientation="Horizontal" Value="1.0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" />
-                                        <Slider x:Name="topright_v" ValueChanged="topright_v_valuechanged" Header="texture v" Width="auto"  Orientation="Horizontal" Value="0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" />
-                                        <Slider x:Name="topright_x" ValueChanged="topright_x_valuechanged" Header="vertex x" Width="auto" Orientation="Horizontal" Value="1.0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" />
-                                        <Slider x:Name="topright_y" ValueChanged="topright_y_valuechanged" Header="vertex y" Width="auto"  Orientation="Horizontal" Value="0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" />
+                                        <Slider x:Name="topright_u" Header="texture u" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture.topright_u, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
+                                        <Slider x:Name="topright_v" Header="texture v" Width="auto"  Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture.topright_v, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
+                                        <Slider x:Name="topright_x" Header="vertex x" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture.topright_x, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
+                                        <Slider x:Name="topright_y" Header="vertex y" Width="auto"  Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture.topright_y, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
@@ -260,10 +282,10 @@
                                 <TextBlock FontWeight="ExtraBlack" Text="Bottom left"/>
                                 <Border BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundListMediumRevealBorderBrush}" Padding="3,3,3,3">
                                     <StackPanel Orientation="Vertical">
-                                        <Slider x:Name="bottomleft_u" ValueChanged="bottomleft_u_valuechanged" Header="texture u" Width="auto" Orientation="Horizontal" Value="0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" />
-                                        <Slider x:Name="bottomleft_v" ValueChanged="bottomleft_v_valuechanged" Header="texture v" Width="auto" Orientation="Horizontal" Value="1.0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" />
-                                        <Slider x:Name="bottomleft_x" ValueChanged="bottomleft_x_valuechanged" Header="vertex x" Width="auto" Orientation="Horizontal" Value="0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" />
-                                        <Slider x:Name="bottomleft_y" ValueChanged="bottomleft_y_valuechanged" Header="vertex y" Width="auto" Orientation="Horizontal" Value="1.0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" />
+                                        <Slider x:Name="bottomleft_u" Header="texture u" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture.bottomleft_u, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
+                                        <Slider x:Name="bottomleft_v" Header="texture v" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture.bottomleft_v, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
+                                        <Slider x:Name="bottomleft_x" Header="vertex x" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture.bottomleft_x, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
+                                        <Slider x:Name="bottomleft_y" Header="vertex y" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture.bottomleft_y, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
@@ -272,25 +294,58 @@
                                 <TextBlock FontWeight="ExtraBlack" Text="Bottom right"/>
                                 <Border BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundListMediumRevealBorderBrush}" Padding="3,3,3,3">
                                     <StackPanel Orientation="Vertical">
-                                        <Slider x:Name="bottomright_u" ValueChanged="bottomright_u_valuechanged" Header="texture u" Width="auto" Orientation="Horizontal" Value="1.0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None"/>
-                                        <Slider x:Name="bottomright_v" ValueChanged="bottomright_v_valuechanged" Header="texture v" Width="auto" Orientation="Horizontal" Value="1.0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" />
-                                        <Slider x:Name="bottomright_x" ValueChanged="bottomright_x_valuechanged" Header="vertex x" Width="auto" Orientation="Horizontal" Value="1.0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None"/>
-                                        <Slider x:Name="bottomright_y" ValueChanged="bottomright_y_valuechanged" Header="vertex y" Width="auto" Orientation="Horizontal" Value="1.0" Minimum="-1.0" Maximum="1.0" StepFrequency="0.05" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" />
+                                        <Slider x:Name="bottomright_u" Header="texture u" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture.bottomright_u, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None"/>
+                                        <Slider x:Name="bottomright_v" Header="texture v" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture.bottomright_v, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
+                                        <Slider x:Name="bottomright_x" Header="vertex x" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture.bottomright_x, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None"/>
+                                        <Slider x:Name="bottomright_y" Header="vertex y" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture.bottomright_y, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
                                     </StackPanel>
                                 </Border>
                             </StackPanel>
+
                         </Grid>
 
+
                         <RelativePanel>
-                            <ColorPicker x:Name="sampler_bordercolor" ColorChanged="sampler_bordercolor_changed" IsColorSliderVisible="False" IsColorChannelTextInputVisible="False" IsAlphaEnabled="True" IsAlphaSliderVisible="True" 
+                            <!--<local:attribute_slider Label="Scale" value_prop="{x:Bind texture_showcase_vm.current_texture.scale, Mode=TwoWay}"/>-->
+                            <TextBlock x:Name="scale_label" Text="Scale" HorizontalAlignment="Left" />
+                            <TextBlock x:Name="scale_text_value" Text="{x:Bind texture_showcase_vm.current_texture.scale, Mode=OneWay}" HorizontalAlignment="Right"
+                                       RelativePanel.AlignRightWithPanel="True"
+                                       RelativePanel.RightOf="scale_label" />
+
+                            <Slider x:Name="Scale" Value="{x:Bind texture_showcase_vm.current_texture.scale, Mode=TwoWay}" Orientation="Horizontal" Minimum="0" Maximum="10" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None"
+                                   RelativePanel.Below="scale_label" 
+                                   RelativePanel.AlignRightWith="scale_text_value"
+                                   RelativePanel.AlignLeftWith="scale_label"
+                                   RelativePanel.AlignRightWithPanel="True" />
+                        </RelativePanel>
+
+                        <RelativePanel>
+
+                            <TextBlock x:Name="lod_label" Text="Level of detail" HorizontalAlignment="Left" />
+                            <TextBlock x:Name="lod_text_value" Text="{x:Bind texture_showcase_vm.current_texture.current_lod, Mode=OneWay}" HorizontalAlignment="Right"
+                                       RelativePanel.AlignRightWithPanel="True"
+                                       RelativePanel.RightOf="lod_label" />
+
+                            <Slider x:Name="current_lod" Value="{x:Bind texture_showcase_vm.current_texture.current_lod, Mode=TwoWay}" Orientation="Horizontal" Minimum="0" Maximum="10" StepFrequency="0.01" TickFrequency="1" SnapsTo="StepValues" TickPlacement="None"
+                                    RelativePanel.Below="lod_label"
+                                    RelativePanel.AlignRightWith="lod_text_value"
+                                    RelativePanel.AlignLeftWith="lod_label"
+                                    RelativePanel.AlignRightWithPanel="True"/>
+
+
+                        </RelativePanel>
+
+                        <RelativePanel>
+                            <ColorPicker x:Name="sampler_bordercolor" Color="{x:Bind texture_showcase_vm.current_texture.sampler_border_color, Mode=TwoWay}" 
+                                            IsColorSliderVisible="False" IsColorChannelTextInputVisible="False" IsAlphaEnabled="True" IsAlphaSliderVisible="True" 
                                             RelativePanel.RightOf="texture_coords_sliders" />
 
                             <StackPanel x:Name="texture_coords_sliders" Orientation="Vertical" Width="300">
-                                <Slider x:Name="sampler_maxLOD" ValueChanged="sampler_maxLOD_changed" Header="Max LOD" Width="auto" Orientation="Horizontal" Value="10" Maximum="10" Minimum="{Binding Value, ElementName=sampler_minLOD}" 
-                                            StepFrequency="0.1" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" />
+                                <Slider x:Name="sampler_maxLOD" Value="{x:Bind texture_showcase_vm.current_texture.sampler_maxLOD, Mode=TwoWay}" Header="Max LOD" Width="auto" Orientation="Horizontal" Maximum="10" Minimum="{Binding Value, ElementName=sampler_minLOD}" 
+                                            StepFrequency="0.1" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
 
-                                <Slider x:Name="sampler_minLOD" ValueChanged="sampler_minLOD_changed" Header="Min LOD" Width="auto" Orientation="Horizontal" Value="0" Minimum="0" Maximum="10.0" 
-                                            StepFrequency="0.1" TickFrequency="0.05" SnapsTo="StepValues" TickPlacement="None" />
+                                <Slider x:Name="sampler_minLOD" Value="{x:Bind texture_showcase_vm.current_texture.sampler_minLOD, Mode=TwoWay}" Header="Min LOD" Width="auto" Orientation="Horizontal" Minimum="0" Maximum="10.0" 
+                                            StepFrequency="0.1" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
 
                                 <ComboBox SelectionChanged="sampler_addressmode_u_changed" Header="Address Mode U" PlaceholderText="U addressing mode" Width="auto"
                                               ItemsSource="{x:Bind texture_showcase_vm.address_modes, Mode=OneWay}" DisplayMemberPath="attribute_name" SelectedIndex="0"/>

@@ -13,7 +13,7 @@ namespace winrt::wzrd_editor::implementation
 
 	struct texture_showcase_vm : texture_showcase_vmT<texture_showcase_vm>
 	{
-		texture_showcase_vm() = default;
+		texture_showcase_vm();
 
 		IObservableVector<IInspectable> textures();
 		void textures(IObservableVector<IInspectable> const& value);
@@ -21,6 +21,10 @@ namespace winrt::wzrd_editor::implementation
 		void shaders(IObservableVector<IInspectable> const& value);
 		IObservableVector<IInspectable> address_modes();
 		void address_modes(IObservableVector<IInspectable> const& value);
+		graphics::texture current_texture();
+		void current_texture(graphics::texture const& value);
+		Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> mipmaps();
+		void mipmaps(Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> const& value);
 		winrt::event_token PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& handler);
 		void PropertyChanged(winrt::event_token const& token) noexcept;
 
@@ -28,6 +32,8 @@ namespace winrt::wzrd_editor::implementation
 		IObservableVector<IInspectable> m_textures = winrt::single_threaded_observable_vector<IInspectable>();
 		IObservableVector<IInspectable> m_shaders = winrt::single_threaded_observable_vector<IInspectable>();
 		IObservableVector<IInspectable> m_address_modes = winrt::single_threaded_observable_vector<IInspectable>();
+		IObservableVector<IInspectable> m_mipmaps = winrt::single_threaded_observable_vector<IInspectable>();
+		graphics::texture m_current_texture;
 
 		winrt::event<Windows::UI::Xaml::Data::PropertyChangedEventHandler> m_property_changed;
 

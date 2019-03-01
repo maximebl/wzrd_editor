@@ -1,0 +1,22 @@
+﻿<UserControl
+    x:Class="wzrd_editor.attribute_slider"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:wzrd_editor"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d" >
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" >
+        <TextBlock x:Name="scale_label" Text="{x:Bind Label, Mode=OneWay}" HorizontalAlignment="Left" />
+        <TextBlock x:Name="scale_text_value" Text="{x:Bind value_prop, Mode=TwoWay}" HorizontalAlignment="Right"
+                                       RelativePanel.AlignRightWithPanel="True"
+                                       RelativePanel.RightOf="scale_label" />
+
+        <Slider x:Name="Scale" Value="{x:Bind value_prop, Mode=TwoWay}" Width="200" Orientation="Horizontal" Minimum="0" Maximum="10" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None"
+                                   RelativePanel.Below="scale_label" 
+                                   RelativePanel.AlignRightWith="scale_text_value"
+                                   RelativePanel.AlignLeftWith="scale_label"
+                                   RelativePanel.AlignRightWithPanel="True" />
+
+    </StackPanel>
+</UserControl>
