@@ -24,9 +24,9 @@
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
 
-            <NavigationViewItem Tag="wzrd_editor.shading_showcase" Content="Shading" IsEnabled="False">
+            <NavigationViewItem Tag="wzrd_editor.transforms_showcase_page" Content="Transforms" IsEnabled="True">
                 <NavigationViewItem.Icon>
-                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE771;"/>
+                    <FontIcon FontFamily="Segoe MDL2 Assets" Glyph="&#xE759;"/>
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
         </NavigationView.MenuItems>

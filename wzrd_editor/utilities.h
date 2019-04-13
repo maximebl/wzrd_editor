@@ -195,5 +195,9 @@ public:
 	static ID3D12Device* device;
 	static ID3D12GraphicsCommandList* cmd_list;
 	static void generate_address_modes_attributes(winrt::Windows::Foundation::Collections::IObservableVector<winrt::Windows::Foundation::IInspectable> & address_modes);
+	static void generate_filtering_methods_attributes(winrt::Windows::Foundation::Collections::IObservableVector<winrt::Windows::Foundation::IInspectable> & filtering_methods);
+	static void generate_filter_reduction_types_attributes(winrt::Windows::Foundation::Collections::IObservableVector<winrt::Windows::Foundation::IInspectable> & filtering_methods);
+	static void generate_filter_comparisonfuncs_attributes(winrt::Windows::Foundation::Collections::IObservableVector<winrt::Windows::Foundation::IInspectable> & comparison_funcs);
+	static void generate_sampling_functions_attributes(winrt::Windows::Foundation::Collections::IObservableVector<winrt::Windows::Foundation::IInspectable> & sampling_functions);
 };
 

@@ -1,0 +1,9 @@
+namespace wzrd_editor
+{
+    [bindable]
+    [default_interface]
+    runtimeclass enum_to_int : Windows.UI.Xaml.Data.IValueConverter
+    {
+        enum_to_int();
+    }
+}

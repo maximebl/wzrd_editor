@@ -19,6 +19,7 @@
     <ClCompile Include="utilities.cpp" />
     <ClCompile Include="texture.cpp" />
     <ClCompile Include="generic_attribute.cpp" />
+    <ClCompile Include="subresource.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -31,6 +32,7 @@
     <ClInclude Include="utilities.h" />
     <ClInclude Include="texture.h" />
     <ClInclude Include="generic_attribute.h" />
+    <ClInclude Include="subresource.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="graphics.def" />

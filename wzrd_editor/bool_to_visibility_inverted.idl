@@ -1,0 +1,9 @@
+namespace wzrd_editor
+{
+    [bindable]
+    [default_interface]
+    runtimeclass bool_to_visibility_inverted : Windows.UI.Xaml.Data.IValueConverter
+    {
+        bool_to_visibility_inverted();
+    }
+}

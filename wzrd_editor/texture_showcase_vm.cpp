@@ -40,12 +40,12 @@ namespace winrt::wzrd_editor::implementation
 		update_value(L"address_modes", m_address_modes, value);
 	}
 
-	Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> texture_showcase_vm::mipmaps()
+	IObservableVector<IInspectable> texture_showcase_vm::mipmaps()
 	{
 		return m_mipmaps;
 	}
 
-	void texture_showcase_vm::mipmaps(Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> const& value)
+	void texture_showcase_vm::mipmaps(IObservableVector<IInspectable> const& value)
 	{
 		update_value(L"mipmaps", m_mipmaps, value);
 	}
@@ -58,6 +58,76 @@ namespace winrt::wzrd_editor::implementation
 	void texture_showcase_vm::current_texture(graphics::texture const& value)
 	{
 		update_value(L"current_texture", m_current_texture, value);
+	}
+
+	graphics::renderer texture_showcase_vm::current_renderer()
+	{
+		return m_current_renderer;
+	}
+
+	void texture_showcase_vm::current_renderer(graphics::renderer const& value)
+	{
+		update_value(L"current_renderer", m_current_renderer, value);
+	}
+
+	IObservableVector<IInspectable> texture_showcase_vm::minification_filters()
+	{
+		return m_minification_filters;
+	}
+
+	void texture_showcase_vm::minification_filters(IObservableVector<IInspectable> const& value)
+	{
+		update_value(L"minification_filters", m_minification_filters, value);
+	}
+
+	IObservableVector<IInspectable> texture_showcase_vm::magnification_filters()
+	{
+		return m_magnification_filters;
+	}
+
+	void texture_showcase_vm::magnification_filters(IObservableVector<IInspectable> const& value)
+	{
+		update_value(L"magnification_filters", m_magnification_filters, value);
+	}
+
+	IObservableVector<IInspectable> texture_showcase_vm::miplevel_sampling_filters()
+	{
+		return m_miplevel_sampling_filters;
+	}
+
+	void texture_showcase_vm::miplevel_sampling_filters(Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> const& value)
+	{
+		update_value(L"miplevel_sampling_filters", m_miplevel_sampling_filters, value);
+	}
+
+	IObservableVector<IInspectable> texture_showcase_vm::filter_reduction_types()
+	{
+		return m_filter_reduction_types;
+	}
+
+	void texture_showcase_vm::filter_reduction_types(IObservableVector<IInspectable> const& value)
+	{
+		update_value(L"filter_reduction_types", m_filter_reduction_types, value);
+	}
+
+	IObservableVector<IInspectable> texture_showcase_vm::filter_comparisonfuncs()
+	{
+		return m_filter_comparisonfuncs;
+	}
+
+	void texture_showcase_vm::filter_comparisonfuncs(IObservableVector<IInspectable> const& value)
+	{
+		update_value(L"filter_comparisonfuncs", m_filter_comparisonfuncs, value);
+	}
+
+	IObservableVector<IInspectable> texture_showcase_vm::sampling_functions()
+	{
+		return m_sampling_functions;
+	}
+
+	void texture_showcase_vm::sampling_functions(IObservableVector<IInspectable> const& value)
+	{
+		update_value(L"sampling_functions", m_sampling_functions, value);
 	}
 
 	winrt::event_token texture_showcase_vm::PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& handler)

@@ -14,6 +14,8 @@ namespace winrt::graphics::implementation
 
 		Windows::UI::Xaml::Media::Imaging::SoftwareBitmapSource mipmap_bitmap_source();
 		void mipmap_bitmap_source(Windows::UI::Xaml::Media::Imaging::SoftwareBitmapSource const& value);
+		Windows::UI::Xaml::Media::Imaging::BitmapImage mipmap_bitmap_source2();
+		void mipmap_bitmap_source2(Windows::UI::Xaml::Media::Imaging::BitmapImage const& value);
 		uint8_t mip_level();
 		void mip_level(uint8_t value);
 		uint64_t width();
@@ -30,6 +32,7 @@ namespace winrt::graphics::implementation
 
 	private:
 		Windows::UI::Xaml::Media::Imaging::SoftwareBitmapSource m_mipmap_bitmap_source = nullptr;
+		Windows::UI::Xaml::Media::Imaging::BitmapImage m_mipmap_bitmap_source2 = nullptr;
 		uint8_t m_mip_level = 0;
 		uint64_t m_width = 0;
 		uint64_t m_height = 0;

@@ -201,6 +201,9 @@
     <ProjectReference Include="..\os_utilities\os_utilities.vcxproj">
       <Project>{725ce0b3-91ac-4049-bfff-8cd01c536441}</Project>
     </ProjectReference>
+    <ProjectReference Include="DirectXTex\DirectXTex\DirectXTex_Windows10.vcxproj">
+      <Project>{fb3f52b5-bfe8-43fd-836f-363735dab738}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

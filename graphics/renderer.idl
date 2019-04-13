@@ -27,13 +27,13 @@ namespace graphics
 	};
 
 	[default_interface]
-	runtimeclass renderer
+	runtimeclass renderer : Windows.UI.Xaml.Data.INotifyPropertyChanged
 	{
 		renderer();
 
 		void enable_debug_layer();
 		void initialize_buffers_showcase(Windows.UI.Xaml.Controls.SwapChainPanel target_swapchain);
-		void initialize_textures_showcase(Windows.Foundation.Collections.IMap<String, Object> ui_items, Windows.Foundation.Collections.IMap<String, Object> ui_item_values);
+		void initialize_textures_showcase(Windows.Foundation.Collections.IMap<String, Object> ui_items);
 		void clear_shaders();
 		void clear_textures();
 		void remove_texture(String name);
@@ -44,7 +44,10 @@ namespace graphics
 		Boolean is_rendering{ get; };
 		primitive_types current_topology{ get; set; };
 		Windows.Foundation.IAsyncOperation<compilation_result> pick_and_compile_shader(shader new_shader);
-		Windows.Foundation.IAsyncOperation<texture> pick_texture(graphics.texture new_texture, String name);
+		Windows.Foundation.IAsyncOperationWithProgress<texture, String> pick_texture(graphics.texture new_texture, String name);
 		buffer current_buffer{ get; set; };
+
+		UInt32 viewport_width;
+		UInt32 viewport_height;
 	}
 }

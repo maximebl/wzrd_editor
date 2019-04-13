@@ -60,8 +60,58 @@ namespace winrt::graphics::implementation
 		float sampler_maxLOD();
 		void sampler_maxLOD(float value);
 
+		float forced_miplevel();
+		void forced_miplevel(float value);
+
+		float sample_comparison_value();
+		void sample_comparison_value(float value);
+
+		uint32_t max_anisotropy();
+		void max_anisotropy(uint32_t value);
+
 		Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> mipmaps();
 		void mipmaps(Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> const value);
+
+		bool is_forced_mip_level();
+		void is_forced_mip_level(bool value);
+
+		bool is_screen_coords();
+		void is_screen_coords(bool value);
+
+		int32_t x_pixel_offset();
+		void x_pixel_offset(int32_t value);
+
+		int32_t y_pixel_offset();
+		void y_pixel_offset(int32_t value);
+
+		bool is_anisotropic();
+		void is_anisotropic(bool value);
+
+		graphics::filtering_method minification_filter();
+		void minification_filter(graphics::filtering_method const& value);
+		graphics::filtering_method magnification_filter();
+		void magnification_filter(graphics::filtering_method const& value);
+		graphics::filtering_method miplevel_sampling_filter();
+		void miplevel_sampling_filter(graphics::filtering_method const& value);
+
+		graphics::filter_reduction_type reduction();
+		void reduction(graphics::filter_reduction_type const& value);
+
+		graphics::filter_comparison_function comparison_function();
+		void comparison_function(graphics::filter_comparison_function const& value);
+
+		graphics::sampling_function sampling_function();
+		void sampling_function(graphics::sampling_function const& value);
+
+		graphics::alpha_mode alpha_mode();
+		void alpha_mode(graphics::alpha_mode const& value);
+
+		graphics::texture_address_mode u_address_mode();
+		void u_address_mode(graphics::texture_address_mode const& value);
+		graphics::texture_address_mode v_address_mode();
+		void v_address_mode(graphics::texture_address_mode const& value);
+		graphics::texture_address_mode w_address_mode();
+		void w_address_mode(graphics::texture_address_mode const& value);
 
 		float topleft_u();
 		void topleft_u(float value);
@@ -111,8 +161,29 @@ namespace winrt::graphics::implementation
 		Windows::UI::Color m_sampler_border_color;
 		float m_sampler_minLOD = 0.0f;
 		float m_sampler_maxLOD = 10.f;
+		float m_forced_miplevel = 0.0f;
+		bool m_is_forced_mip_level = false;
+		bool m_is_screen_coords = false;
+		int32_t m_x_pixel_offset = 0;
+		int32_t m_y_pixel_offset = 0;
+		float m_sample_comparison_value = 0.0f;
+		uint32_t m_max_anisotropy = 16;
 
 		Windows::Foundation::Collections::IObservableVector<IInspectable> m_mipmaps;
+		bool m_is_anisotropic = false;
+
+		filtering_method m_minification_filter = filtering_method::linear_interpolation;
+		filtering_method m_magnification_filter = filtering_method::linear_interpolation;
+		filtering_method m_miplevel_sampling_filter = filtering_method::linear_interpolation;
+		graphics::sampling_function m_sampling_function = graphics::sampling_function::sample;
+
+		filter_reduction_type m_reduction = filter_reduction_type::standard;
+		filter_comparison_function m_comparison_function = filter_comparison_function::always;
+
+		texture_address_mode m_u_address_mode = texture_address_mode::wrap;
+		texture_address_mode m_v_address_mode = texture_address_mode::wrap;
+		texture_address_mode m_w_address_mode = texture_address_mode::wrap;
+		graphics::alpha_mode m_alpha_mode = alpha_mode::unknown;
 
 		uint64_t m_mip_levels = 1.0f;
 		uint64_t m_width = 0.0f;

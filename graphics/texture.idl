@@ -2,6 +2,62 @@ import "subresource.idl";
 
 namespace graphics
 {
+	enum filtering_method
+	{
+		point = 0,
+		linear_interpolation = 1,
+	};
+
+	enum filter_reduction_type
+	{
+		standard = 0,
+		comparison = 1,
+		minimum = 2,
+		maximum = 3
+	};
+
+	enum filter_comparison_function
+	{
+		never = 1,
+		less = 2,
+		equal = 3,
+		less_equal = 4,
+		greater = 5,
+		not_equal = 6,
+		greater_equal = 7,
+		always = 8
+	};
+
+	enum sampling_function
+	{
+		sample = 0,
+		load = 1,
+		gather_red = 2,
+		gather_blue = 3,
+		gather_green = 4,
+		gather_alpha = 5,
+		sample_grad = 6,
+		sample_bias = 7,
+	};
+
+	enum texture_address_mode
+	{
+		wrap = 1,
+		mirror = 2,
+		clamp = 3,
+		border = 4,
+		mirror_once = 5
+	};
+
+	enum alpha_mode
+	{
+		unknown = 0,
+		straight = 1,
+		premultiplied = 2,
+		opaque = 3,
+		custom = 4
+	};
+
 	[bindable]
 	[default_interface]
 	runtimeclass texture : Windows.UI.Xaml.Data.INotifyPropertyChanged
@@ -26,6 +82,27 @@ namespace graphics
 		Single sampler_minLOD;
 		Single sampler_maxLOD;
 		IObservableVector<IInspectable> mipmaps;
+		Boolean is_forced_mip_level;
+		Boolean is_screen_coords;
+		Int32 x_pixel_offset;
+		Int32 y_pixel_offset;
+		Single forced_miplevel;
+		Single sample_comparison_value;
+		UInt32 max_anisotropy;
+
+		Boolean is_anisotropic;
+
+		filtering_method minification_filter;
+		filtering_method magnification_filter;
+		filtering_method miplevel_sampling_filter;
+		filter_reduction_type reduction;
+		filter_comparison_function comparison_function;
+		sampling_function sampling_function;
+		alpha_mode alpha_mode;
+
+		texture_address_mode u_address_mode;
+		texture_address_mode v_address_mode;
+		texture_address_mode w_address_mode;
 
 		Single topleft_u;
 		Single topleft_v;

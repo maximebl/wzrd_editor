@@ -14,21 +14,23 @@
         <converters:bool_invert x:Key="bool_invert_converter"/>
         <converters:ivector_to_bool x:Key="ivector_to_bool_converter"/>
         <converters:float_to_int x:Key="float_to_int_converter"/>
+        <converters:enum_to_int x:Key="enum_to_int_converter"/>
+        <converters:filter_reduction_to_int x:Key="filter_reduction_to_int_converter"/>
+        <converters:bool_to_visibility_inverted x:Key="bool_to_visibility_inverted_converter"/>
+        <converters:alphamode_to_string x:Key="alphamode_to_string_converter"/>
 
         <DataTemplate x:Key="mipmaps_template" x:DataType="graphics:subresource">
-            <StackPanel>
-                <TextBlock Text="{x:Bind mip_level, Mode=OneWay}"></TextBlock>
-                <TextBlock Text="{x:Bind row_pitch, Mode=OneWay}"></TextBlock>
-                <TextBlock Text="{x:Bind slice_pitch, Mode=OneWay}"></TextBlock>
-                <!--<Image Source="" />-->
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <TextBlock Text="{x:Bind mip_level, Mode=OneWay}"/>
+                <TextBlock Text="{x:Bind row_pitch, Mode=OneWay}"/>
+                <TextBlock Text="{x:Bind slice_pitch, Mode=OneWay}"/>
+                <Image Source="{x:Bind mipmap_bitmap_source, Mode=OneWay}" Width="{Binding width}" Height="{Binding height}" />
             </StackPanel>
         </DataTemplate>
 
         <DataTemplate x:Key="textures_list_template" x:DataType="graphics:texture" >
             <ListViewItem
-                HorizontalContentAlignment="Stretch"
-                PointerEntered="onmouseenter_textures_list"
-                PointerExited="onmouseexit_textures_list">
+                HorizontalContentAlignment="Stretch">
                 <StackPanel Orientation="Vertical">
                     <StackPanel.ChildrenTransitions>
                         <RepositionThemeTransition/>
@@ -47,7 +49,7 @@
                         </Image.Transitions>
                     </Image>
 
-                    <StackPanel Orientation="Vertical" Visibility="{x:Bind is_loading, Converter={StaticResource bool_invert_converter}, Mode=OneWay}">
+                    <StackPanel Orientation="Vertical" Visibility="{x:Bind is_loading, Converter={StaticResource bool_to_visibility_inverted_converter}, Mode=OneWay}">
                         <StackPanel.ChildrenTransitions>
                             <RepositionThemeTransition/>
                             <EntranceThemeTransition IsStaggeringEnabled="True" />
@@ -66,6 +68,11 @@
                         </RelativePanel>
 
                         <NavigationViewItemSeparator/>
+
+                        <RelativePanel Margin="0,5,0,0" >
+                            <TextBlock x:Name="alpha_mode_label" FontWeight="Bold" Text="Alpha mode" />
+                            <TextBlock x:Name="alpha_mode" Text="{x:Bind alpha_mode, Mode=OneWay, Converter={StaticResource alphamode_to_string_converter}}" RelativePanel.Below="alpha_mode_label" />
+                        </RelativePanel>
 
                         <RelativePanel Margin="0,5,0,0" >
                             <TextBlock x:Name="mip_levels_label" FontWeight="Bold" Text="Mip levels" />
@@ -122,12 +129,12 @@
                         <EntranceThemeTransition IsStaggeringEnabled="True" />
                     </StackPanel.ChildrenTransitions>
 
-                    <ProgressRing Margin="0,0,13,0" Visibility="{x:Bind is_loading, Mode=OneWay}" IsActive="{x:Bind is_loading, Mode=TwoWay}"/>
+                    <ProgressRing Margin="0,0,13,0" Visibility="{Binding is_loading, Mode=OneWay}" IsActive="{Binding is_loading, Mode=TwoWay}"/>
                     <SymbolIcon Margin="0,0,13,0" x:Name="shader_type_icon" Symbol="{x:Bind type_glyph}"/>
                     <TextBlock Margin="0,0,13,0" Text="{x:Bind shader_name, Mode=OneWay}" VerticalAlignment="Center"/>
-                    <TextBlock Text="Compilation failed." Visibility="{x:Bind is_error, Mode=OneWay}" Foreground="{StaticResource SystemControlErrorTextForegroundBrush}" VerticalAlignment="Center"/>
+                    <TextBlock Text="Compilation failed." Visibility="{Binding is_error, Mode=OneWay}" Foreground="{StaticResource SystemControlErrorTextForegroundBrush}" VerticalAlignment="Center"/>
 
-                    <Button x:Name="shader_details" Content="Shader details" Visibility="{x:Bind is_error, Converter={StaticResource bool_invert_converter}, Mode=OneWay}">
+                    <Button x:Name="shader_details" Content="Shader details" Visibility="{Binding is_error, Converter={StaticResource bool_to_visibility_inverted_converter}, Mode=OneWay}">
                         <Button.Flyout>
                             <Flyout>
                                 <ListView
@@ -140,7 +147,7 @@
                         </Button.Flyout>
                     </Button>
 
-                    <Button x:Name="bound_resources" Content="Bound resources" Visibility="{x:Bind is_error, Converter={StaticResource bool_invert_converter}, Mode=OneWay}">
+                    <Button x:Name="bound_resources" Content="Bound resources" Visibility="{Binding is_error, Converter={StaticResource bool_to_visibility_inverted_converter}, Mode=OneWay}">
                         <Button.Flyout>
                             <Flyout>
                                 <ListView
@@ -205,8 +212,7 @@
                                   ItemTemplate="{StaticResource textures_list_template}"
                                   ItemsSource="{x:Bind texture_showcase_vm.textures}"
                                   VerticalContentAlignment="Stretch"
-                                  HorizontalContentAlignment="Stretch"
-                                  Visibility="Visible" >
+                                  HorizontalContentAlignment="Stretch" >
 
                             <ListView.ItemContainerTransitions>
                                 <TransitionCollection>
@@ -232,17 +238,12 @@
                             </ListView.Resources>
                         </ListView>
 
-                        <!--<FlipView MaxWidth="400" Height="270" 
-                                  ItemTemplate="{StaticResource mipmaps_template}" 
-                                  SelectedIndex="{x:Bind texture_showcase_vm.current_texture.current_lod, Converter={StaticResource float_to_int_converter} ,Mode=OneWay}" 
-                                  ItemsSource="{x:Bind texture_showcase_vm.current_texture.mipmaps}"/>-->
+                        <Slider x:Name="viewport_width" Header="Viewport width" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_renderer.viewport_width, Mode=TwoWay}" Minimum="0" Maximum="1000" StepFrequency="1" TickFrequency="1" SnapsTo="StepValues" TickPlacement="None" />
+                        <Slider x:Name="viewport_height" Header="Viewport height" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_renderer.viewport_height, Mode=TwoWay}" Minimum="0" Maximum="1000" StepFrequency="1" TickFrequency="1" SnapsTo="StepValues" TickPlacement="None" />
+                        <CheckBox x:Name="chk_is_screen_coords" Content="Use screen coordinates" IsChecked="{x:Bind texture_showcase_vm.current_texture.is_screen_coords, Mode=TwoWay}"/>
 
-                        <ListView
-                            x:Name="mipmaps"
-                            Width="200"
-                            ItemsSource="{x:Bind texture_showcase_vm.mipmaps, Mode=OneWay}"
-                            ItemTemplate="{StaticResource mipmaps_template}"
-                            />
+                        <Slider x:Name="x_pixel_offset" Header="X pixel offset" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture.x_pixel_offset, Mode=TwoWay}" Minimum="-10" Maximum="10" StepFrequency="1" TickFrequency="1" SnapsTo="StepValues" TickPlacement="None" />
+                        <Slider x:Name="y_pixel_offset" Header="Y pixel offset" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture.y_pixel_offset, Mode=TwoWay}" Minimum="-10" Maximum="10" StepFrequency="1" TickFrequency="1" SnapsTo="StepValues" TickPlacement="None" />
 
                         <Grid Width="600" HorizontalAlignment="Left">
                             <Grid.ColumnDefinitions>
@@ -306,38 +307,49 @@
 
 
                         <RelativePanel>
-                            <!--<local:attribute_slider Label="Scale" value_prop="{x:Bind texture_showcase_vm.current_texture.scale, Mode=TwoWay}"/>-->
-                            <TextBlock x:Name="scale_label" Text="Scale" HorizontalAlignment="Left" />
-                            <TextBlock x:Name="scale_text_value" Text="{x:Bind texture_showcase_vm.current_texture.scale, Mode=OneWay}" HorizontalAlignment="Right"
-                                       RelativePanel.AlignRightWithPanel="True"
-                                       RelativePanel.RightOf="scale_label" />
+                            <StackPanel x:Name="scale_lod_sliders" Orientation="Vertical" Width="300">
+                                <RelativePanel x:Name="scale_slider">
+                                    <TextBlock x:Name="scale_label" Text="Scale" HorizontalAlignment="Left" />
+                                    <TextBlock x:Name="scale_text_value" Text="{x:Bind texture_showcase_vm.current_texture.scale, Mode=OneWay}" HorizontalAlignment="Right"
+                                               RelativePanel.AlignRightWithPanel="True"
+                                               RelativePanel.RightOf="scale_label" />
 
-                            <Slider x:Name="Scale" Value="{x:Bind texture_showcase_vm.current_texture.scale, Mode=TwoWay}" Orientation="Horizontal" Minimum="0" Maximum="10" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None"
-                                   RelativePanel.Below="scale_label" 
-                                   RelativePanel.AlignRightWith="scale_text_value"
-                                   RelativePanel.AlignLeftWith="scale_label"
-                                   RelativePanel.AlignRightWithPanel="True" />
-                        </RelativePanel>
+                                    <Slider x:Name="Scale" 
+                                            Value="{x:Bind texture_showcase_vm.current_texture.scale, Mode=TwoWay}" Orientation="Horizontal" Minimum="0" Maximum="10" StepFrequency="0.001" TickFrequency="0.001" SnapsTo="Ticks" TickPlacement="None"
+                                            RelativePanel.Below="scale_label" 
+                                            RelativePanel.AlignRightWith="scale_text_value"
+                                            RelativePanel.AlignLeftWith="scale_label" />
+                                </RelativePanel>
 
-                        <RelativePanel>
+                                <RelativePanel x:Name="lod_slider">
+                                    <TextBlock x:Name="lod_label" Text="Level of detail" HorizontalAlignment="Left"/>
+                                    <TextBlock x:Name="lod_text_value" Text="{x:Bind texture_showcase_vm.current_texture.current_lod, Mode=OneWay}" HorizontalAlignment="Right"
+                                               RelativePanel.AlignRightWithPanel="True"
+                                               RelativePanel.RightOf="lod_label" />
 
-                            <TextBlock x:Name="lod_label" Text="Level of detail" HorizontalAlignment="Left" />
-                            <TextBlock x:Name="lod_text_value" Text="{x:Bind texture_showcase_vm.current_texture.current_lod, Mode=OneWay}" HorizontalAlignment="Right"
-                                       RelativePanel.AlignRightWithPanel="True"
-                                       RelativePanel.RightOf="lod_label" />
+                                    <Slider x:Name="current_lod" 
+                                            IsEnabled="False" 
+                                            Value="{x:Bind texture_showcase_vm.current_texture.current_lod, Mode=TwoWay}" Orientation="Horizontal" Minimum="0" Maximum="10" StepFrequency="0.01" TickFrequency="1" SnapsTo="StepValues" TickPlacement="None"
+                                            RelativePanel.Below="lod_label"
+                                            RelativePanel.AlignRightWith="lod_text_value"
+                                            RelativePanel.AlignLeftWith="lod_label" />
+                                </RelativePanel>
+                            </StackPanel>
 
-                            <Slider x:Name="current_lod" Value="{x:Bind texture_showcase_vm.current_texture.current_lod, Mode=TwoWay}" Orientation="Horizontal" Minimum="0" Maximum="10" StepFrequency="0.01" TickFrequency="1" SnapsTo="StepValues" TickPlacement="None"
-                                    RelativePanel.Below="lod_label"
-                                    RelativePanel.AlignRightWith="lod_text_value"
-                                    RelativePanel.AlignLeftWith="lod_label"
-                                    RelativePanel.AlignRightWithPanel="True"/>
-
-
+                            <FlipView 
+                                  x:Name="flipview"
+                                  MaxWidth="1100" 
+                                  MaxHeight="1100"
+                                  IsEnabled="False"
+                                  SelectedIndex="{x:Bind texture_showcase_vm.current_texture.current_lod, Converter={StaticResource float_to_int_converter}, Mode=OneWay}" 
+                                  ItemTemplate="{StaticResource mipmaps_template}" 
+                                  ItemsSource="{x:Bind texture_showcase_vm.mipmaps, Mode=OneTime}"
+                                  RelativePanel.RightOf="scale_lod_sliders"/>
                         </RelativePanel>
 
                         <RelativePanel>
                             <ColorPicker x:Name="sampler_bordercolor" Color="{x:Bind texture_showcase_vm.current_texture.sampler_border_color, Mode=TwoWay}" 
-                                            IsColorSliderVisible="False" IsColorChannelTextInputVisible="False" IsAlphaEnabled="True" IsAlphaSliderVisible="True" 
+                                            IsColorSliderVisible="False" IsColorChannelTextInputVisible="False" IsAlphaEnabled="False" IsAlphaSliderVisible="False" 
                                             RelativePanel.RightOf="texture_coords_sliders" />
 
                             <StackPanel x:Name="texture_coords_sliders" Orientation="Vertical" Width="300">
@@ -347,14 +359,66 @@
                                 <Slider x:Name="sampler_minLOD" Value="{x:Bind texture_showcase_vm.current_texture.sampler_minLOD, Mode=TwoWay}" Header="Min LOD" Width="auto" Orientation="Horizontal" Minimum="0" Maximum="10.0" 
                                             StepFrequency="0.1" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
 
-                                <ComboBox SelectionChanged="sampler_addressmode_u_changed" Header="Address Mode U" PlaceholderText="U addressing mode" Width="auto"
-                                              ItemsSource="{x:Bind texture_showcase_vm.address_modes, Mode=OneWay}" DisplayMemberPath="attribute_name" SelectedIndex="0"/>
+                                <StackPanel Orientation="Horizontal">
+                                    <CheckBox x:Name="chk_force_miplevel" Content="Force mip level" IsChecked="{x:Bind texture_showcase_vm.current_texture.is_forced_mip_level, Mode=TwoWay}"/>
 
-                                <ComboBox SelectionChanged="sampler_addressmode_v_changed" Header="Address Mode V" PlaceholderText="V addressing mode" Width="auto"
-                                              ItemsSource="{x:Bind texture_showcase_vm.address_modes, Mode=OneWay}" DisplayMemberPath="attribute_name" SelectedIndex="0"/>
+                                    <Slider x:Name="force_miplevel" Value="{x:Bind texture_showcase_vm.current_texture.forced_miplevel, Mode=TwoWay}" Header="Mip-level to force" Width="auto" Orientation="Horizontal" Minimum="0" Maximum="{Binding Value, ElementName=sampler_maxLOD}" 
+                                            StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" IsEnabled="{Binding IsChecked, ElementName=chk_force_miplevel}"/>
+                                </StackPanel>
 
-                                <ComboBox SelectionChanged="sampler_addressmode_w_changed" Header="Address Mode W" PlaceholderText="W addressing mode" Width="auto"
-                                              ItemsSource="{x:Bind texture_showcase_vm.address_modes, Mode=OneWay}" DisplayMemberPath="attribute_name" SelectedIndex="0"/>
+                                <ComboBox Header="Address Mode U" PlaceholderText="U addressing mode" Width="auto"
+                                          SelectedIndex="{x:Bind texture_showcase_vm.current_texture.u_address_mode, Mode=TwoWay, Converter={StaticResource enum_to_int_converter}}"
+                                          ItemsSource="{x:Bind texture_showcase_vm.address_modes, Mode=OneTime}" DisplayMemberPath="attribute_name"/>
+
+                                <ComboBox Header="Address Mode V" PlaceholderText="V addressing mode" Width="auto"
+                                          SelectedIndex="{x:Bind texture_showcase_vm.current_texture.v_address_mode, Mode=TwoWay, Converter={StaticResource enum_to_int_converter}}"
+                                          ItemsSource="{x:Bind texture_showcase_vm.address_modes, Mode=OneTime}" DisplayMemberPath="attribute_name"/>
+
+                                <ComboBox Header="Address Mode W" PlaceholderText="W addressing mode" Width="auto"
+                                          SelectedIndex="{x:Bind texture_showcase_vm.current_texture.w_address_mode, Mode=TwoWay, Converter={StaticResource enum_to_int_converter}}"
+                                          ItemsSource="{x:Bind texture_showcase_vm.address_modes, Mode=OneTime}" DisplayMemberPath="attribute_name"/>
+                            </StackPanel>
+                        </RelativePanel>
+
+                        <RelativePanel>
+                            <StackPanel>
+                                <ComboBox Header="Minification filter" PlaceholderText="Choose a minification filter" Width="auto" 
+                                          IsEnabled="{x:Bind texture_showcase_vm.current_texture.is_anisotropic,Mode=OneWay, Converter={StaticResource bool_invert_converter}}"
+                                          ItemsSource="{x:Bind texture_showcase_vm.minification_filters, Mode=OneTime}" DisplayMemberPath="attribute_name"
+                                          SelectedIndex="{x:Bind texture_showcase_vm.current_texture.minification_filter, Mode=TwoWay, Converter={StaticResource enum_to_int_converter}}" />
+
+                                <ComboBox Header="Magnification filter" PlaceholderText="Choose a magnification filter" Width="auto"
+                                          IsEnabled="{x:Bind texture_showcase_vm.current_texture.is_anisotropic,Mode=OneWay, Converter={StaticResource bool_invert_converter}}"
+                                          ItemsSource="{x:Bind texture_showcase_vm.magnification_filters, Mode=OneTime}" DisplayMemberPath="attribute_name" 
+                                          SelectedIndex="{x:Bind texture_showcase_vm.current_texture.magnification_filter, Mode=TwoWay, Converter={StaticResource enum_to_int_converter}}"/>
+
+                                <ComboBox Header="Mip-level filter" PlaceholderText="Choose a mip-level filter" Width="auto"
+                                          IsEnabled="{x:Bind texture_showcase_vm.current_texture.is_anisotropic,Mode=OneWay, Converter={StaticResource bool_invert_converter}}"
+                                          ItemsSource="{x:Bind texture_showcase_vm.miplevel_sampling_filters, Mode=OneTime}" DisplayMemberPath="attribute_name" 
+                                          SelectedIndex="{x:Bind texture_showcase_vm.current_texture.miplevel_sampling_filter, Mode=TwoWay, Converter={StaticResource enum_to_int_converter}}"/>
+
+                                <ComboBox Header="Filter reduction type" PlaceholderText="Choose a reduction type" Width="auto"
+                                          ItemsSource="{x:Bind texture_showcase_vm.filter_reduction_types, Mode=OneTime}" DisplayMemberPath="attribute_name" 
+                                          SelectedIndex="{x:Bind texture_showcase_vm.current_texture.reduction, Mode=TwoWay, Converter={StaticResource enum_to_int_converter}}"/>
+
+                                <ComboBox Header="Filter comparison function" PlaceholderText="Choose a comparison function" Width="auto"
+                                          ItemsSource="{x:Bind texture_showcase_vm.filter_comparisonfuncs, Mode=OneTime}" DisplayMemberPath="attribute_name" 
+                                          SelectedIndex="{x:Bind texture_showcase_vm.current_texture.comparison_function, Mode=TwoWay, Converter={StaticResource enum_to_int_converter}}"/>
+
+                                <Slider x:Name="sampler_comparison_value" Value="{x:Bind texture_showcase_vm.current_texture.sample_comparison_value, Mode=TwoWay}" Header="Sampler comparison value" Width="auto" Orientation="Horizontal" Minimum="-100" Maximum="100.0" 
+                                            StepFrequency="0.1" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
+
+                                <ComboBox Header="Sampling functions" PlaceholderText="Choose a sampling function" Width="auto"
+                                          ItemsSource="{x:Bind texture_showcase_vm.sampling_functions, Mode=OneTime}" DisplayMemberPath="attribute_name" 
+                                          SelectedIndex="{x:Bind texture_showcase_vm.current_texture.sampling_function, Mode=TwoWay, Converter={StaticResource enum_to_int_converter}}"/>
+
+                                <StackPanel Orientation="Horizontal">
+
+                                    <Slider x:Name="max_anisotropy" Value="{x:Bind texture_showcase_vm.current_texture.max_anisotropy, Mode=TwoWay}" Header="Max anisotropy" Width="auto" Orientation="Horizontal" Minimum="0" Maximum="16" 
+                                            StepFrequency="1" TickFrequency="1" SnapsTo="StepValues" TickPlacement="None" />
+                                    <RadioButton Content="Anisotropic" Tag="Anisotropic" GroupName="isotropy" IsChecked="{x:Bind texture_showcase_vm.current_texture.is_anisotropic, Mode=TwoWay}"/>
+                                    <RadioButton Content="Isotropic" Tag="Isotropic" GroupName="isotropy" IsChecked="True"/>
+                                </StackPanel>
                             </StackPanel>
                         </RelativePanel>
                     </StackPanel>
@@ -406,8 +470,7 @@
                           SelectionChanged="shader_selection_changed"
                           HorizontalAlignment="Left"
                           x:Name="shaders_list"
-                          Visibility="Visible"
-                          ItemsSource="{x:Bind texture_showcase_vm.shaders}"
+                          ItemsSource="{x:Bind texture_showcase_vm.shaders, Mode=OneTime}"
                           ItemTemplate="{StaticResource shader_list_template}">
                             <ListView.ItemContainerTransitions>
                                 <TransitionCollection>

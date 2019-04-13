@@ -6,6 +6,6 @@ namespace wzrd_editor
 	runtimeclass texture_showcase_page : Windows.UI.Xaml.Controls.Page
 	{
 		texture_showcase_page();
-		texture_showcase_vm texture_showcase_vm{ get; };
+		texture_showcase_vm texture_showcase_vm;
 	}
 }

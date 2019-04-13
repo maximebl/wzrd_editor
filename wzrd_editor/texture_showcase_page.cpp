@@ -10,20 +10,12 @@ namespace winrt::wzrd_editor::implementation
 	texture_showcase_page::texture_showcase_page()
 	{
 		InitializeComponent();
-		m_spring_animation = Window::Current().Compositor().CreateSpringVector3Animation();
-		m_spring_animation.DampingRatio(0.65f);
-		m_spring_animation.Period(std::chrono::milliseconds{ 50 });
-		m_spring_animation.Target(hstring{ L"Scale" });
+
+		m_texture_showcase_vm.current_renderer(m_renderer);
 
 		m_renderer.enable_debug_layer();
 
 		m_ui_items[hstring{ L"swapchain_panel" }] = box_value(swapchain_panel());
-
-		m_ui_control_values.Insert(hstring{ L"sampler_addressmode_u" }, nullptr);
-		m_ui_control_values.Insert(hstring{ L"sampler_addressmode_v" }, nullptr);
-		m_ui_control_values.Insert(hstring{ L"sampler_addressmode_w" }, nullptr);
-
-		m_ui_control_values.Insert(hstring{ L"scale" }, box_value(1.0f));
 
 		auto ui_items = winrt::single_threaded_map<hstring, IInspectable>(std::move(m_ui_items));
 
@@ -32,12 +24,35 @@ namespace winrt::wzrd_editor::implementation
 		auto address_modes = m_texture_showcase_vm.address_modes();
 		Utilities::generate_address_modes_attributes(address_modes);
 
-		m_renderer.initialize_textures_showcase(ui_items, m_ui_control_values);
+		auto minification_filter = m_texture_showcase_vm.minification_filters();
+		Utilities::generate_filtering_methods_attributes(minification_filter);
+
+		auto magnification_filter = m_texture_showcase_vm.magnification_filters();
+		Utilities::generate_filtering_methods_attributes(magnification_filter);
+
+		auto miplevel_sampling_filter = m_texture_showcase_vm.miplevel_sampling_filters();
+		Utilities::generate_filtering_methods_attributes(miplevel_sampling_filter);
+
+		auto filter_reduction_types = m_texture_showcase_vm.filter_reduction_types();
+		Utilities::generate_filter_reduction_types_attributes(filter_reduction_types);
+
+		auto filter_comparisonfuncs = m_texture_showcase_vm.filter_comparisonfuncs();
+		Utilities::generate_filter_comparisonfuncs_attributes(filter_comparisonfuncs);
+
+		auto sampling_functions = m_texture_showcase_vm.sampling_functions();
+		Utilities::generate_sampling_functions_attributes(sampling_functions);
+
+		m_renderer.initialize_textures_showcase(ui_items);
 	}
 
 	wzrd_editor::texture_showcase_vm texture_showcase_page::texture_showcase_vm()
 	{
 		return m_texture_showcase_vm;
+	}
+
+	void texture_showcase_page::texture_showcase_vm(wzrd_editor::texture_showcase_vm const& value)
+	{
+		m_texture_showcase_vm = value;
 	}
 
 	IAsyncAction texture_showcase_page::onclick_vertexshader_picker(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
@@ -121,31 +136,31 @@ namespace winrt::wzrd_editor::implementation
 
 	IAsyncAction texture_showcase_page::delete_selected_shader(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		auto _shaders_list = shaders_list();
+		//auto _shaders_list = shaders_list();
 
-		auto items_source = _shaders_list.ItemsSource();
-		auto items_list = winrt::unbox_value<IObservableVector<IInspectable>>(items_source);
-		auto selected_index = _shaders_list.SelectedIndex();
-		auto current_shader_selection = winrt::unbox_value<graphics::shader>(items_list.GetAt(selected_index));
+		//auto items_source = _shaders_list.ItemsSource();
+		//auto items_list = winrt::unbox_value<IObservableVector<IInspectable>>(items_source);
+		//auto selected_index = _shaders_list.SelectedIndex();
+		//auto current_shader_selection = winrt::unbox_value<graphics::shader>(items_list.GetAt(selected_index));
 
-		m_renderer.remove_shader(current_shader_selection.shader_name());
-		items_list.RemoveAt(selected_index);
+		//m_renderer.remove_shader(current_shader_selection.shader_name());
+		//items_list.RemoveAt(selected_index);
 
 		co_return;
 	}
 
 	IAsyncAction texture_showcase_page::delete_selected_texture(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		auto _textures_list = textures_list();
+		//auto _textures_list = textures_list();
 
-		auto items_source = _textures_list.ItemsSource();
-		auto items_list = winrt::unbox_value<IObservableVector<IInspectable>>(items_source);
+		//auto items_source = _textures_list.ItemsSource();
+		//auto items_list = winrt::unbox_value<IObservableVector<IInspectable>>(items_source);
 
-		auto selected_index = _textures_list.SelectedIndex();
-		auto current_texture_selection = winrt::unbox_value<graphics::texture>(items_list.GetAt(selected_index));
+		//auto selected_index = _textures_list.SelectedIndex();
+		//auto current_texture_selection = winrt::unbox_value<graphics::texture>(items_list.GetAt(selected_index));
 
-		m_renderer.remove_texture(current_texture_selection.texture_name());
-		items_list.RemoveAt(selected_index);
+		//m_renderer.remove_texture(current_texture_selection.texture_name());
+		//items_list.RemoveAt(selected_index);
 
 		co_return;
 	}
@@ -158,43 +173,30 @@ namespace winrt::wzrd_editor::implementation
 		texture_showcase_vm().textures().Append(new_texture);
 
 		new_texture.is_loading(true);
-		new_texture = co_await m_renderer.pick_texture(new_texture, hstring{ L"default_texture" });
-		new_texture.is_loading(false);
+		auto pick_tex_async_op = m_renderer.pick_texture(new_texture, hstring{ L"default_texture" });
 
-		auto new_mipmaps = new_texture.mipmaps();
-		for (auto mipmap : new_mipmaps)
+		pick_tex_async_op.Progress([](auto const& /* sender */, hstring progress)
+			{
+				hstring msg = L"\n" + progress + L"\n";
+				OutputDebugStringW(msg.c_str());
+			});
+
+		new_texture = co_await pick_tex_async_op;
+
+		if (!new_texture)
 		{
-			texture_showcase_vm().mipmaps().Append(box_value(mipmap));
+			texture_showcase_vm().textures().RemoveAtEnd();
 		}
-		co_return;
-	}
+		else
+		{
+			new_texture.is_loading(false);
 
-	void texture_showcase_page::play_spring_animation(float target_value, IInspectable const & sender)
-	{
-		auto current_ui_element = sender.as<Windows::UI::Xaml::UIElement>();
-
-		m_spring_animation.FinalValue(Numerics::float3{ target_value, target_value, 1.0f });
-		auto child_item = Windows::UI::Xaml::Media::VisualTreeHelper::GetChild(current_ui_element, 0);
-		auto image_item = Windows::UI::Xaml::Media::VisualTreeHelper::GetChild(child_item, 0);
-
-		auto visual = Windows::UI::Xaml::Hosting::ElementCompositionPreview::GetElementVisual(unbox_value<Windows::UI::Xaml::UIElement>(image_item));
-		visual.StartAnimation(hstring{ L"Scale" }, m_spring_animation);
-	}
-
-	IAsyncAction texture_showcase_page::onmouseenter_textures_list(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
-	{
-		//sender.as<Windows::UI::Xaml::FrameworkElement>().Height(200);
-		//sender.as<Windows::UI::Xaml::FrameworkElement>().Width(1000);
-		//play_spring_animation(2.0f, sender);
-
-		co_return;
-	}
-
-	IAsyncAction texture_showcase_page::onmouseexit_textures_list(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
-	{
-		//sender.as<Windows::UI::Xaml::FrameworkElement>().Height(100);
-		//play_spring_animation(1.0f, sender);
-		co_return;
+			auto new_mipmaps = new_texture.mipmaps();
+			for (auto mipmap : new_mipmaps)
+			{
+				texture_showcase_vm().mipmaps().Append(box_value(mipmap));
+			}
+		}
 	}
 
 	IAsyncAction texture_showcase_page::shader_selection_changed(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
@@ -224,29 +226,6 @@ namespace winrt::wzrd_editor::implementation
 		{
 			VisualStateManager().GoToState(*this, L"valid_texture_not_selected", false);
 		}
-		co_return;
-	}
-	IAsyncAction texture_showcase_page::sampler_addressmode_u_changed(IInspectable const & sender, winrt::Windows::UI::Xaml::Controls::SelectionChangedEventArgs const & args)
-	{
-		auto current_combobox = unbox_value<Windows::UI::Xaml::Controls::ComboBox>(sender);
-		auto selected_addressmode = unbox_value<graphics::generic_attribute>(current_combobox.SelectedItem());
-		m_ui_control_values.Insert(hstring{ L"sampler_addressmode_u" }, box_value(selected_addressmode.attribute_value()));
-		co_return;
-	}
-
-	IAsyncAction texture_showcase_page::sampler_addressmode_v_changed(IInspectable const & sender, winrt::Windows::UI::Xaml::Controls::SelectionChangedEventArgs const & args)
-	{
-		auto current_combobox = unbox_value<Windows::UI::Xaml::Controls::ComboBox>(sender);
-		auto selected_addressmode = unbox_value<graphics::generic_attribute>(current_combobox.SelectedItem());
-		m_ui_control_values.Insert(hstring{ L"sampler_addressmode_v" }, box_value(selected_addressmode.attribute_value()));
-		co_return;
-	}
-
-	IAsyncAction texture_showcase_page::sampler_addressmode_w_changed(IInspectable const & sender, winrt::Windows::UI::Xaml::Controls::SelectionChangedEventArgs const & args)
-	{
-		auto current_combobox = unbox_value<Windows::UI::Xaml::Controls::ComboBox>(sender);
-		auto selected_addressmode = unbox_value<graphics::generic_attribute>(current_combobox.SelectedItem());
-		m_ui_control_values.Insert(hstring{ L"sampler_addressmode_w" }, box_value(selected_addressmode.attribute_value()));
 		co_return;
 	}
 

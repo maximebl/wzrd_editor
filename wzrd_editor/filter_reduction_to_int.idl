@@ -1,0 +1,9 @@
+namespace wzrd_editor
+{
+    [bindable]
+    [default_interface]
+    runtimeclass filter_reduction_to_int : Windows.UI.Xaml.Data.IValueConverter
+    {
+        filter_reduction_to_int();
+    }
+}

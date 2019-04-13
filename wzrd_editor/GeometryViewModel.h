@@ -8,6 +8,7 @@ namespace winrt::wzrd_editor::implementation
     struct GeometryViewModel : GeometryViewModelT<GeometryViewModel>
     {
         GeometryViewModel();
+        ~GeometryViewModel();
 
         wzrd_editor::Geometry Geometry();
 		Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> Shaders();

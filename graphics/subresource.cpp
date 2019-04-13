@@ -16,6 +16,16 @@ namespace winrt::graphics::implementation
 		update_value(L"mipmap_bitmap_source", m_mipmap_bitmap_source, value);
 	}
 
+	Windows::UI::Xaml::Media::Imaging::BitmapImage subresource::mipmap_bitmap_source2()
+	{
+		return m_mipmap_bitmap_source2;
+	}
+
+	void subresource::mipmap_bitmap_source2(Windows::UI::Xaml::Media::Imaging::BitmapImage const& value)
+	{
+		update_value(L"mipmap_bitmap_source2", m_mipmap_bitmap_source2, value);
+	}
+
 	uint8_t subresource::mip_level()
 	{
 		return m_mip_level;

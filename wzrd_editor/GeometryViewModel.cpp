@@ -9,6 +9,10 @@ namespace winrt::wzrd_editor::implementation
 	{
 	}
 
+	GeometryViewModel::~GeometryViewModel()
+	{
+	}
+
     wzrd_editor::Geometry GeometryViewModel::Geometry()
     {
 		return m_geometry;

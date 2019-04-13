@@ -97,8 +97,8 @@
         <DataTemplate x:Key="texture_list_template" x:DataType="local:Texture">
             <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Margin="8,8,0,0">
                 <SymbolIcon x:Name="texture_type_icon" Symbol="Page2"></SymbolIcon>
-                <TextBlock Text="{x:Bind Name}"></TextBlock>
-                <ProgressRing Margin="1,0,0,0" IsActive="{x:Bind Loading, Mode=TwoWay}"/>
+                <!--<TextBlock Text="{x:Bind Name}"></TextBlock>-->
+                <!--<ProgressRing Margin="1,0,0,0" IsActive="{x:Bind Loading, Mode=TwoWay}"/>-->
             </StackPanel>
         </DataTemplate>
     </Page.Resources>
@@ -234,15 +234,15 @@
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Stretch">
                         <ListView x:Name="shaders_list" HorizontalAlignment="Stretch" Width="auto" Height="auto" VerticalAlignment="Top"
                       HeaderTemplate="{StaticResource shaders_list_header}" 
-                      Visibility="{x:Bind Path=GeometryViewModel.Shaders.Size, Converter={StaticResource int_to_visibility_converter}, Mode=OneWay}"
+                      Visibility="{Binding Path=GeometryViewModel.Shaders.Size, Converter={StaticResource int_to_visibility_converter}, Mode=OneWay}"
                       ItemsSource="{x:Bind GeometryViewModel.Shaders}" 
                       ItemTemplate="{StaticResource shaders_list_template}">
                         </ListView>
 
                         <ListView x:Name="textures_list" HorizontalAlignment="Stretch" Width="auto" Height="auto" VerticalAlignment="Top"
                       HeaderTemplate="{StaticResource textures_list_header}" 
-                      Visibility="{x:Bind GeometryViewModel.Textures.Size, Converter={StaticResource int_to_visibility_converter}, Mode=OneWay}"
                       ItemsSource="{x:Bind GeometryViewModel.Textures}" 
+                      Visibility="{Binding GeometryViewModel.Textures.Size, Converter={StaticResource int_to_visibility_converter}, Mode=OneWay}"
                       ItemTemplate="{StaticResource texture_list_template}">
                         </ListView>
                     </StackPanel>
@@ -414,12 +414,11 @@
                     </StackPanel>
 
                     <ListView x:Name="vertices_list" HorizontalAlignment="Stretch" Width="auto" Height="auto" Margin="-2,3" VerticalAlignment="Center"
-                      Visibility="{x:Bind Path=GeometryViewModel.Geometry.Vertices.Size, Converter={StaticResource int_to_visibility_converter}, Mode=OneWay}"
+                      Visibility="{Binding Path=GeometryViewModel.Geometry.Vertices.Size, Converter={StaticResource int_to_visibility_converter}, Mode=OneWay}"
                       Background="{StaticResource ContentDialogDimmingThemeBrush}"
                       ItemsSource="{x:Bind Path=GeometryViewModel.Geometry.Vertices}" 
                       HeaderTemplate="{StaticResource vertices_list_header}" 
                       ItemTemplate="{StaticResource vertices_list_template}"/>
-
 
                 </StackPanel>
             </StackPanel>

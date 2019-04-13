@@ -210,56 +210,235 @@ void Utilities::wait(DWORD duration)
 	CloseHandle(event_handle);
 }
 
-void Utilities::generate_address_modes_attributes(IObservableVector<IInspectable> & address_modes)
+auto set_values = [](winrt::hstring name, winrt::hstring value, winrt::hstring description, IObservableVector<IInspectable>& attributes_vector) {
+
+	winrt::graphics::generic_attribute new_attribute;
+	new_attribute.attribute_name(name);
+	new_attribute.attribute_description(description);
+	new_attribute.attribute_value(value);
+	attributes_vector.Append(new_attribute);
+};
+
+void Utilities::generate_filtering_methods_attributes(IObservableVector<IInspectable> & filtering_methods)
 {
-
-#define get_name(var)  #var 
-
-	auto set_values = [address_modes](winrt::hstring name, winrt::hstring value, winrt::hstring description) {
-
-		winrt::graphics::generic_attribute new_attribute;
-		new_attribute.attribute_name(name);
-		new_attribute.attribute_description(description);
-		new_attribute.attribute_value(value);
-		address_modes.Append(new_attribute);
-	};
-
 	winrt::hstring description;
 	winrt::hstring value;
 	winrt::hstring name;
 
 	{
-		name = winrt::to_hstring(get_name(D3D12_TEXTURE_ADDRESS_MODE_WRAP));
+		name = L"Point sampling";
+		description = L"";
+		value = winrt::to_hstring(D3D12_FILTER_TYPE::D3D12_FILTER_TYPE_POINT);
+		set_values(name, value, description, filtering_methods);
+	}
+
+	{
+		name = L"Linear interpolation";
+		description = L"";
+		value = winrt::to_hstring(D3D12_FILTER_TYPE::D3D12_FILTER_TYPE_LINEAR);
+		set_values(name, value, description, filtering_methods);
+	}
+}
+
+void Utilities::generate_filter_reduction_types_attributes(winrt::Windows::Foundation::Collections::IObservableVector<winrt::Windows::Foundation::IInspectable>& filter_reduction_types)
+{
+	winrt::hstring description;
+	winrt::hstring value;
+	winrt::hstring name;
+
+	{
+		name = L"Standard";
+		description = L"";
+		value = winrt::to_hstring(D3D12_FILTER_REDUCTION_TYPE::D3D12_FILTER_REDUCTION_TYPE_STANDARD);
+		set_values(name, value, description, filter_reduction_types);
+	}
+
+	{
+		name = L"Comparison";
+		description = L"";
+		value = winrt::to_hstring(D3D12_FILTER_REDUCTION_TYPE::D3D12_FILTER_REDUCTION_TYPE_COMPARISON);
+		set_values(name, value, description, filter_reduction_types);
+	}
+
+	{
+		name = L"Minimum";
+		description = L"";
+		value = winrt::to_hstring(D3D12_FILTER_REDUCTION_TYPE::D3D12_FILTER_REDUCTION_TYPE_MINIMUM);
+		set_values(name, value, description, filter_reduction_types);
+	}
+
+	{
+		name = L"Maximum";
+		description = L"";
+		value = winrt::to_hstring(D3D12_FILTER_REDUCTION_TYPE::D3D12_FILTER_REDUCTION_TYPE_MAXIMUM);
+		set_values(name, value, description, filter_reduction_types);
+	}
+}
+
+void Utilities::generate_filter_comparisonfuncs_attributes(winrt::Windows::Foundation::Collections::IObservableVector<winrt::Windows::Foundation::IInspectable>& comparison_funcs)
+{
+	winrt::hstring description;
+	winrt::hstring value;
+	winrt::hstring name;
+
+	{
+		name = L"Never";
+		description = L"Never pass the comparison.";
+		value = winrt::to_hstring(D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_NEVER);
+		set_values(name, value, description, comparison_funcs);
+	}
+
+	{
+		name = L"Less";
+		description = L"If the source data is less than the destination data, the comparison passes.";
+		value = winrt::to_hstring(D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_LESS);
+		set_values(name, value, description, comparison_funcs);
+	}
+
+	{
+		name = L"Equal";
+		description = L"If the source data is equal to the destination data, the comparison passes.";
+		value = winrt::to_hstring(D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_EQUAL);
+		set_values(name, value, description, comparison_funcs);
+	}
+
+	{
+		name = L"Less or equal";
+		description = L"If the source data is less than or equal to the destination data, the comparison passes.";
+		value = winrt::to_hstring(D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_LESS_EQUAL);
+		set_values(name, value, description, comparison_funcs);
+	}
+
+	{
+		name = L"Greater";
+		description = L"If the source data is greater than the destination data, the comparison passes.";
+		value = winrt::to_hstring(D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_GREATER);
+		set_values(name, value, description, comparison_funcs);
+	}
+
+	{
+		name = L"Not equal";
+		description = L"If the source data is not equal to the destination data, the comparison passes.";
+		value = winrt::to_hstring(D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_NOT_EQUAL);
+		set_values(name, value, description, comparison_funcs);
+	}
+
+	{
+		name = L"Greater or equal";
+		description = L"If the source data is greater than or equal to the destination data, the comparison passes.";
+		value = winrt::to_hstring(D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_GREATER_EQUAL);
+		set_values(name, value, description, comparison_funcs);
+	}
+
+	{
+		name = L"Always";
+		description = L"Always pass the comparison.";
+		value = winrt::to_hstring(D3D12_COMPARISON_FUNC::D3D12_COMPARISON_FUNC_ALWAYS);
+		set_values(name, value, description, comparison_funcs);
+	}
+}
+
+void Utilities::generate_sampling_functions_attributes(winrt::Windows::Foundation::Collections::IObservableVector<winrt::Windows::Foundation::IInspectable>& sampling_functions)
+{
+	winrt::hstring description;
+	winrt::hstring value;
+	winrt::hstring name;
+
+	{
+		name = L"Sample";
+		description = L"Samples a texture using the provided SamplerSate.";
+		value = winrt::to_hstring(static_cast<uint32_t>(winrt::graphics::sampling_function::sample));
+		set_values(name, value, description, sampling_functions);
+	}
+
+	{
+		name = L"Load";
+		description = L"Reads texture data and returns it's color directly without applying any filtering. We showcase how to use this function using the screen xy coordinates.";
+		value = winrt::to_hstring(static_cast<uint32_t>(winrt::graphics::sampling_function::load));
+		set_values(name, value, description, sampling_functions);
+	}
+
+	{
+		name = L"Gather red";
+		description = L"Returns the red channel of the texture.";
+		value = winrt::to_hstring(static_cast<uint32_t>(winrt::graphics::sampling_function::gather_red));
+		set_values(name, value, description, sampling_functions);
+	}
+
+	{
+		name = L"Gather green";
+		description = L"Returns the green channel of the texture.";
+		value = winrt::to_hstring(static_cast<uint32_t>(winrt::graphics::sampling_function::gather_green));
+		set_values(name, value, description, sampling_functions);
+	}
+
+	{
+		name = L"Gather blue";
+		description = L"Returns the blue channel of the texture.";
+		value = winrt::to_hstring(static_cast<uint32_t>(winrt::graphics::sampling_function::gather_blue));
+		set_values(name, value, description, sampling_functions);
+	}
+
+	{
+		name = L"Gather alpha";
+		description = L"Returns the alpha channel of the texture.";
+		value = winrt::to_hstring(static_cast<uint32_t>(winrt::graphics::sampling_function::gather_alpha));
+		set_values(name, value, description, sampling_functions);
+	}
+
+	{
+		name = L"Sample grad";
+		description = L"Samples a texture using a gradient to influence the way the sample location is calculated.";
+		value = winrt::to_hstring(static_cast<uint32_t>(winrt::graphics::sampling_function::sample_grad));
+		set_values(name, value, description, sampling_functions);
+	}
+
+	{
+		name = L"Sample bias";
+		description = L"Samples a texture after applying a bias to the mipmap level.";
+		value = winrt::to_hstring(static_cast<uint32_t>(winrt::graphics::sampling_function::sample_bias));
+		set_values(name, value, description, sampling_functions);
+	}
+}
+
+void Utilities::generate_address_modes_attributes(IObservableVector<IInspectable> & address_modes)
+{
+	winrt::hstring description;
+	winrt::hstring value;
+	winrt::hstring name;
+
+	{
+		name = L"Wrap";
 		description = L"Tile the texture at every (u,v) integer junction. For example, for u values between -1 and 3, the texture is repeated three times.";
 		value = winrt::to_hstring(D3D12_TEXTURE_ADDRESS_MODE_WRAP);
-		set_values(name, value, description);
+		set_values(name, value, description, address_modes);
 	}
 
 	{
-		name = winrt::to_hstring(get_name(D3D12_TEXTURE_ADDRESS_MODE_MIRROR));
+		name = L"Mirror";
 		description = L"Flip the texture at every (u,v) integer junction. For u values between -1 and 1, for example, the texture is addressed normally; between 1 and 2, the texture is flipped (mirrored); between 2 and 3, the texture is normal again; and so on.";
 		value = winrt::to_hstring(D3D12_TEXTURE_ADDRESS_MODE_MIRROR);
-		set_values(name, value, description);
+		set_values(name, value, description, address_modes);
 	}
 
 	{
-		name = winrt::to_hstring(get_name(D3D12_TEXTURE_ADDRESS_MODE_CLAMP));
+		name = L"Clamp";
 		description = L"Texture coordinates outside the range [-1.0, 1.0] are set to the texture color at 0.0 or 1.0, respectively.";
 		value = winrt::to_hstring(D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
-		set_values(name, value, description);
+		set_values(name, value, description, address_modes);
 	}
 
 	{
-		name = winrt::to_hstring(get_name(D3D12_TEXTURE_ADDRESS_MODE_BORDER));
+		name = L"Border";
 		description = L"Texture coordinates outside the range [-1.0, 1.0] are set to the border color specified in D3D12_SAMPLER_DESC or HLSL code.";
 		value = winrt::to_hstring(D3D12_TEXTURE_ADDRESS_MODE_BORDER);
-		set_values(name, value, description);
+		set_values(name, value, description, address_modes);
 	}
 
 	{
-		name = winrt::to_hstring(get_name(D3D12_TEXTURE_ADDRESS_MODE_MIRROR_ONCE));
+		name = L"Mirror once";
 		description = L"Similar to D3D12_TEXTURE_ADDRESS_MODE_MIRROR and D3D12_TEXTURE_ADDRESS_MODE_CLAMP. Takes the absolute value of the texture coordinate (thus, mirroring around -1), and then clamps to the maximum value.";
 		value = winrt::to_hstring(D3D12_TEXTURE_ADDRESS_MODE_MIRROR_ONCE);
-		set_values(name, value, description);
+		set_values(name, value, description, address_modes);
 	}
 }

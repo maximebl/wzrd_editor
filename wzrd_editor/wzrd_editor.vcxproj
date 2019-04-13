@@ -102,6 +102,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="alphamode_to_string.h">
+      <DependentUpon>alphamode_to_string.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="attribute_slider.h">
       <DependentUpon>attribute_slider.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -110,8 +114,20 @@
       <DependentUpon>bool_invert.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
+    <ClInclude Include="bool_to_visibility_inverted.h">
+      <DependentUpon>bool_to_visibility_inverted.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="buffer_size_select_dialog.h">
       <DependentUpon>buffer_size_select_dialog.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
+    <ClInclude Include="enum_to_int.h">
+      <DependentUpon>enum_to_int.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
+    <ClInclude Include="filter_reduction_to_int.h">
+      <DependentUpon>filter_reduction_to_int.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
     <ClInclude Include="float_to_int.h">
@@ -160,6 +176,10 @@
       <DependentUpon>texture_showcase_vm.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
+    <ClInclude Include="transforms_showcase_page.h">
+      <DependentUpon>transforms_showcase_page.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="utilities.h" />
     <ClInclude Include="Vertex.h">
       <DependentUpon>Vertex.idl</DependentUpon>
@@ -195,6 +215,9 @@
     <Page Include="texture_showcase_page.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="transforms_showcase_page.xaml">
+      <SubType>Designer</SubType>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -215,6 +238,10 @@
     <Image Include="Assets\Wide310x150Logo.scale-200.png" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="alphamode_to_string.cpp">
+      <DependentUpon>alphamode_to_string.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="attribute_slider.cpp">
       <DependentUpon>attribute_slider.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -223,8 +250,20 @@
       <DependentUpon>bool_invert.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
+    <ClCompile Include="bool_to_visibility_inverted.cpp">
+      <DependentUpon>bool_to_visibility_inverted.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="buffer_size_select_dialog.cpp">
       <DependentUpon>buffer_size_select_dialog.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
+    <ClCompile Include="enum_to_int.cpp">
+      <DependentUpon>enum_to_int.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
+    <ClCompile Include="filter_reduction_to_int.cpp">
+      <DependentUpon>filter_reduction_to_int.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
     <ClCompile Include="float_to_int.cpp">
@@ -284,6 +323,10 @@
       <DependentUpon>texture_showcase_vm.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
+    <ClCompile Include="transforms_showcase_page.cpp">
+      <DependentUpon>transforms_showcase_page.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="utilities.cpp" />
     <ClCompile Include="Vertex.cpp">
       <DependentUpon>Vertex.idl</DependentUpon>
@@ -301,6 +344,9 @@
     <ClCompile Include="wzrd_vec3.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Midl Include="alphamode_to_string.idl">
+      <SubType>Designer</SubType>
+    </Midl>
     <Midl Include="App.idl">
       <DependentUpon>App.xaml</DependentUpon>
     </Midl>
@@ -311,9 +357,18 @@
     <Midl Include="bool_invert.idl">
       <SubType>Designer</SubType>
     </Midl>
+    <Midl Include="bool_to_visibility_inverted.idl">
+      <SubType>Designer</SubType>
+    </Midl>
     <Midl Include="buffer_size_select_dialog.idl">
       <DependentUpon>buffer_size_select_dialog.xaml</DependentUpon>
       <SubType>Code</SubType>
+    </Midl>
+    <Midl Include="enum_to_int.idl">
+      <SubType>Designer</SubType>
+    </Midl>
+    <Midl Include="filter_reduction_to_int.idl">
+      <SubType>Designer</SubType>
     </Midl>
     <Midl Include="float_to_int.idl">
       <SubType>Designer</SubType>
@@ -345,6 +400,10 @@
     </Midl>
     <Midl Include="texture_showcase_vm.idl">
       <SubType>Designer</SubType>
+    </Midl>
+    <Midl Include="transforms_showcase_page.idl">
+      <DependentUpon>transforms_showcase_page.xaml</DependentUpon>
+      <SubType>Code</SubType>
     </Midl>
     <Midl Include="Vertex.idl">
       <SubType>Designer</SubType>

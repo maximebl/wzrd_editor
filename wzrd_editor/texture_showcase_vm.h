@@ -23,8 +23,23 @@ namespace winrt::wzrd_editor::implementation
 		void address_modes(IObservableVector<IInspectable> const& value);
 		graphics::texture current_texture();
 		void current_texture(graphics::texture const& value);
-		Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> mipmaps();
-		void mipmaps(Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> const& value);
+		graphics::renderer current_renderer();
+		void current_renderer(graphics::renderer const& value);
+		IObservableVector<IInspectable> mipmaps();
+		void mipmaps(IObservableVector<IInspectable> const& value);
+		IObservableVector<IInspectable> minification_filters();
+		void minification_filters(IObservableVector<IInspectable> const& value);
+		IObservableVector<IInspectable> magnification_filters();
+		void magnification_filters(IObservableVector<IInspectable> const& value);
+		IObservableVector<IInspectable> miplevel_sampling_filters();
+		void miplevel_sampling_filters(IObservableVector<IInspectable> const& value);
+		IObservableVector<IInspectable> filter_reduction_types();
+		void filter_reduction_types(IObservableVector<IInspectable> const& value);
+		IObservableVector<IInspectable> filter_comparisonfuncs();
+		void filter_comparisonfuncs(IObservableVector<IInspectable> const& value);
+		Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> sampling_functions();
+		void sampling_functions(Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> const& value);
+
 		winrt::event_token PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& handler);
 		void PropertyChanged(winrt::event_token const& token) noexcept;
 
@@ -33,7 +48,14 @@ namespace winrt::wzrd_editor::implementation
 		IObservableVector<IInspectable> m_shaders = winrt::single_threaded_observable_vector<IInspectable>();
 		IObservableVector<IInspectable> m_address_modes = winrt::single_threaded_observable_vector<IInspectable>();
 		IObservableVector<IInspectable> m_mipmaps = winrt::single_threaded_observable_vector<IInspectable>();
+		IObservableVector<IInspectable> m_minification_filters = winrt::single_threaded_observable_vector<IInspectable>();
+		IObservableVector<IInspectable> m_magnification_filters = winrt::single_threaded_observable_vector<IInspectable>();
+		IObservableVector<IInspectable> m_miplevel_sampling_filters = winrt::single_threaded_observable_vector<IInspectable>();
+		IObservableVector<IInspectable> m_filter_reduction_types = winrt::single_threaded_observable_vector<IInspectable>();
+		IObservableVector<IInspectable> m_filter_comparisonfuncs = winrt::single_threaded_observable_vector<IInspectable>();
+		IObservableVector<IInspectable> m_sampling_functions = winrt::single_threaded_observable_vector<IInspectable>();
 		graphics::texture m_current_texture;
+		graphics::renderer m_current_renderer;
 
 		winrt::event<Windows::UI::Xaml::Data::PropertyChangedEventHandler> m_property_changed;
 

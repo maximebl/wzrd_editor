@@ -175,10 +175,189 @@ using Windows::Foundation::IInspectable; namespace winrt::graphics::implementati
 	}
 
 	void texture::mipmaps(Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> const value)
-    {
-		m_mipmaps = value;
+	{
 		update_value(L"mipmaps", m_mipmaps, value);
+	}
+
+	float texture::forced_miplevel()
+	{
+		return m_forced_miplevel;
+	}
+
+	void texture::forced_miplevel(float value)
+	{
+		update_value(L"forced_miplevel", m_forced_miplevel, value);
+	}
+
+	bool texture::is_forced_mip_level()
+	{
+		return m_is_forced_mip_level;
+	}
+
+	void texture::is_forced_mip_level(bool value)
+	{
+		update_value(L"is_forced_mip_level", m_is_forced_mip_level, value);
+	}
+
+	bool texture::is_screen_coords()
+	{
+		return m_is_screen_coords;
+	}
+
+	void texture::is_screen_coords(bool value)
+	{
+		update_value(L"is_screen_coords", m_is_screen_coords, value);
+	}
+
+	float texture::sample_comparison_value()
+	{
+		return m_sample_comparison_value;
+	}
+
+	void texture::sample_comparison_value(float value)
+	{
+		update_value(L"sample_comparison_value", m_sample_comparison_value, value);
+	}
+
+	uint32_t texture::max_anisotropy()
+	{
+		return m_max_anisotropy;
+	}
+
+	void texture::max_anisotropy(uint32_t value)
+	{
+		update_value(L"max_anisotropy", m_max_anisotropy, value);
+	}
+
+	int32_t texture::x_pixel_offset()
+	{
+		return m_x_pixel_offset;
+	}
+
+	void texture::x_pixel_offset(int32_t value)
+	{
+		update_value(L"x_pixel_offset", m_x_pixel_offset, value);
+	}
+
+	int32_t texture::y_pixel_offset()
+	{
+		return m_y_pixel_offset;
+	}
+
+	void texture::y_pixel_offset(int32_t value)
+	{
+		update_value(L"y_pixel_offset", m_y_pixel_offset, value);
+	}
+
+	bool texture::is_anisotropic()
+	{
+		return m_is_anisotropic;
+	}
+
+	void texture::is_anisotropic(bool value)
+	{
+		update_value(L"is_anisotropic", m_is_anisotropic, value);
+	}
+
+	graphics::filtering_method texture::minification_filter()
+	{
+		return m_minification_filter;
+	}
+
+	void texture::minification_filter(graphics::filtering_method const& value)
+	{
+		update_value(L"minification_filter", m_minification_filter, value);
+	}
+
+	graphics::filtering_method texture::magnification_filter()
+	{
+		return m_magnification_filter;
+	}
+
+	void texture::magnification_filter(graphics::filtering_method const& value)
+	{
+		update_value(L"magnification_filter", m_magnification_filter, value);
+	}
+
+	graphics::filtering_method texture::miplevel_sampling_filter()
+	{
+		return m_miplevel_sampling_filter;
+	}
+
+	void texture::miplevel_sampling_filter(graphics::filtering_method const& value)
+	{
+		update_value(L"miplevel_sampling_filter", m_miplevel_sampling_filter, value);
+	}
+
+	graphics::filter_reduction_type texture::reduction()
+	{
+		return m_reduction;
+	}
+
+	void texture::reduction(graphics::filter_reduction_type const& value)
+	{
+		update_value(L"reduction", m_reduction, value);
+	}
+
+	graphics::filter_comparison_function texture::comparison_function()
+	{
+		return m_comparison_function;
+	}
+
+	void texture::comparison_function(graphics::filter_comparison_function const& value)
+	{
+		update_value(L"comparison_function", m_comparison_function, value);
+	}
+
+	graphics::sampling_function texture::sampling_function()
+	{
+		return m_sampling_function;
+	}
+
+	void texture::sampling_function(graphics::sampling_function const& value)
+	{
+		update_value(L"sampling_function", m_sampling_function, value);
+	}
+
+    graphics::alpha_mode texture::alpha_mode()
+    {
+		return m_alpha_mode;
     }
+
+    void texture::alpha_mode(graphics::alpha_mode const& value)
+    {
+		update_value(L"alpha_mode", m_alpha_mode, value);
+    }
+
+	graphics::texture_address_mode texture::u_address_mode()
+	{
+		return m_u_address_mode;
+	}
+
+	void texture::u_address_mode(graphics::texture_address_mode const& value)
+	{
+		update_value(L"u_address_mode", m_u_address_mode, value);
+	}
+
+	graphics::texture_address_mode texture::v_address_mode()
+	{
+		return m_v_address_mode;
+	}
+
+	void texture::v_address_mode(graphics::texture_address_mode const& value)
+	{
+		update_value(L"v_address_mode", m_v_address_mode, value);
+	}
+
+	graphics::texture_address_mode texture::w_address_mode()
+	{
+		return m_w_address_mode;
+	}
+
+	void texture::w_address_mode(graphics::texture_address_mode const& value)
+	{
+		update_value(L"w_address_mode", m_w_address_mode, value);
+	}
 
 	float texture::topleft_u()
 	{

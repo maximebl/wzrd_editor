@@ -18,6 +18,10 @@ namespace winrt::wzrd_editor::implementation
 		m_renderer.initialize_buffers_showcase(swapChainPanel());
 	}
 
+	MainPage::~MainPage()
+	{
+	}
+
 	IAsyncAction MainPage::ui_thread_work()
 	{
 		co_await m_ui_thread;

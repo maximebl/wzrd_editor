@@ -1,0 +1,9 @@
+namespace wzrd_editor
+{
+	[bindable]
+	[default_interface]
+	runtimeclass alphamode_to_string : Windows.UI.Xaml.Data.IValueConverter
+	{
+		alphamode_to_string();
+	}
+}

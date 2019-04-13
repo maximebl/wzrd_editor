@@ -1,5 +1,4 @@
-﻿#pragma once
-
+﻿#pragma once 
 #include "renderer.g.h"
 #include "upload_buffer.h"
 #include "buffer.h"
@@ -7,13 +6,66 @@
 #include "texture.h"
 #include "shader.h"
 #include <DDSTextureLoader.h>
+#include <DirectXTex/DirectXTex/DirectXTex.h>
+
+#define MAKEFOURCC(ch0, ch1, ch2, ch3) \
+                (static_cast<uint32_t>(static_cast<uint8_t>(ch0)) \
+                | (static_cast<uint32_t>(static_cast<uint8_t>(ch1)) << 8) \
+                | (static_cast<uint32_t>(static_cast<uint8_t>(ch2)) << 16) \
+                | (static_cast<uint32_t>(static_cast<uint8_t>(ch3)) << 24))
 
 namespace winrt::graphics::implementation
 {
+	struct DDS_HEADER_DXT10
+	{
+		DXGI_FORMAT              dxgiFormat;
+		D3D12_RESOURCE_DIMENSION resourceDimension;
+		UINT                     miscFlag;
+		UINT                     arraySize;
+		UINT                     miscFlags2;
+	};
+
+	struct DDS_PIXELFORMAT
+	{
+		uint32_t    size;
+		uint32_t    flags;
+		uint32_t    fourCC;
+		uint32_t    RGBBitCount;
+		uint32_t    RBitMask;
+		uint32_t    GBitMask;
+		uint32_t    BBitMask;
+		uint32_t    ABitMask;
+	};
+
+	struct DDS_HEADER
+	{
+		uint32_t        size;
+		uint32_t        flags;
+		uint32_t        height;
+		uint32_t        width;
+		uint32_t        pitchOrLinearSize;
+		uint32_t        depth; // only if DDS_HEADER_FLAGS_VOLUME is set in flags
+		uint32_t        mipMapCount;
+		uint32_t        reserved1[11];
+		DDS_PIXELFORMAT ddspf;
+		uint32_t        caps;
+		uint32_t        caps2;
+		uint32_t        caps3;
+		uint32_t        caps4;
+		uint32_t        reserved2;
+	};
+
 	struct object_constants
 	{
 		DirectX::XMFLOAT4X4 world = MathHelper::Identity4x4();
 		DirectX::XMFLOAT4X4 texture_transform = MathHelper::Identity4x4();
+	};
+
+	struct shader_readback_data
+	{
+		float level_of_detail;
+		uint32_t width;
+		uint32_t height;
 	};
 
 	struct renderer : rendererT<renderer>
@@ -22,11 +74,7 @@ namespace winrt::graphics::implementation
 
 		void enable_debug_layer();
 		void initialize_buffers_showcase(Windows::UI::Xaml::Controls::SwapChainPanel const& target_swapchain);
-		void initialize_textures_showcase(
-			Windows::Foundation::Collections::IMap<hstring,
-			Windows::Foundation::IInspectable> const& ui_items,
-			Windows::Foundation::Collections::IMap<hstring, Windows::Foundation::IInspectable> const& ui_item_values
-		);
+		void initialize_textures_showcase(Windows::Foundation::Collections::IMap<hstring, Windows::Foundation::IInspectable> const& ui_items);
 		void start_render_loop();
 		void stop_render_loop();
 		void clear_shaders();
@@ -38,16 +86,24 @@ namespace winrt::graphics::implementation
 		void current_buffer(graphics::buffer const& value);
 		Windows::Foundation::IAsyncOperation<graphics::compilation_result> pick_and_compile_shader(graphics::shader new_shader);
 
-		Windows::Foundation::IAsyncOperation<graphics::texture> pick_texture(graphics::texture new_texture, hstring name);
+		Windows::Foundation::IAsyncOperationWithProgress<graphics::texture, hstring> pick_texture(graphics::texture new_texture, hstring name);
 		graphics::primitive_types current_topology();
 		void current_topology(graphics::primitive_types const& value);
+
+		int32_t viewport_width();
+		void viewport_width(int32_t value);
+
+		int32_t viewport_height();
+		void viewport_height(int32_t value);
 
 		static ID3D12Device* g_device;
 		static ID3D12GraphicsCommandList* g_cmd_list;
 
+		winrt::event_token PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& handler);
+		void PropertyChanged(winrt::event_token const& token) noexcept;
+
 	private:
 		Windows::UI::Xaml::Controls::SwapChainPanel m_swapchain_panel;
-		Windows::Foundation::Collections::IMap<hstring, IInspectable> m_ui_item_values = nullptr;
 		winrt::apartment_context m_ui_thread;
 
 		bool m_is_rendering = false;
@@ -56,8 +112,8 @@ namespace winrt::graphics::implementation
 		int m_current_backbuffer = 0;
 		UINT m_rtv_descriptor_size = 0;
 
-		constexpr static int m_output_width = 700;
-		constexpr static int m_output_height = 700;
+		int32_t m_output_width = 512;
+		int32_t m_output_height = 512;
 		D3D12_VIEWPORT m_screen_viewport;
 		D3D12_RECT m_scissor_rect;
 
@@ -106,7 +162,6 @@ namespace winrt::graphics::implementation
 		unsigned char* m_mapped_texcoord_data = nullptr;
 		unsigned char* m_mapped_position_data = nullptr;
 
-		com_ptr<ID3D12Resource> gpu_tex_resource = nullptr;
 		com_ptr<ID3D12Resource> intermediate_upload_resource = nullptr;
 
 		std::vector<D3D12_INPUT_ELEMENT_DESC> m_basic_input_layout;
@@ -132,6 +187,7 @@ namespace winrt::graphics::implementation
 		void create_cb_billboard_pos();
 		void create_uav();
 		std::vector<UINT8> generate_texture_data(UINT texture_width, UINT texture_height, UINT texture_pixel_size);
+		Windows::Foundation::IAsyncAction create_subresources_for_ui(std::vector<D3D12_SUBRESOURCE_DATA> & original_mipmaps, IObservableVector<IInspectable> & ui_mipmaps, DXGI_FORMAT format, uint32_t width);
 		std::vector<CD3DX12_STATIC_SAMPLER_DESC> get_static_samplers();
 		void init_psos();
 		void execute_cmd_list();
@@ -144,7 +200,8 @@ namespace winrt::graphics::implementation
 		void create_billboard_pso(com_ptr<ID3DBlob> vertex_shader, com_ptr<ID3DBlob> pixel_shader, com_ptr<ID3DBlob> geometry_shader, com_ptr<ID3D12PipelineState>& m_pso);
 		void reflect_shader(com_ptr<implementation::shader> target_shader);
 		D3D12_CPU_DESCRIPTOR_HANDLE current_backbuffer_view() const;
-		void create_crate_texture(std::vector<unsigned char> bytes, uint32_t file_size, hstring texture_name, uint32_t width, uint32_t height, uint32_t pixel_size);
+		Windows::Foundation::IAsyncAction upload_to_gpu(graphics::texture& texture, std::vector<D3D12_SUBRESOURCE_DATA> bytes, hstring texture_name, DXGI_FORMAT texture_format);
+		hstring get_dimension(D3D12_RESOURCE_DIMENSION dimension);
 		Windows::Foundation::IAsyncAction main_loop();
 
 		// synchronization
@@ -152,12 +209,30 @@ namespace winrt::graphics::implementation
 		UINT64 m_cpu_fence = 0;
 		void flush_cmd_queue();
 		void update_samplers();
+		D3D12_FILTER select_filter();
 
 		void render_1();
 		void render_2();
 
 		std::unordered_map<hstring, com_ptr<ID3DBlob>> m_shaders;
 		std::unordered_map<hstring, graphics::texture> m_textures;
+
+		winrt::event<Windows::UI::Xaml::Data::PropertyChangedEventHandler> m_property_changed;
+
+		void raise_property_changed(hstring const& property_name)
+		{
+			m_property_changed(*this, Windows::UI::Xaml::Data::PropertyChangedEventArgs(property_name));
+		}
+
+		template <class T>
+		void update_value(hstring const& property_name, T & var, T value)
+		{
+			if (var != value)
+			{
+				var = value;
+				raise_property_changed(property_name);
+			}
+		}
 	};
 }
 
