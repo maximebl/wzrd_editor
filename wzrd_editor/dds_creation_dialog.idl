@@ -1,0 +1,8 @@
+namespace wzrd_editor
+{
+	[default_interface]
+	runtimeclass dds_creation_dialog : Windows.UI.Xaml.Controls.ContentDialog, Windows.UI.Xaml.Data.INotifyPropertyChanged
+	{
+		dds_creation_dialog();
+	}
+}

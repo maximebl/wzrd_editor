@@ -578,7 +578,6 @@ namespace winrt::graphics::implementation
 		auto texture_file_buffer = co_await winrt::Windows::Storage::FileIO::ReadBufferAsync(file);
 		auto texture_file_bytes = co_await os_utilities::read_file_bytes(texture_file_buffer);
 
-
 		uint32_t sizeof_dds_magic_number = sizeof(uint32_t);
 		unsigned char* dds_data = texture_file_bytes.data();
 		// DDS files start with a section called dwMagicNumber of size DWORD, which is 32bits, followed by a DDS_HEADER section.
@@ -588,7 +587,7 @@ namespace winrt::graphics::implementation
 		// We now offset to the beginning of the extended header, which is positioned after the DDS_HEADER
 		DDS_HEADER_DXT10* extended_header = reinterpret_cast<DDS_HEADER_DXT10*>(dds_data + sizeof_dds_magic_number + dds_header->size);
 
-		bool is_dx10_extended = dds_header->ddspf.fourCC == MAKEFOURCC('D', 'X', '1', '0');
+		bool is_dx10_extended = dds_header->ddspf.fourCC != MAKEFOURCC('D', 'X', '1', '0');
 		if (!is_dx10_extended)
 		{
 			//new_texture.is_error(true);
@@ -610,6 +609,7 @@ namespace winrt::graphics::implementation
 		new_texture.slice_pitch(slice_pitch);
 
 		std::vector<D3D12_SUBRESOURCE_DATA> subresources;
+
 		winrt::check_hresult(
 			DirectX::LoadDDSTextureFromMemory(
 				g_device,
@@ -622,7 +622,6 @@ namespace winrt::graphics::implementation
 
 		progress(L"Uploading " + name + L" to the GPU");
 		co_await upload_to_gpu(new_texture, subresources, name, extended_header->dxgiFormat);
-
 
 		progress(L"Generating bitmaps from mipmaps");
 		auto new_mipmaps = single_threaded_observable_vector<IInspectable>();

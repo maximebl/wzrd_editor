@@ -5,7 +5,7 @@
 #include "utilities.h"
 #include "texture.h"
 #include "shader.h"
-#include <DDSTextureLoader.h>
+#include "DirectXTK12/Inc/DDSTextureLoader.h"
 #include <DirectXTex/DirectXTex/DirectXTex.h>
 
 #define MAKEFOURCC(ch0, ch1, ch2, ch3) \

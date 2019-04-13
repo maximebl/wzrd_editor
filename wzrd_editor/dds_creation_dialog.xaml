@@ -1,0 +1,19 @@
+﻿<ContentDialog
+    x:Class="wzrd_editor.dds_creation_dialog"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:wzrd_editor"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+
+    Title="Create DDS file"
+    PrimaryButtonText="Create"
+    PrimaryButtonClick="onclick_create"
+    CloseButtonText="Cancel"
+    DefaultButton="Primary"
+    mc:Ignorable="d">
+
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Button x:Name="Button" Click="ClickHandler">Click Me</Button>
+    </StackPanel>
+</ContentDialog>

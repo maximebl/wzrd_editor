@@ -122,6 +122,10 @@
       <DependentUpon>buffer_size_select_dialog.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
+    <ClInclude Include="dds_creation_dialog.h">
+      <DependentUpon>dds_creation_dialog.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="enum_to_int.h">
       <DependentUpon>enum_to_int.idl</DependentUpon>
       <SubType>Code</SubType>
@@ -206,6 +210,9 @@
     <Page Include="buffer_size_select_dialog.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="dds_creation_dialog.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="MainPage.xaml">
       <SubType>Designer</SubType>
     </Page>
@@ -256,6 +263,10 @@
     </ClCompile>
     <ClCompile Include="buffer_size_select_dialog.cpp">
       <DependentUpon>buffer_size_select_dialog.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
+    <ClCompile Include="dds_creation_dialog.cpp">
+      <DependentUpon>dds_creation_dialog.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
     <ClCompile Include="enum_to_int.cpp">
@@ -362,6 +373,10 @@
     </Midl>
     <Midl Include="buffer_size_select_dialog.idl">
       <DependentUpon>buffer_size_select_dialog.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Midl>
+    <Midl Include="dds_creation_dialog.idl">
+      <DependentUpon>dds_creation_dialog.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Midl>
     <Midl Include="enum_to_int.idl">

@@ -19,6 +19,9 @@
     <Page Include="transforms_showcase_page.xaml">
       <Filter>views</Filter>
     </Page>
+    <Page Include="dds_creation_dialog.xaml">
+      <Filter>views</Filter>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Midl Include="App.idl" />
@@ -118,6 +121,7 @@
     <ClCompile Include="filter_reduction_to_int.cpp" />
     <ClCompile Include="bool_to_visibility_inverted.cpp" />
     <ClCompile Include="transforms_showcase_page.cpp" />
+    <ClCompile Include="alphamode_to_string.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h" />
@@ -157,6 +161,7 @@
     <ClInclude Include="filter_reduction_to_int.h" />
     <ClInclude Include="bool_to_visibility_inverted.h" />
     <ClInclude Include="transforms_showcase_page.h" />
+    <ClInclude Include="alphamode_to_string.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Wide310x150Logo.scale-200.png">

@@ -202,7 +202,24 @@
                 <PivotItem Header="Textures">
                     <StackPanel Orientation="Vertical">
                         <CommandBar x:Name="textures_cmd_bar" Background="Transparent" IsOpen="False" DefaultLabelPosition="Right" HorizontalAlignment="Left">
-                            <AppBarButton x:Name="textures_picker" Icon="Add" Label="Add" Click="onclick_pick_texture"/>
+                            <AppBarButton x:Name="textures_picker" Icon="Add" Label="Add">
+                                <AppBarButton.Flyout>
+                                    <MenuFlyout>
+                                        <MenuFlyoutItem x:Name="pick_existing_texture" Click="onclick_pick_texture" Text="Existing DDS file">
+                                            <MenuFlyoutItem.KeyboardAccelerators>
+                                                <KeyboardAccelerator  Key="T"/>
+                                            </MenuFlyoutItem.KeyboardAccelerators>
+                                        </MenuFlyoutItem>
+
+                                        <MenuFlyoutItem x:Name="create_texture" Click="onclick_create_texture" Text="New DDS file">
+                                            <MenuFlyoutItem.KeyboardAccelerators>
+                                                <KeyboardAccelerator  Key="T" Modifiers="Shift"/>
+                                            </MenuFlyoutItem.KeyboardAccelerators>
+                                        </MenuFlyoutItem>
+                                    </MenuFlyout>
+                                </AppBarButton.Flyout>
+                            </AppBarButton>
+
                             <AppBarButton x:Name="appbarbutton_delete_texture" Icon="Delete" Label="Delete" Click="delete_selected_texture" IsEnabled="False"/>
                         </CommandBar>
 

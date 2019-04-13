@@ -16,6 +16,7 @@
 #include "bool_to_visibility_inverted.h"
 #include "filter_reduction_to_int.h"
 #include "utilities.h"
+#include "dds_creation_dialog.h"
 
 namespace winrt::wzrd_editor::implementation
 {
@@ -30,6 +31,7 @@ namespace winrt::wzrd_editor::implementation
 		IAsyncAction delete_selected_shader(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
 		IAsyncAction delete_selected_texture(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
 		IAsyncAction onclick_pick_texture(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
+		IAsyncAction onclick_create_texture(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
 		IAsyncAction shader_selection_changed(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
 		IAsyncAction texture_selection_changed(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);
 
@@ -40,7 +42,6 @@ namespace winrt::wzrd_editor::implementation
 		std::map<hstring, Windows::Foundation::IInspectable> m_ui_items = {};
 		Windows::Foundation::Collections::IMap<hstring, IInspectable> m_ui_control_values = winrt::single_threaded_map<hstring, IInspectable>();
 		graphics::renderer m_renderer;
-		void play_spring_animation(float target_value, Windows::Foundation::IInspectable const & sender);
 
 		wzrd_editor::texture_showcase_vm m_texture_showcase_vm = winrt::make<wzrd_editor::implementation::texture_showcase_vm>();
 	};

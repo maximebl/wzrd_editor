@@ -199,6 +199,12 @@ namespace winrt::wzrd_editor::implementation
 		}
 	}
 
+	IAsyncAction texture_showcase_page::onclick_create_texture(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		auto dialog = winrt::make<dds_creation_dialog>();
+		auto dialog_result = co_await dialog.ShowAsync();
+	}
+
 	IAsyncAction texture_showcase_page::shader_selection_changed(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
 		auto selected_items_count = unbox_value<Windows::UI::Xaml::Controls::ListView>(sender).SelectedItems().Size();
