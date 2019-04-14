@@ -21,13 +21,13 @@ concurrency::task<std::vector<unsigned char>> Utilities::read_file_bytes(winrt::
 	auto dataReader = winrt::Windows::Storage::Streams::DataReader::FromBuffer(fileBuffer);
 
 	return concurrency::create_task([fileBuffer, dataReader]() -> std::vector<unsigned char>
-	{
-		std::vector<unsigned char> file_bytes;
-		int fileSize = fileBuffer.Length();
-		file_bytes.assign(fileSize, 0);
-		dataReader.ReadBytes(file_bytes);
-		return file_bytes;
-	});
+		{
+			std::vector<unsigned char> file_bytes;
+			int fileSize = fileBuffer.Length();
+			file_bytes.assign(fileSize, 0);
+			dataReader.ReadBytes(file_bytes);
+			return file_bytes;
+		});
 }
 
 winrt::Windows::Foundation::IAsyncOperation<winrt::Windows::Storage::Streams::IBuffer> Utilities::pick_file_buffer(winrt::hstring file_extension, pick_modes pick_mode)
@@ -398,6 +398,48 @@ void Utilities::generate_sampling_functions_attributes(winrt::Windows::Foundatio
 		description = L"Samples a texture after applying a bias to the mipmap level.";
 		value = winrt::to_hstring(static_cast<uint32_t>(winrt::graphics::sampling_function::sample_bias));
 		set_values(name, value, description, sampling_functions);
+	}
+}
+
+void Utilities::generate_alpha_modes_attributes(winrt::Windows::Foundation::Collections::IObservableVector<winrt::Windows::Foundation::IInspectable>& alpha_modes)
+{
+	winrt::hstring description;
+	winrt::hstring value;
+	winrt::hstring name;
+
+	{
+		name = L"unknown";
+		description = L"";
+		value = winrt::to_hstring(static_cast<uint32_t>(winrt::graphics::alpha_mode::unknown));
+		set_values(name, value, description, alpha_modes);
+	}
+
+	{
+		name = L"straight";
+		description = L"";
+		value = winrt::to_hstring(static_cast<uint32_t>(winrt::graphics::alpha_mode::straight));
+		set_values(name, value, description, alpha_modes);
+	}
+
+	{
+		name = L"premultiplied";
+		description = L"";
+		value = winrt::to_hstring(static_cast<uint32_t>(winrt::graphics::alpha_mode::premultiplied));
+		set_values(name, value, description, alpha_modes);
+	}
+
+	{
+		name = L"opaque";
+		description = L"";
+		value = winrt::to_hstring(static_cast<uint32_t>(winrt::graphics::alpha_mode::opaque));
+		set_values(name, value, description, alpha_modes);
+	}
+
+	{
+		name = L"custom";
+		description = L"";
+		value = winrt::to_hstring(static_cast<uint32_t>(winrt::graphics::alpha_mode::custom));
+		set_values(name, value, description, alpha_modes);
 	}
 }
 

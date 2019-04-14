@@ -199,5 +199,6 @@ public:
 	static void generate_filter_reduction_types_attributes(winrt::Windows::Foundation::Collections::IObservableVector<winrt::Windows::Foundation::IInspectable> & filtering_methods);
 	static void generate_filter_comparisonfuncs_attributes(winrt::Windows::Foundation::Collections::IObservableVector<winrt::Windows::Foundation::IInspectable> & comparison_funcs);
 	static void generate_sampling_functions_attributes(winrt::Windows::Foundation::Collections::IObservableVector<winrt::Windows::Foundation::IInspectable> & sampling_functions);
+	static void generate_alpha_modes_attributes(winrt::Windows::Foundation::Collections::IObservableVector<winrt::Windows::Foundation::IInspectable> & alpha_modes);
 };
 

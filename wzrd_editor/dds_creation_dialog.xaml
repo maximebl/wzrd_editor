@@ -14,6 +14,14 @@
     mc:Ignorable="d">
 
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
-        <Button x:Name="Button" Click="ClickHandler">Click Me</Button>
+        <Slider x:Name="width" Header="Width" Width="auto" Orientation="Horizontal" 
+                Value="{Binding width, Mode=TwoWay}" Minimum="4" Maximum="1024" StepFrequency="1" TickFrequency="1" SnapsTo="StepValues" TickPlacement="None" />
+        <Slider x:Name="height" Header="Height" Width="auto" Orientation="Horizontal" 
+                Value="{Binding height, Mode=TwoWay}" Minimum="4" Maximum="1024" StepFrequency="1" TickFrequency="1" SnapsTo="StepValues" TickPlacement="None" />
+
+              <!--SelectedIndex="{x:Bind , Mode=TwoWay, Converter={StaticResource enum_to_int_converter}}"-->
+        <ComboBox Header="Alpha mode" PlaceholderText="Choose an alpha mode" Width="auto"
+              SelectedIndex="0"
+              ItemsSource="{x:Bind alpha_modes, Mode=OneTime}" DisplayMemberPath="attribute_name"/>
     </StackPanel>
 </ContentDialog>

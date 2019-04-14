@@ -4,5 +4,9 @@ namespace wzrd_editor
 	runtimeclass dds_creation_dialog : Windows.UI.Xaml.Controls.ContentDialog, Windows.UI.Xaml.Data.INotifyPropertyChanged
 	{
 		dds_creation_dialog();
+
+		UInt32 width;
+		UInt32 height;
+		Windows.Foundation.Collections.IObservableVector<IInspectable> alpha_modes{ get; };
 	}
 }
