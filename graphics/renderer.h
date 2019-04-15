@@ -7,6 +7,7 @@
 #include "shader.h"
 #include "DirectXTK12/Inc/DDSTextureLoader.h"
 #include <DirectXTex/DirectXTex/DirectXTex.h>
+#include <chrono>
 
 #define MAKEFOURCC(ch0, ch1, ch2, ch3) \
                 (static_cast<uint32_t>(static_cast<uint8_t>(ch0)) \

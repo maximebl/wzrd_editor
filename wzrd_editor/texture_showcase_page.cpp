@@ -173,15 +173,15 @@ namespace winrt::wzrd_editor::implementation
 		texture_showcase_vm().textures().Append(new_texture);
 
 		new_texture.is_loading(true);
-		auto pick_tex_async_op = m_renderer.pick_texture(new_texture, hstring{ L"default_texture" });
+		auto pick_texture_async = m_renderer.pick_texture(new_texture, hstring{ L"default_texture" });
 
-		pick_tex_async_op.Progress([](auto const& /* sender */, hstring progress)
+		pick_texture_async.Progress([](auto const& /* sender */, hstring progress)
 			{
 				hstring msg = L"\n" + progress + L"\n";
 				OutputDebugStringW(msg.c_str());
 			});
 
-		new_texture = co_await pick_tex_async_op;
+		new_texture = co_await pick_texture_async;
 
 		if (!new_texture)
 		{
@@ -189,13 +189,13 @@ namespace winrt::wzrd_editor::implementation
 		}
 		else
 		{
-			new_texture.is_loading(false);
-
 			auto new_mipmaps = new_texture.mipmaps();
 			for (auto mipmap : new_mipmaps)
 			{
 				texture_showcase_vm().mipmaps().Append(box_value(mipmap));
 			}
+
+			new_texture.is_loading(false);
 		}
 	}
 

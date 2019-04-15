@@ -558,13 +558,21 @@ namespace winrt::graphics::implementation
 	Windows::Foundation::IAsyncOperationWithProgress<graphics::texture, hstring> renderer::pick_texture(graphics::texture new_texture, hstring name)
 	{
 		using namespace Windows::Graphics::Imaging;
+		using namespace std::chrono_literals;
 
 		auto progress = co_await winrt::get_progress_token();
+		auto cancellation_token = co_await winrt::get_cancellation_token();
 
 		Windows::Storage::Pickers::FileOpenPicker picker;
 		picker.FileTypeFilter().Append(hstring(L".dds"));
 
-		auto file = co_await picker.PickSingleFileAsync();
+		co_await 5s;
+
+		Windows::Storage::StorageFile file = nullptr;
+		if (!cancellation_token())
+		{
+			file = co_await picker.PickSingleFileAsync();
+		}
 
 		if (file == nullptr)
 		{
