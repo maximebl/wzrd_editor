@@ -1,15 +1,14 @@
 namespace wzrd_editor
 {
-	[default_interface]
-	runtimeclass dds_creation_dialog : Windows.UI.Xaml.Controls.ContentDialog, Windows.UI.Xaml.Data.INotifyPropertyChanged
-	{
-		dds_creation_dialog();
-
+    [default_interface]
+    runtimeclass dds_creation_page : Windows.UI.Xaml.Controls.Page, Windows.UI.Xaml.Data.INotifyPropertyChanged
+    {
+        dds_creation_page();
 		UInt32 width;
 		UInt32 height;
 		Windows.Foundation.Collections.IObservableVector<IInspectable> alpha_modes{ get; };
 		graphics.alpha_mode alpha_mode;
 		Boolean is_texture_array;
 		String texture_name;
-	}
+    }
 }

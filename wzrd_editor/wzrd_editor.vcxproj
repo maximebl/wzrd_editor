@@ -126,6 +126,14 @@
       <DependentUpon>dds_creation_dialog.xaml</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
+    <ClInclude Include="dds_creation_page.h">
+      <DependentUpon>dds_creation_page.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
+    <ClInclude Include="dds_creation_vm.h">
+      <DependentUpon>dds_creation_vm.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="enum_to_int.h">
       <DependentUpon>enum_to_int.idl</DependentUpon>
       <SubType>Code</SubType>
@@ -180,6 +188,10 @@
       <DependentUpon>texture_showcase_vm.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClInclude>
+    <ClInclude Include="texture_vm.h">
+      <DependentUpon>texture_vm.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClInclude>
     <ClInclude Include="transforms_showcase_page.h">
       <DependentUpon>transforms_showcase_page.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -211,6 +223,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="dds_creation_dialog.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="dds_creation_page.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Include="MainPage.xaml">
@@ -267,6 +282,14 @@
     </ClCompile>
     <ClCompile Include="dds_creation_dialog.cpp">
       <DependentUpon>dds_creation_dialog.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
+    <ClCompile Include="dds_creation_page.cpp">
+      <DependentUpon>dds_creation_page.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
+    <ClCompile Include="dds_creation_vm.cpp">
+      <DependentUpon>dds_creation_vm.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
     <ClCompile Include="enum_to_int.cpp">
@@ -334,6 +357,10 @@
       <DependentUpon>texture_showcase_vm.idl</DependentUpon>
       <SubType>Code</SubType>
     </ClCompile>
+    <ClCompile Include="texture_vm.cpp">
+      <DependentUpon>texture_vm.idl</DependentUpon>
+      <SubType>Code</SubType>
+    </ClCompile>
     <ClCompile Include="transforms_showcase_page.cpp">
       <DependentUpon>transforms_showcase_page.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -379,6 +406,13 @@
       <DependentUpon>dds_creation_dialog.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Midl>
+    <Midl Include="dds_creation_page.idl">
+      <DependentUpon>dds_creation_page.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Midl>
+    <Midl Include="dds_creation_vm.idl">
+      <SubType>Designer</SubType>
+    </Midl>
     <Midl Include="enum_to_int.idl">
       <SubType>Designer</SubType>
     </Midl>
@@ -414,6 +448,9 @@
       <SubType>Code</SubType>
     </Midl>
     <Midl Include="texture_showcase_vm.idl">
+      <SubType>Designer</SubType>
+    </Midl>
+    <Midl Include="texture_vm.idl">
       <SubType>Designer</SubType>
     </Midl>
     <Midl Include="transforms_showcase_page.idl">

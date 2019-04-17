@@ -42,6 +42,9 @@ namespace winrt::wzrd_editor::implementation
 		auto sampling_functions = m_texture_showcase_vm.sampling_functions();
 		Utilities::generate_sampling_functions_attributes(sampling_functions);
 
+		auto alpha_modes_cpy = m_texture_showcase_vm.dds_creation_vm().alpha_modes();
+		Utilities::generate_alpha_modes_attributes(alpha_modes_cpy);
+
 		m_renderer.initialize_textures_showcase(ui_items);
 	}
 
@@ -66,12 +69,12 @@ namespace winrt::wzrd_editor::implementation
 
 		switch (result.status)
 		{
-		case graphics::compilation_status::error:
+		case graphics::operation_status::error:
 			new_shader.is_error(true);
 			co_await os_utilities::show_error_dialog(result.error_message, hstring{ L"Vertex shader compilation error" });
 			break;
 
-		case graphics::compilation_status::cancelled:
+		case graphics::operation_status::cancelled:
 			texture_showcase_vm().shaders().RemoveAtEnd();
 
 		default:
@@ -92,12 +95,12 @@ namespace winrt::wzrd_editor::implementation
 
 		switch (result.status)
 		{
-		case graphics::compilation_status::error:
+		case graphics::operation_status::error:
 			new_shader.is_error(true);
 			co_await os_utilities::show_error_dialog(result.error_message, hstring{ L"Pixel shader compilation error" });
 			break;
 
-		case graphics::compilation_status::cancelled:
+		case graphics::operation_status::cancelled:
 			texture_showcase_vm().shaders().RemoveAtEnd();
 
 		default:
@@ -118,12 +121,12 @@ namespace winrt::wzrd_editor::implementation
 
 		switch (result.status)
 		{
-		case graphics::compilation_status::error:
+		case graphics::operation_status::error:
 			new_shader.is_error(true);
 			co_await os_utilities::show_error_dialog(result.error_message, hstring{ L"Geometry shader compilation error" });
 			break;
 
-		case graphics::compilation_status::cancelled:
+		case graphics::operation_status::cancelled:
 			texture_showcase_vm().shaders().RemoveAtEnd();
 			break;
 
@@ -167,13 +170,14 @@ namespace winrt::wzrd_editor::implementation
 
 	IAsyncAction texture_showcase_page::onclick_pick_texture(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		auto new_texture = graphics::texture();
+		wzrd_editor::texture_vm new_texture_vm = make<wzrd_editor::implementation::texture_vm>();
+		new_texture_vm.is_loading(true);
 
-		texture_showcase_vm().current_texture(new_texture);
-		texture_showcase_vm().textures().Append(new_texture);
+		texture_showcase_vm().current_texture_vm(new_texture_vm);
+		texture_showcase_vm().textures().Append(new_texture_vm);
 
-		new_texture.is_loading(true);
-		auto pick_texture_async = m_renderer.pick_texture(new_texture, hstring{ L"default_texture" });
+		graphics::texture new_texture = nullptr;
+		auto pick_texture_async = m_renderer.pick_texture(new_texture, L"default_texture");
 
 		pick_texture_async.Progress([](auto const& /* sender */, hstring progress)
 			{
@@ -181,28 +185,45 @@ namespace winrt::wzrd_editor::implementation
 				OutputDebugStringW(msg.c_str());
 			});
 
-		new_texture = co_await pick_texture_async;
+		graphics::operation_result result = co_await pick_texture_async;
 
-		if (!new_texture)
+		new_texture_vm.current_texture(new_texture);
+		new_texture_vm.is_loading(false);
+
+		this->Bindings->Update();
+
+		hstring error_msg;
+		IObservableVector<IInspectable> new_mipmaps;
+
+		switch (result.status)
 		{
-			texture_showcase_vm().textures().RemoveAtEnd();
-		}
-		else
-		{
-			auto new_mipmaps = new_texture.mipmaps();
+		case graphics::operation_status::success:
+			new_mipmaps = new_texture.mipmaps();
 			for (auto mipmap : new_mipmaps)
 			{
 				texture_showcase_vm().mipmaps().Append(box_value(mipmap));
 			}
 
 			new_texture.is_loading(false);
+			break;
+		case graphics::operation_status::error:
+			os_utilities::show_error_dialog(result.error_message, L"Failed to parse the DDS file");
+			texture_showcase_vm().textures().RemoveAtEnd();
+			break;
+
+		case graphics::operation_status::cancelled:
+			error_msg = result.error_message;
+			texture_showcase_vm().textures().RemoveAtEnd();
+			break;
+
+		default:
+			break;
 		}
 	}
 
 	IAsyncAction texture_showcase_page::onclick_create_texture(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		auto dialog = winrt::make<dds_creation_dialog>();
-		auto dialog_result = co_await dialog.ShowAsync();
+		co_return;
 	}
 
 	IAsyncAction texture_showcase_page::shader_selection_changed(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
@@ -235,8 +256,14 @@ namespace winrt::wzrd_editor::implementation
 		co_return;
 	}
 
+	IAsyncAction texture_showcase_page::onclick_create_dds(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
+	{
+		return IAsyncAction();
+	}
+
 	IAsyncAction texture_showcase_page::render_onclick(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
+		//texture_page_content_frame().Navigate(winrt::xaml_typename<transforms_showcase_page>(), nullptr);
 		m_renderer.start_render_loop();
 		split_pane().IsPaneOpen(true);
 		co_return;

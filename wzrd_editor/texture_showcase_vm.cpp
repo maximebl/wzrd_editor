@@ -50,14 +50,14 @@ namespace winrt::wzrd_editor::implementation
 		update_value(L"mipmaps", m_mipmaps, value);
 	}
 
-	graphics::texture texture_showcase_vm::current_texture()
+	wzrd_editor::texture_vm texture_showcase_vm::current_texture_vm()
 	{
-		return m_current_texture;
+		return m_current_texture_vm;
 	}
 
-	void texture_showcase_vm::current_texture(graphics::texture const& value)
+	void texture_showcase_vm::current_texture_vm(wzrd_editor::texture_vm const& value)
 	{
-		update_value(L"current_texture", m_current_texture, value);
+		update_value(L"current_texture", m_current_texture_vm, value);
 	}
 
 	graphics::renderer texture_showcase_vm::current_renderer()
@@ -128,6 +128,16 @@ namespace winrt::wzrd_editor::implementation
 	void texture_showcase_vm::sampling_functions(IObservableVector<IInspectable> const& value)
 	{
 		update_value(L"sampling_functions", m_sampling_functions, value);
+	}
+
+	wzrd_editor::dds_creation_vm texture_showcase_vm::dds_creation_vm()
+	{
+		return m_dds_creation_vm;
+	}
+
+	void texture_showcase_vm::dds_creation_vm(wzrd_editor::dds_creation_vm const& value)
+	{
+		update_value(L"dds_creation_vm", m_dds_creation_vm, value);
 	}
 
 	winrt::event_token texture_showcase_vm::PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& handler)

@@ -7,7 +7,7 @@
 #include "shader.h"
 #include "DirectXTK12/Inc/DDSTextureLoader.h"
 #include <DirectXTex/DirectXTex/DirectXTex.h>
-#include <chrono>
+#include "../os_utilities/os_utilities.h"
 
 #define MAKEFOURCC(ch0, ch1, ch2, ch3) \
                 (static_cast<uint32_t>(static_cast<uint8_t>(ch0)) \
@@ -85,9 +85,14 @@ namespace winrt::graphics::implementation
 		bool is_rendering();
 		graphics::buffer current_buffer();
 		void current_buffer(graphics::buffer const& value);
-		Windows::Foundation::IAsyncOperation<graphics::compilation_result> pick_and_compile_shader(graphics::shader new_shader);
+		Windows::Foundation::IAsyncOperation<graphics::operation_result> pick_and_compile_shader(graphics::shader new_shader);
 
-		Windows::Foundation::IAsyncOperationWithProgress<graphics::texture, hstring> pick_texture(graphics::texture new_texture, hstring name);
+		Windows::Foundation::IAsyncOperationWithProgress<graphics::operation_result, hstring> pick_texture(graphics::texture& new_texture, hstring name);
+		Windows::Foundation::IAsyncOperationWithProgress<graphics::operation_result, hstring> create_dds_textures(
+			Windows::Foundation::Collections::IObservableVector<graphics::texture>& new_textures, 
+			uint64_t width, 
+			uint64_t height, 
+			graphics::alpha_mode const& alpha_mode);
 		graphics::primitive_types current_topology();
 		void current_topology(graphics::primitive_types const& value);
 

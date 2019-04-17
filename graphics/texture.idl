@@ -64,24 +64,27 @@ namespace graphics
 	{
 		texture();
 
-		String texture_name;
-		String file_name;
 		Boolean is_loading;
 		Boolean is_error;
 		Windows.UI.Xaml.Media.Imaging.SoftwareBitmapSource bitmap_source;
 
+		String texture_name;
+		String file_name;
 		UInt32 mip_levels;
 		UInt32 width;
 		UInt32 height;
 		String dimension;
 		UInt32 row_pitch;
 		UInt32 slice_pitch;
+		alpha_mode alpha_mode;
+		IObservableVector<IInspectable> mipmaps;
+
 		Single current_lod;
 		Single scale;
+
 		Windows.UI.Color sampler_border_color;
 		Single sampler_minLOD;
 		Single sampler_maxLOD;
-		IObservableVector<IInspectable> mipmaps;
 		Boolean is_forced_mip_level;
 		Boolean is_screen_coords;
 		Int32 x_pixel_offset;
@@ -98,7 +101,6 @@ namespace graphics
 		filter_reduction_type reduction;
 		filter_comparison_function comparison_function;
 		sampling_function sampling_function;
-		alpha_mode alpha_mode;
 
 		texture_address_mode u_address_mode;
 		texture_address_mode v_address_mode;

@@ -13,16 +13,16 @@ namespace graphics
 		line_strips = 4
 	};
 
-	enum compilation_status
+	enum operation_status
 	{
 		success = 0,
 		error = 1,
 		cancelled = 2
 	};
 
-	struct compilation_result
+	struct operation_result
 	{
-		compilation_status status;
+		operation_status status;
 		String error_message;
 	};
 
@@ -35,6 +35,7 @@ namespace graphics
 		void initialize_buffers_showcase(Windows.UI.Xaml.Controls.SwapChainPanel target_swapchain);
 		void initialize_textures_showcase(Windows.Foundation.Collections.IMap<String, Object> ui_items);
 		void clear_shaders();
+		Windows.Foundation.IAsyncOperationWithProgress<operation_result, String> create_dds_textures(out IObservableVector<graphics.texture> new_textures, UInt64 width, UInt64 height, alpha_mode alpha_mode);
 		void clear_textures();
 		void remove_texture(String name);
 		void remove_shader(String name);
@@ -43,8 +44,8 @@ namespace graphics
 
 		Boolean is_rendering{ get; };
 		primitive_types current_topology{ get; set; };
-		Windows.Foundation.IAsyncOperation<compilation_result> pick_and_compile_shader(shader new_shader);
-		Windows.Foundation.IAsyncOperationWithProgress<texture, String> pick_texture(graphics.texture new_texture, String name);
+		Windows.Foundation.IAsyncOperation<operation_result> pick_and_compile_shader(shader new_shader);
+		Windows.Foundation.IAsyncOperationWithProgress<operation_result, String> pick_texture(out graphics.texture new_texture, String name);
 		buffer current_buffer{ get; set; };
 
 		UInt32 viewport_width;

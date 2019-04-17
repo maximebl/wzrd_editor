@@ -10,7 +10,7 @@ namespace os_utilities
 		multiple_files_async = 1
 	};
 
-	concurrency::task<std::vector<unsigned char>> pick_file_bytes(winrt::hstring file_extension);
+	concurrency::task<std::vector<unsigned char>> pick_file(winrt::hstring file_extension);
 	winrt::Windows::Foundation::IAsyncOperation<winrt::Windows::Storage::Streams::IBuffer> pick_file_buffer(winrt::hstring file_extension, pick_modes pick_mode);
 	concurrency::task<std::vector<unsigned char>> read_file_bytes(winrt::Windows::Storage::Streams::IBuffer file_buffer);
 	void wait_duration(DWORD duration);

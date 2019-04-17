@@ -1,9 +1,10 @@
 namespace wzrd_editor
 {
+	[bindable]
 	[default_interface]
-	runtimeclass dds_creation_dialog : Windows.UI.Xaml.Controls.ContentDialog, Windows.UI.Xaml.Data.INotifyPropertyChanged
+	runtimeclass dds_creation_vm : Windows.UI.Xaml.Data.INotifyPropertyChanged
 	{
-		dds_creation_dialog();
+		dds_creation_vm();
 
 		UInt32 width;
 		UInt32 height;

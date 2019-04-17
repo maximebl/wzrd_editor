@@ -1,4 +1,5 @@
-import "texture.idl";
+import "texture_vm.idl";
+import "dds_creation_vm.idl";
 
 namespace wzrd_editor
 {
@@ -16,7 +17,8 @@ namespace wzrd_editor
 		Windows.Foundation.Collections.IObservableVector<IInspectable> filter_reduction_types;
 		Windows.Foundation.Collections.IObservableVector<IInspectable> filter_comparisonfuncs;
 		Windows.Foundation.Collections.IObservableVector<IInspectable> sampling_functions;
-		graphics.texture current_texture;
+		texture_vm current_texture_vm;
 		graphics.renderer current_renderer;
+		dds_creation_vm dds_creation_vm;
     }
 }

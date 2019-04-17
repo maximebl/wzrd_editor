@@ -6,12 +6,12 @@ ID3D12GraphicsCommandList* winrt::graphics::implementation::renderer::g_cmd_list
 
 namespace winrt::graphics::implementation
 {
-	Windows::Foundation::IAsyncOperation<graphics::compilation_result>
+	Windows::Foundation::IAsyncOperation<graphics::operation_result>
 		renderer::pick_and_compile_shader(graphics::shader new_shader)
 	{
 		m_ui_thread = winrt::apartment_context();
 
-		graphics::compilation_result result;
+		graphics::operation_result result;
 
 		Windows::Storage::Pickers::FileOpenPicker picker;
 		picker.FileTypeFilter().Append(hstring(L".hlsl"));
@@ -19,7 +19,7 @@ namespace winrt::graphics::implementation
 
 		if (file == nullptr)
 		{
-			result.status = graphics::compilation_status::cancelled;
+			result.status = graphics::operation_status::cancelled;
 			return result;
 		}
 
@@ -77,12 +77,12 @@ namespace winrt::graphics::implementation
 			auto error_msg_ptr = static_cast<const char*>(errors->GetBufferPointer());
 			hstring message = to_hstring(error_msg_ptr);
 
-			result.status = graphics::compilation_status::error;
+			result.status = graphics::operation_status::error;
 			result.error_message = message;
 			return result;
 		}
 
-		result.status = graphics::compilation_status::success;
+		result.status = graphics::operation_status::success;
 		m_shaders[new_shader.shader_name()] = byte_code;
 
 		co_await m_ui_thread;
@@ -274,8 +274,8 @@ namespace winrt::graphics::implementation
 		auto g = static_cast<float>(current_border_color.G / 255.f);
 		auto b = static_cast<float>(current_border_color.B / 255.f);
 		auto a = static_cast<float>(current_border_color.A / 255.f);
-
 		float border_color[4] = { r,g,b,a };
+
 		memcpy(m_sampler_desc.BorderColor, border_color, sizeof(FLOAT) * 4);
 		m_sampler_desc.AddressU = static_cast<D3D12_TEXTURE_ADDRESS_MODE>(m_textures[L"default_texture"].u_address_mode());
 		m_sampler_desc.AddressV = static_cast<D3D12_TEXTURE_ADDRESS_MODE>(m_textures[L"default_texture"].v_address_mode());
@@ -555,30 +555,60 @@ namespace winrt::graphics::implementation
 		m_current_buffer = value.as<graphics::implementation::buffer>();
 	}
 
-	Windows::Foundation::IAsyncOperationWithProgress<graphics::texture, hstring> renderer::pick_texture(graphics::texture new_texture, hstring name)
+    Windows::Foundation::IAsyncOperationWithProgress<graphics::operation_result, hstring> renderer::create_dds_textures(
+		IObservableVector<graphics::texture>& new_textures, 
+		uint64_t width, 
+		uint64_t height, 
+		graphics::alpha_mode const& alpha_mode)
+    {
+		using namespace DirectX;
+
+		auto file_bytes = co_await os_utilities::pick_file(L".jpg");
+
+		Image new_image;
+		new_image.format = DXGI_FORMAT::DXGI_FORMAT_BC3_UNORM;
+		new_image.height = width;
+		new_image.width = height;
+
+		size_t row_pitch;
+		size_t slice_pitch;
+		check_hresult(
+			ComputePitch(new_image.format, new_image.width, new_image.height, row_pitch, slice_pitch)
+		);
+
+		new_image.slicePitch = slice_pitch;
+		new_image.rowPitch = row_pitch;
+		//new_image.pixels = 
+
+		Blob new_blob;
+		SaveToDDSMemory(new_image, DDS_FLAGS::DDS_FLAGS_FORCE_DX10_EXT, new_blob);
+
+		graphics::operation_result result;
+		result.status = operation_status::success;
+		co_return result;
+    }
+
+	Windows::Foundation::IAsyncOperationWithProgress<graphics::operation_result, hstring> renderer::pick_texture(graphics::texture& new_texture, hstring name)
 	{
 		using namespace Windows::Graphics::Imaging;
-		using namespace std::chrono_literals;
+
+		graphics::operation_result result;
 
 		auto progress = co_await winrt::get_progress_token();
-		auto cancellation_token = co_await winrt::get_cancellation_token();
 
 		Windows::Storage::Pickers::FileOpenPicker picker;
 		picker.FileTypeFilter().Append(hstring(L".dds"));
 
-		co_await 5s;
-
-		Windows::Storage::StorageFile file = nullptr;
-		if (!cancellation_token())
-		{
-			file = co_await picker.PickSingleFileAsync();
-		}
+		Windows::Storage::StorageFile file = co_await picker.PickSingleFileAsync();
 
 		if (file == nullptr)
 		{
-			return nullptr;
+			result.status = operation_status::cancelled;
+			result.error_message = L"The user closed the file picker.";
+			co_return result;
 		}
 
+		new_texture = graphics::texture();
 		new_texture.file_name(file.Name());
 		new_texture.texture_name(name);
 
@@ -595,10 +625,12 @@ namespace winrt::graphics::implementation
 		// We now offset to the beginning of the extended header, which is positioned after the DDS_HEADER
 		DDS_HEADER_DXT10* extended_header = reinterpret_cast<DDS_HEADER_DXT10*>(dds_data + sizeof_dds_magic_number + dds_header->size);
 
-		bool is_dx10_extended = dds_header->ddspf.fourCC != MAKEFOURCC('D', 'X', '1', '0');
+		bool is_dx10_extended = dds_header->ddspf.fourCC == MAKEFOURCC('D', 'X', '1', '0');
 		if (!is_dx10_extended)
 		{
-			//new_texture.is_error(true);
+			result.status = operation_status::error;
+			result.error_message = L"The file " + file.Name() + L" does not contain a DDS_HEADER_DXT10 extended header." ;
+			co_return result;
 		}
 
 		auto new_alpha_mode = static_cast<DDS_ALPHA_MODE>(extended_header->miscFlags2 & 0x7L);
@@ -650,8 +682,10 @@ namespace winrt::graphics::implementation
 		new_texture.bitmap_source(new_bitmap_source);
 
 		m_textures[name] = new_texture;
+		result.status = operation_status::success;
+		result.error_message = L"";
 
-		co_return new_texture;
+		co_return result;
 	}
 
 	Windows::Foundation::IAsyncAction renderer::upload_to_gpu(graphics::texture& texture, std::vector<D3D12_SUBRESOURCE_DATA> subresources, hstring texture_name, DXGI_FORMAT texture_format)

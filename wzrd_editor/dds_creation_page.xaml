@@ -1,19 +1,13 @@
-﻿<ContentDialog
-    x:Class="wzrd_editor.dds_creation_dialog"
+﻿<Page
+    x:Class="wzrd_editor.dds_creation_page"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:wzrd_editor"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-
-    Title="Create DDS file"
-    PrimaryButtonText="Create"
-    PrimaryButtonClick="onclick_create"
-    CloseButtonText="Cancel"
-    DefaultButton="Primary"
     mc:Ignorable="d">
 
-    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+    <StackPanel x:Name="dds_creation_form" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
         <Slider x:Name="width" Header="Width" Width="auto" Orientation="Horizontal" 
                 Value="{Binding width, Mode=TwoWay}" Minimum="4" Maximum="1024" StepFrequency="1" TickFrequency="1" SnapsTo="StepValues" TickPlacement="None" />
         <Slider x:Name="height" Header="Height" Width="auto" Orientation="Horizontal" 
@@ -26,5 +20,7 @@
         <ComboBox Header="Alpha mode" PlaceholderText="Choose an alpha mode" Width="auto"
               SelectedIndex="0"
               ItemsSource="{x:Bind alpha_modes, Mode=OneTime}" DisplayMemberPath="attribute_name"/>
+
+        <Button Content="Create" Click="onclick_create_dds"/>
     </StackPanel>
-</ContentDialog>
+</Page>

@@ -5,6 +5,8 @@
 #pragma once
 
 #include "texture_showcase_vm.g.h"
+#include "texture_vm.h"
+#include "dds_creation_vm.h"
 
 namespace winrt::wzrd_editor::implementation
 {
@@ -21,8 +23,8 @@ namespace winrt::wzrd_editor::implementation
 		void shaders(IObservableVector<IInspectable> const& value);
 		IObservableVector<IInspectable> address_modes();
 		void address_modes(IObservableVector<IInspectable> const& value);
-		graphics::texture current_texture();
-		void current_texture(graphics::texture const& value);
+		wzrd_editor::texture_vm current_texture_vm();
+		void current_texture_vm(wzrd_editor::texture_vm const& value);
 		graphics::renderer current_renderer();
 		void current_renderer(graphics::renderer const& value);
 		IObservableVector<IInspectable> mipmaps();
@@ -39,6 +41,8 @@ namespace winrt::wzrd_editor::implementation
 		void filter_comparisonfuncs(IObservableVector<IInspectable> const& value);
 		Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> sampling_functions();
 		void sampling_functions(Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> const& value);
+		wzrd_editor::dds_creation_vm dds_creation_vm();
+		void dds_creation_vm(wzrd_editor::dds_creation_vm const& value);
 
 		winrt::event_token PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& handler);
 		void PropertyChanged(winrt::event_token const& token) noexcept;
@@ -54,8 +58,10 @@ namespace winrt::wzrd_editor::implementation
 		IObservableVector<IInspectable> m_filter_reduction_types = winrt::single_threaded_observable_vector<IInspectable>();
 		IObservableVector<IInspectable> m_filter_comparisonfuncs = winrt::single_threaded_observable_vector<IInspectable>();
 		IObservableVector<IInspectable> m_sampling_functions = winrt::single_threaded_observable_vector<IInspectable>();
-		graphics::texture m_current_texture;
+
+		wzrd_editor::texture_vm m_current_texture_vm = winrt::make<wzrd_editor::implementation::texture_vm>();
 		graphics::renderer m_current_renderer;
+		wzrd_editor::dds_creation_vm m_dds_creation_vm = winrt::make<wzrd_editor::implementation::dds_creation_vm>();
 
 		winrt::event<Windows::UI::Xaml::Data::PropertyChangedEventHandler> m_property_changed;
 

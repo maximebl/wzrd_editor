@@ -519,7 +519,6 @@ using Windows::Foundation::IInspectable; namespace winrt::graphics::implementati
 		update_value(L"bottomright_y", m_bottomright_y, value);
 	}
 
-
 	winrt::event_token texture::PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& handler)
 	{
 		return m_property_changed.add(handler);

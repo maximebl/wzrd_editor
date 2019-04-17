@@ -1,0 +1,14 @@
+import "texture.idl";
+
+namespace wzrd_editor
+{
+	[bindable]
+	[default_interface]
+	runtimeclass texture_vm : Windows.UI.Xaml.Data.INotifyPropertyChanged
+	{
+		texture_vm();
+		graphics.texture current_texture;
+		Boolean is_error;
+		Boolean is_loading;
+	}
+}

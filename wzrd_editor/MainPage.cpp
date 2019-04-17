@@ -135,12 +135,12 @@ namespace winrt::wzrd_editor::implementation
 
 		switch (result.status)
 		{
-		case graphics::compilation_status::error:
+		case graphics::operation_status::error:
 			new_shader.is_error(true);
 			show_error_dialog(result.error_message);
 			break;
 
-		case graphics::compilation_status::cancelled:
+		case graphics::operation_status::cancelled:
 			m_geometryViewModel.Shaders().RemoveAtEnd();
 
 		default:
@@ -161,12 +161,12 @@ namespace winrt::wzrd_editor::implementation
 
 		switch (result.status)
 		{
-		case graphics::compilation_status::error:
+		case graphics::operation_status::error:
 			new_shader.is_error(true);
 			show_error_dialog(result.error_message);
 			break;
 
-		case graphics::compilation_status::cancelled:
+		case graphics::operation_status::cancelled:
 			m_geometryViewModel.Shaders().RemoveAtEnd();
 
 		default:

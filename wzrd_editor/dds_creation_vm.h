@@ -1,27 +1,24 @@
 ﻿#pragma once
 
-#include "dds_creation_dialog.g.h"
+#include "dds_creation_vm.g.h"
 
 namespace winrt::wzrd_editor::implementation
 {
-	struct dds_creation_dialog : dds_creation_dialogT<dds_creation_dialog>
+	struct dds_creation_vm : dds_creation_vmT<dds_creation_vm>
 	{
-		dds_creation_dialog();
+		dds_creation_vm() = default;
 
 		uint32_t width();
 		void width(uint32_t value);
 		uint32_t height();
 		void height(uint32_t value);
+		Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> alpha_modes();
 		graphics::alpha_mode alpha_mode();
 		void alpha_mode(graphics::alpha_mode const& value);
-		Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> alpha_modes();
 		bool is_texture_array();
 		void is_texture_array(bool value);
 		hstring texture_name();
 		void texture_name(hstring const& value);
-
-		winrt::Windows::Foundation::IAsyncAction onclick_create(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::Controls::ContentDialogButtonClickEventArgs const& args);
-
 		winrt::event_token PropertyChanged(Windows::UI::Xaml::Data::PropertyChangedEventHandler const& handler);
 		void PropertyChanged(winrt::event_token const& token) noexcept;
 
@@ -55,7 +52,7 @@ namespace winrt::wzrd_editor::implementation
 
 namespace winrt::wzrd_editor::factory_implementation
 {
-	struct dds_creation_dialog : dds_creation_dialogT<dds_creation_dialog, implementation::dds_creation_dialog>
+	struct dds_creation_vm : dds_creation_vmT<dds_creation_vm, implementation::dds_creation_vm>
 	{
 	};
 }
