@@ -89,10 +89,11 @@ namespace winrt::graphics::implementation
 
 		Windows::Foundation::IAsyncOperationWithProgress<graphics::operation_result, hstring> pick_texture(graphics::texture& new_texture, hstring name);
 		Windows::Foundation::IAsyncOperationWithProgress<graphics::operation_result, hstring> create_dds_textures(
-			Windows::Foundation::Collections::IObservableVector<graphics::texture>& new_textures, 
-			uint64_t width, 
-			uint64_t height, 
-			graphics::alpha_mode const& alpha_mode);
+			hstring name,
+			uint64_t width,
+			uint64_t height,
+			graphics::alpha_mode const& alpha_mode,
+			Windows::Foundation::Collections::IObservableVector<graphics::texture>& new_textures);
 		graphics::primitive_types current_topology();
 		void current_topology(graphics::primitive_types const& value);
 
@@ -206,7 +207,7 @@ namespace winrt::graphics::implementation
 		void create_billboard_pso(com_ptr<ID3DBlob> vertex_shader, com_ptr<ID3DBlob> pixel_shader, com_ptr<ID3DBlob> geometry_shader, com_ptr<ID3D12PipelineState>& m_pso);
 		void reflect_shader(com_ptr<implementation::shader> target_shader);
 		D3D12_CPU_DESCRIPTOR_HANDLE current_backbuffer_view() const;
-		Windows::Foundation::IAsyncAction upload_to_gpu(graphics::texture& texture, std::vector<D3D12_SUBRESOURCE_DATA> bytes, hstring texture_name, DXGI_FORMAT texture_format);
+		Windows::Foundation::IAsyncAction upload_to_gpu(graphics::texture& texture, std::vector<D3D12_SUBRESOURCE_DATA> bytes, DXGI_FORMAT texture_format);
 		hstring get_dimension(D3D12_RESOURCE_DIMENSION dimension);
 		Windows::Foundation::IAsyncAction main_loop();
 

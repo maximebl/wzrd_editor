@@ -223,6 +223,7 @@ namespace winrt::wzrd_editor::implementation
 
 	IAsyncAction texture_showcase_page::onclick_create_texture(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
+		VisualStateManager().GoToState(*this, L"creating_dds_texture", true);
 		co_return;
 	}
 
@@ -258,12 +259,19 @@ namespace winrt::wzrd_editor::implementation
 
 	IAsyncAction texture_showcase_page::onclick_create_dds(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		return IAsyncAction();
+		IObservableVector<graphics::texture> new_dds_texture = nullptr;
+		m_renderer.create_dds_textures(
+			m_texture_showcase_vm.dds_creation_vm().texture_name(),
+			m_texture_showcase_vm.dds_creation_vm().width(),
+			m_texture_showcase_vm.dds_creation_vm().height(),
+			m_texture_showcase_vm.dds_creation_vm().alpha_mode(),
+			new_dds_texture
+		);
+		co_return;
 	}
 
 	IAsyncAction texture_showcase_page::render_onclick(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		//texture_page_content_frame().Navigate(winrt::xaml_typename<transforms_showcase_page>(), nullptr);
 		m_renderer.start_render_loop();
 		split_pane().IsPaneOpen(true);
 		co_return;

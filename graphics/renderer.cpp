@@ -555,38 +555,79 @@ namespace winrt::graphics::implementation
 		m_current_buffer = value.as<graphics::implementation::buffer>();
 	}
 
-    Windows::Foundation::IAsyncOperationWithProgress<graphics::operation_result, hstring> renderer::create_dds_textures(
-		IObservableVector<graphics::texture>& new_textures, 
-		uint64_t width, 
-		uint64_t height, 
-		graphics::alpha_mode const& alpha_mode)
-    {
+	Windows::Foundation::IAsyncOperationWithProgress<graphics::operation_result, hstring> renderer::create_dds_textures(
+		hstring name,
+		uint64_t width,
+		uint64_t height,
+		graphics::alpha_mode const& alpha_mode,
+		IObservableVector<graphics::texture>& new_textures)
+	{
 		using namespace DirectX;
 
-		auto file_bytes = co_await os_utilities::pick_file(L".jpg");
-
 		Image new_image;
-		new_image.format = DXGI_FORMAT::DXGI_FORMAT_BC3_UNORM;
+		new_image.format = DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM;
 		new_image.height = width;
 		new_image.width = height;
 
-		size_t row_pitch;
-		size_t slice_pitch;
 		check_hresult(
-			ComputePitch(new_image.format, new_image.width, new_image.height, row_pitch, slice_pitch)
+			ComputePitch(new_image.format, new_image.width, new_image.height, new_image.rowPitch, new_image.slicePitch)
 		);
 
-		new_image.slicePitch = slice_pitch;
-		new_image.rowPitch = row_pitch;
-		//new_image.pixels = 
+		com_ptr<graphics::implementation::texture> new_texture = winrt::make_self<graphics::implementation::texture>();
+		new_texture->texture_name(name);
+		new_texture->alpha_mode(alpha_mode);
+		//new_texture->mip_levels(loaded_image_md.mipLevels);
+		new_texture->dimension(get_dimension(D3D12_RESOURCE_DIMENSION::D3D12_RESOURCE_DIMENSION_TEXTURE2D));
+		new_texture->width(new_image.width);
+		new_texture->height(new_image.height);
+		new_texture->row_pitch(new_image.rowPitch);
+		new_texture->slice_pitch(new_image.slicePitch);
+
+		Windows::Storage::Pickers::FileOpenPicker picker;
+		picker.FileTypeFilter().Append(L".bmp");
+		Windows::Storage::StorageFile file = co_await picker.PickSingleFileAsync();
+		Windows::Storage::Streams::IRandomAccessStream stream = co_await file.OpenAsync(Windows::Storage::FileAccessMode::Read);
+		Windows::Graphics::Imaging::BitmapDecoder decoder = co_await Windows::Graphics::Imaging::BitmapDecoder::CreateAsync(stream);
+		auto pixel_data_provider = co_await decoder.GetPixelDataAsync();
+		new_image.pixels = pixel_data_provider.DetachPixelData().data();
 
 		Blob new_blob;
-		SaveToDDSMemory(new_image, DDS_FLAGS::DDS_FLAGS_FORCE_DX10_EXT, new_blob);
+		check_hresult(SaveToDDSMemory(new_image, DDS_FLAGS::DDS_FLAGS_FORCE_DX10_EXT, new_blob));
+
+		// debugging
+		auto folder = Windows::Storage::ApplicationData::Current().LocalFolder().Path();
+		auto file_dest = folder + L"\\new_tex.dds";
+		check_hresult(SaveToDDSFile(new_image, DDS_FLAGS::DDS_FLAGS_NONE, file_dest.data()));
+		// TODO: use the other overload that takes an array of images and metadata
+
+		//std::unique_ptr<TexMetadata> metadata = nullptr;
+		//ScratchImage scratch;
+		//DirectX::LoadFromDDSMemory(new_blob.GetBufferPointer(), new_blob.GetBufferSize(), DDS_FLAGS::DDS_FLAGS_FORCE_DX10_EXT, metadata.get(), scratch);
+		//TexMetadata loaded_image_md = scratch.GetMetadata();
+
+		std::vector<D3D12_SUBRESOURCE_DATA> subresources;
+		check_hresult(
+			LoadDDSTextureFromMemoryEx(
+				g_device,
+				reinterpret_cast<uint8_t*>(new_blob.GetBufferPointer()),
+				new_blob.GetBufferSize(),
+				sizeof(size_t),
+				D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_NONE,
+				DDS_LOADER_FLAGS::DDS_LOADER_DEFAULT,
+				new_texture->texture_default_buffer.put(),
+				subresources,
+				&static_cast<DDS_ALPHA_MODE>(alpha_mode),
+				false
+			));
+
+		co_await upload_to_gpu(new_texture.as<graphics::texture>(), subresources, new_image.format);
+
+		m_textures[name] = new_texture.as<graphics::texture>();
 
 		graphics::operation_result result;
 		result.status = operation_status::success;
 		co_return result;
-    }
+	}
 
 	Windows::Foundation::IAsyncOperationWithProgress<graphics::operation_result, hstring> renderer::pick_texture(graphics::texture& new_texture, hstring name)
 	{
@@ -629,7 +670,7 @@ namespace winrt::graphics::implementation
 		if (!is_dx10_extended)
 		{
 			result.status = operation_status::error;
-			result.error_message = L"The file " + file.Name() + L" does not contain a DDS_HEADER_DXT10 extended header." ;
+			result.error_message = L"The file " + file.Name() + L" does not contain a DDS_HEADER_DXT10 extended header.";
 			co_return result;
 		}
 
@@ -661,7 +702,7 @@ namespace winrt::graphics::implementation
 		);
 
 		progress(L"Uploading " + name + L" to the GPU");
-		co_await upload_to_gpu(new_texture, subresources, name, extended_header->dxgiFormat);
+		co_await upload_to_gpu(new_texture, subresources, extended_header->dxgiFormat);
 
 		progress(L"Generating bitmaps from mipmaps");
 		auto new_mipmaps = single_threaded_observable_vector<IInspectable>();
@@ -688,9 +729,8 @@ namespace winrt::graphics::implementation
 		co_return result;
 	}
 
-	Windows::Foundation::IAsyncAction renderer::upload_to_gpu(graphics::texture& texture, std::vector<D3D12_SUBRESOURCE_DATA> subresources, hstring texture_name, DXGI_FORMAT texture_format)
+	Windows::Foundation::IAsyncAction renderer::upload_to_gpu(graphics::texture& texture, std::vector<D3D12_SUBRESOURCE_DATA> subresources, DXGI_FORMAT texture_format)
 	{
-
 		D3D12_HEAP_PROPERTIES heap_props;
 		heap_props.CPUPageProperty = D3D12_CPU_PAGE_PROPERTY::D3D12_CPU_PAGE_PROPERTY_UNKNOWN;
 		heap_props.MemoryPoolPreference = D3D12_MEMORY_POOL::D3D12_MEMORY_POOL_UNKNOWN;
@@ -711,6 +751,7 @@ namespace winrt::graphics::implementation
 				intermediate_upload_resource.put_void()
 			)
 		);
+
 		UpdateSubresources(g_cmd_list, texture.as<graphics::implementation::texture>()->texture_default_buffer.get(), intermediate_upload_resource.get(), 0, 0, subresources.size(), subresources.data());
 
 		texture.as<graphics::implementation::texture>()->texture_upload_buffer = intermediate_upload_resource;

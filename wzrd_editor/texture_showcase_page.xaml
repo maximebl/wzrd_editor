@@ -192,6 +192,18 @@
                         <Setter Target="appbarbutton_delete_shader.IsEnabled" Value="False"/>
                     </VisualState.Setters>
                 </VisualState>
+
+                <VisualState x:Name="creating_dds_texture">
+                    <VisualState.Setters>
+                        <Setter Target="dds_creation_form.Visibility" Value="Visible"/>
+                    </VisualState.Setters>
+                </VisualState>
+
+                <VisualState x:Name="editing_texture">
+                    <VisualState.Setters>
+                        <Setter Target="dds_creation_form.Visibility" Value="Collapsed"/>
+                    </VisualState.Setters>
+                </VisualState>
             </VisualStateGroup>
         </VisualStateManager.VisualStateGroups>
 
@@ -255,11 +267,16 @@
                             </ListView.Resources>
                         </ListView>
 
-                        <StackPanel x:Name="dds_creation_form" Orientation="Vertical" HorizontalAlignment="Center" VerticalAlignment="Center">
+                        <StackPanel x:Name="dds_creation_form" Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Stretch" Visibility="Collapsed">
+                            <StackPanel.ChildrenTransitions>
+                                <RepositionThemeTransition/>
+                                <EntranceThemeTransition IsStaggeringEnabled="True" />
+                            </StackPanel.ChildrenTransitions>
+
                             <Slider x:Name="width" Header="Width" Width="auto" Orientation="Horizontal" 
-                                Value="{x:Bind texture_showcase_vm.dds_creation_vm.width, Mode=TwoWay}" Minimum="4" Maximum="1024" StepFrequency="1" TickFrequency="1" SnapsTo="StepValues" TickPlacement="None" />
+                                Value="{x:Bind texture_showcase_vm.dds_creation_vm.width, Mode=TwoWay}" Minimum="4" Maximum="1024" StepFrequency="4" TickFrequency="4" SnapsTo="StepValues" TickPlacement="None" />
                             <Slider x:Name="height" Header="Height" Width="auto" Orientation="Horizontal" 
-                                Value="{x:Bind texture_showcase_vm.dds_creation_vm.height, Mode=TwoWay}" Minimum="4" Maximum="1024" StepFrequency="1" TickFrequency="1" SnapsTo="StepValues" TickPlacement="None" />
+                                Value="{x:Bind texture_showcase_vm.dds_creation_vm.height, Mode=TwoWay}" Minimum="4" Maximum="1024" StepFrequency="4" TickFrequency="4" SnapsTo="StepValues" TickPlacement="None" />
 
                             <CheckBox x:Name="chk_is_texture_array" Content="create as a texture array" IsChecked="{x:Bind texture_showcase_vm.dds_creation_vm.is_texture_array, Mode=TwoWay}"/>
 

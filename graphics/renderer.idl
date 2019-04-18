@@ -35,7 +35,7 @@ namespace graphics
 		void initialize_buffers_showcase(Windows.UI.Xaml.Controls.SwapChainPanel target_swapchain);
 		void initialize_textures_showcase(Windows.Foundation.Collections.IMap<String, Object> ui_items);
 		void clear_shaders();
-		Windows.Foundation.IAsyncOperationWithProgress<operation_result, String> create_dds_textures(out IObservableVector<graphics.texture> new_textures, UInt64 width, UInt64 height, alpha_mode alpha_mode);
+		Windows.Foundation.IAsyncOperationWithProgress<operation_result, String> create_dds_textures(String name, UInt64 width, UInt64 height, alpha_mode alpha_mode, out IObservableVector<graphics.texture> new_textures);
 		void clear_textures();
 		void remove_texture(String name);
 		void remove_shader(String name);
