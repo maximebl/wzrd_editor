@@ -563,15 +563,57 @@ namespace winrt::graphics::implementation
 		IObservableVector<graphics::texture>& new_textures)
 	{
 		using namespace DirectX;
+		graphics::operation_result result;
+
+		Windows::Storage::Pickers::FileOpenPicker picker;
+		picker.FileTypeFilter().Append(L".bmp");
+		picker.FileTypeFilter().Append(L".jpg");
+		picker.FileTypeFilter().Append(L".png");
+
+		Windows::Storage::StorageFile file = co_await picker.PickSingleFileAsync();
+
+		if (!file)
+		{
+			result.status = operation_status::cancelled;
+			co_return result;
+		}
+
+		Windows::Storage::Streams::IRandomAccessStream stream = co_await file.OpenAsync(Windows::Storage::FileAccessMode::Read);
+		Windows::Graphics::Imaging::BitmapDecoder decoder = co_await Windows::Graphics::Imaging::BitmapDecoder::CreateAsync(stream);
+		auto pixel_data_provider = co_await decoder.GetPixelDataAsync();
+		Windows::Graphics::Imaging::BitmapPixelFormat format = decoder.BitmapPixelFormat();
+		auto detached_pixels = pixel_data_provider.DetachPixelData();
 
 		Image new_image;
-		new_image.format = DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM;
+		switch (format)
+		{
+		case winrt::Windows::Graphics::Imaging::BitmapPixelFormat::Unknown:
+			new_image.format = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
+			break;
+		case winrt::Windows::Graphics::Imaging::BitmapPixelFormat::Rgba16:
+			new_image.format = DXGI_FORMAT::DXGI_FORMAT_R16G16B16A16_UNORM;
+			break;
+		case winrt::Windows::Graphics::Imaging::BitmapPixelFormat::Rgba8:
+			new_image.format = DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM;
+			break;
+		case winrt::Windows::Graphics::Imaging::BitmapPixelFormat::Bgra8:
+			new_image.format = DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM;
+			break;
+		default:
+			result.error_message = L"The file format is not supported.";
+			break;
+		}
+
+		new_image.pixels = detached_pixels.data();
 		new_image.height = width;
 		new_image.width = height;
 
 		check_hresult(
 			ComputePitch(new_image.format, new_image.width, new_image.height, new_image.rowPitch, new_image.slicePitch)
 		);
+
+		Blob new_blob;
+		check_hresult(SaveToDDSMemory(new_image, DDS_FLAGS::DDS_FLAGS_FORCE_DX10_EXT, new_blob));
 
 		com_ptr<graphics::implementation::texture> new_texture = winrt::make_self<graphics::implementation::texture>();
 		new_texture->texture_name(name);
@@ -583,27 +625,11 @@ namespace winrt::graphics::implementation
 		new_texture->row_pitch(new_image.rowPitch);
 		new_texture->slice_pitch(new_image.slicePitch);
 
-		Windows::Storage::Pickers::FileOpenPicker picker;
-		picker.FileTypeFilter().Append(L".bmp");
-		Windows::Storage::StorageFile file = co_await picker.PickSingleFileAsync();
-		Windows::Storage::Streams::IRandomAccessStream stream = co_await file.OpenAsync(Windows::Storage::FileAccessMode::Read);
-		Windows::Graphics::Imaging::BitmapDecoder decoder = co_await Windows::Graphics::Imaging::BitmapDecoder::CreateAsync(stream);
-		auto pixel_data_provider = co_await decoder.GetPixelDataAsync();
-		new_image.pixels = pixel_data_provider.DetachPixelData().data();
-
-		Blob new_blob;
-		check_hresult(SaveToDDSMemory(new_image, DDS_FLAGS::DDS_FLAGS_FORCE_DX10_EXT, new_blob));
-
 		// debugging
 		auto folder = Windows::Storage::ApplicationData::Current().LocalFolder().Path();
 		auto file_dest = folder + L"\\new_tex.dds";
 		check_hresult(SaveToDDSFile(new_image, DDS_FLAGS::DDS_FLAGS_NONE, file_dest.data()));
 		// TODO: use the other overload that takes an array of images and metadata
-
-		//std::unique_ptr<TexMetadata> metadata = nullptr;
-		//ScratchImage scratch;
-		//DirectX::LoadFromDDSMemory(new_blob.GetBufferPointer(), new_blob.GetBufferSize(), DDS_FLAGS::DDS_FLAGS_FORCE_DX10_EXT, metadata.get(), scratch);
-		//TexMetadata loaded_image_md = scratch.GetMetadata();
 
 		std::vector<D3D12_SUBRESOURCE_DATA> subresources;
 		check_hresult(
@@ -623,8 +649,9 @@ namespace winrt::graphics::implementation
 		co_await upload_to_gpu(new_texture.as<graphics::texture>(), subresources, new_image.format);
 
 		m_textures[name] = new_texture.as<graphics::texture>();
+		new_textures = single_threaded_observable_vector<graphics::texture>();
+		new_textures.Append(new_texture.as<graphics::texture>());
 
-		graphics::operation_result result;
 		result.status = operation_status::success;
 		co_return result;
 	}
@@ -638,7 +665,7 @@ namespace winrt::graphics::implementation
 		auto progress = co_await winrt::get_progress_token();
 
 		Windows::Storage::Pickers::FileOpenPicker picker;
-		picker.FileTypeFilter().Append(hstring(L".dds"));
+		picker.FileTypeFilter().Append(L".dds");
 
 		Windows::Storage::StorageFile file = co_await picker.PickSingleFileAsync();
 
@@ -1369,12 +1396,20 @@ namespace winrt::graphics::implementation
 			bc_image.rowPitch = row_pitch;
 			bc_image.slicePitch = slice_pitch;
 
-			DirectX::ScratchImage decompressed_images;
-			check_hresult(DirectX::Decompress(bc_image, DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM, decompressed_images));
-			const DirectX::Image* decompressed_image = decompressed_images.GetImages();
 			WriteableBitmap writeable_bitmap(subresource_width, subresource_width);
-			uint8_t* target_data = writeable_bitmap.PixelBuffer().data();
-			memcpy(target_data, decompressed_image->pixels, decompressed_image->slicePitch);
+			uint8_t* writeable_bitmap_data = writeable_bitmap.PixelBuffer().data();
+
+			if (format == DXGI_FORMAT::DXGI_FORMAT_BC3_UNORM)
+			{
+				DirectX::ScratchImage decompressed_images;
+				check_hresult(DirectX::Decompress(bc_image, DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM, decompressed_images));
+				const DirectX::Image* decompressed_image = decompressed_images.GetImages();
+				memcpy(writeable_bitmap_data, decompressed_image->pixels, decompressed_image->slicePitch);
+			}
+			else
+			{
+				memcpy(writeable_bitmap_data, bc_image.pixels, bc_image.slicePitch);
+			}
 
 			SoftwareBitmap new_software_bitmap = SoftwareBitmap::CreateCopyFromBuffer(writeable_bitmap.PixelBuffer(), BitmapPixelFormat::Bgra8, subresource_width, subresource_width);
 			new_software_bitmap = SoftwareBitmap::Convert(new_software_bitmap, BitmapPixelFormat::Bgra8, BitmapAlphaMode::Premultiplied);
@@ -1384,11 +1419,11 @@ namespace winrt::graphics::implementation
 
 			graphics::subresource new_ui_mipmap;
 			new_ui_mipmap.mipmap_bitmap_source(new_software_bitmap_source);
-			new_ui_mipmap.height(decompressed_image->height);
-			new_ui_mipmap.width(decompressed_image->width);
+			new_ui_mipmap.height(bc_image.height);
+			new_ui_mipmap.width(bc_image.width);
 			new_ui_mipmap.mip_level(i);
-			new_ui_mipmap.row_pitch(decompressed_image->rowPitch);
-			new_ui_mipmap.slice_pitch(decompressed_image->slicePitch);
+			new_ui_mipmap.row_pitch(bc_image.rowPitch);
+			new_ui_mipmap.slice_pitch(bc_image.slicePitch);
 
 			ui_mipmaps.Append(new_ui_mipmap);
 		}

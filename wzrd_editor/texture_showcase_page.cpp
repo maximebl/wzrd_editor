@@ -180,10 +180,10 @@ namespace winrt::wzrd_editor::implementation
 		auto pick_texture_async = m_renderer.pick_texture(new_texture, L"default_texture");
 
 		pick_texture_async.Progress([](auto const& /* sender */, hstring progress)
-			{
-				hstring msg = L"\n" + progress + L"\n";
-				OutputDebugStringW(msg.c_str());
-			});
+		{
+			hstring msg = L"\n" + progress + L"\n";
+			OutputDebugStringW(msg.c_str());
+		});
 
 		graphics::operation_result result = co_await pick_texture_async;
 
@@ -259,14 +259,39 @@ namespace winrt::wzrd_editor::implementation
 
 	IAsyncAction texture_showcase_page::onclick_create_dds(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
+		wzrd_editor::texture_vm new_texture_vm = make<wzrd_editor::implementation::texture_vm>();
+		texture_showcase_vm().current_texture_vm(new_texture_vm);
+		texture_showcase_vm().textures().Append(new_texture_vm);
+
+		new_texture_vm.is_loading(true);
+
 		IObservableVector<graphics::texture> new_dds_texture = nullptr;
-		m_renderer.create_dds_textures(
+		auto result = co_await m_renderer.create_dds_textures(
 			m_texture_showcase_vm.dds_creation_vm().texture_name(),
 			m_texture_showcase_vm.dds_creation_vm().width(),
 			m_texture_showcase_vm.dds_creation_vm().height(),
 			m_texture_showcase_vm.dds_creation_vm().alpha_mode(),
 			new_dds_texture
 		);
+
+		new_texture_vm.current_texture(new_dds_texture.GetAt(0));
+		new_texture_vm.is_loading(false);
+
+		this->Bindings->Update();
+
+		switch (result.status)
+		{
+		case graphics::operation_status::success:
+			break;
+		case graphics::operation_status::cancelled:
+			co_return;
+			break;
+		case graphics::operation_status::error:
+			break;
+		default:
+			break;
+		}
+
 		co_return;
 	}
 
