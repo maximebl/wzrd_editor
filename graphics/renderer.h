@@ -5,7 +5,7 @@
 #include "utilities.h"
 #include "texture.h"
 #include "shader.h"
-#include "DirectXTK12/Inc/DDSTextureLoader.h"
+#include "../DirectXTK12/Inc/DDSTextureLoader.h"
 #include <DirectXTex/DirectXTex/DirectXTex.h>
 #include "../os_utilities/os_utilities.h"
 
@@ -75,7 +75,7 @@ namespace winrt::graphics::implementation
 
 		void enable_debug_layer();
 		void initialize_buffers_showcase(Windows::UI::Xaml::Controls::SwapChainPanel const& target_swapchain);
-		void initialize_textures_showcase(Windows::Foundation::Collections::IMap<hstring, Windows::Foundation::IInspectable> const& ui_items);
+		void initialize_textures_showcase(Windows::UI::Xaml::Controls::SwapChainPanel const& target_swapchain);
 		void start_render_loop();
 		void stop_render_loop();
 		void clear_shaders();
@@ -110,7 +110,6 @@ namespace winrt::graphics::implementation
 		void PropertyChanged(winrt::event_token const& token) noexcept;
 
 	private:
-		Windows::UI::Xaml::Controls::SwapChainPanel m_swapchain_panel;
 		winrt::apartment_context m_ui_thread;
 
 		bool m_is_rendering = false;

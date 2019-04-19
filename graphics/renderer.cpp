@@ -152,14 +152,8 @@ namespace winrt::graphics::implementation
 		create_empty_rootsignature(get_static_samplers());
 	}
 
-	void renderer::initialize_textures_showcase(
-		Windows::Foundation::Collections::IMap<hstring,
-		Windows::Foundation::IInspectable> const& ui_items
-	)
+	void renderer::initialize_textures_showcase(Windows::UI::Xaml::Controls::SwapChainPanel const& target_swapchain)
 	{
-		auto boxed_swapchain_panel = ui_items.Lookup(hstring{ L"swapchain_panel" });
-		m_swapchain_panel = unbox_value<Windows::UI::Xaml::Controls::SwapChainPanel>(boxed_swapchain_panel);
-
 		create_factory();
 		create_device();
 		create_fence();
@@ -169,7 +163,7 @@ namespace winrt::graphics::implementation
 		create_srv_heap();
 		create_sampler_heap();
 		create_depthstencil_buffer();
-		create_swapchain_xaml(m_swapchain_panel);
+		create_swapchain_xaml(target_swapchain);
 		create_render_targets();
 		create_texture_rootsignature(get_static_samplers());
 		create_point();
@@ -197,10 +191,12 @@ namespace winrt::graphics::implementation
 			m_cmd_queue->Signal(m_gpu_fence.get(), m_cpu_fence)
 		);
 
-		if (m_gpu_fence->GetCompletedValue() < m_cpu_fence)
+		auto gpu_completed_value = m_gpu_fence->GetCompletedValue();
+		bool is_gpu_fence_completed = gpu_completed_value >= m_cpu_fence;
+
+		if (!is_gpu_fence_completed)
 		{
 			HANDLE event_handle = CreateEventEx(nullptr, false, false, EVENT_ALL_ACCESS);
-
 			check_hresult(m_gpu_fence->SetEventOnCompletion(m_cpu_fence, event_handle));
 			WaitForSingleObject(event_handle, INFINITE);
 			CloseHandle(event_handle);
@@ -480,7 +476,12 @@ namespace winrt::graphics::implementation
 		empty_range.End = 0;
 		m_uav_lod_readback_buffer->Unmap(0, &empty_range);
 
-		check_hresult(m_swapchain->Present(0, 0));
+		auto hr = m_swapchain->Present(0, 0);
+		check_hresult(hr);
+		if (hr == E_FAIL)
+		{
+			check_hresult(m_device->GetDeviceRemovedReason());
+		}
 		m_current_backbuffer = (m_current_backbuffer + 1) % m_swapchain_buffer_count;
 	}
 
@@ -563,6 +564,8 @@ namespace winrt::graphics::implementation
 		IObservableVector<graphics::texture>& new_textures)
 	{
 		using namespace DirectX;
+		using namespace Windows::Graphics::Imaging;
+
 		graphics::operation_result result;
 
 		Windows::Storage::Pickers::FileOpenPicker picker;
@@ -647,6 +650,16 @@ namespace winrt::graphics::implementation
 			));
 
 		co_await upload_to_gpu(new_texture.as<graphics::texture>(), subresources, new_image.format);
+
+		auto new_mipmaps = single_threaded_observable_vector<IInspectable>();
+		co_await create_subresources_for_ui(subresources, new_mipmaps, new_image.format, new_image.width);
+		new_texture->mipmaps(new_mipmaps);
+
+		SoftwareBitmap new_software_bitmap = co_await decoder.GetSoftwareBitmapAsync();
+		new_software_bitmap = SoftwareBitmap::Convert(new_software_bitmap, BitmapPixelFormat::Bgra8, BitmapAlphaMode::Premultiplied);
+		Windows::UI::Xaml::Media::Imaging::SoftwareBitmapSource new_bitmap_source;
+		co_await new_bitmap_source.SetBitmapAsync(new_software_bitmap);
+		new_texture->bitmap_source(new_bitmap_source);
 
 		m_textures[name] = new_texture.as<graphics::texture>();
 		new_textures = single_threaded_observable_vector<graphics::texture>();
@@ -1388,13 +1401,13 @@ namespace winrt::graphics::implementation
 			int32_t row_pitch = original_mipmaps[i].RowPitch;
 			int32_t subresource_width = max(1, texture_width >> i);
 
-			DirectX::Image bc_image;
-			bc_image.format = format;
-			bc_image.height = subresource_width;
-			bc_image.width = subresource_width;
-			bc_image.pixels = (uint8_t*)original_mipmaps[i].pData;
-			bc_image.rowPitch = row_pitch;
-			bc_image.slicePitch = slice_pitch;
+			DirectX::Image mipmap_image;
+			mipmap_image.format = format;
+			mipmap_image.height = subresource_width;
+			mipmap_image.width = subresource_width;
+			mipmap_image.pixels = (uint8_t*)original_mipmaps[i].pData;
+			mipmap_image.rowPitch = row_pitch;
+			mipmap_image.slicePitch = slice_pitch;
 
 			WriteableBitmap writeable_bitmap(subresource_width, subresource_width);
 			uint8_t* writeable_bitmap_data = writeable_bitmap.PixelBuffer().data();
@@ -1402,13 +1415,13 @@ namespace winrt::graphics::implementation
 			if (format == DXGI_FORMAT::DXGI_FORMAT_BC3_UNORM)
 			{
 				DirectX::ScratchImage decompressed_images;
-				check_hresult(DirectX::Decompress(bc_image, DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM, decompressed_images));
+				check_hresult(DirectX::Decompress(mipmap_image, DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM, decompressed_images));
 				const DirectX::Image* decompressed_image = decompressed_images.GetImages();
 				memcpy(writeable_bitmap_data, decompressed_image->pixels, decompressed_image->slicePitch);
 			}
 			else
 			{
-				memcpy(writeable_bitmap_data, bc_image.pixels, bc_image.slicePitch);
+				memcpy(writeable_bitmap_data, mipmap_image.pixels, mipmap_image.slicePitch);
 			}
 
 			SoftwareBitmap new_software_bitmap = SoftwareBitmap::CreateCopyFromBuffer(writeable_bitmap.PixelBuffer(), BitmapPixelFormat::Bgra8, subresource_width, subresource_width);
@@ -1419,11 +1432,11 @@ namespace winrt::graphics::implementation
 
 			graphics::subresource new_ui_mipmap;
 			new_ui_mipmap.mipmap_bitmap_source(new_software_bitmap_source);
-			new_ui_mipmap.height(bc_image.height);
-			new_ui_mipmap.width(bc_image.width);
+			new_ui_mipmap.height(mipmap_image.height);
+			new_ui_mipmap.width(mipmap_image.width);
 			new_ui_mipmap.mip_level(i);
-			new_ui_mipmap.row_pitch(bc_image.rowPitch);
-			new_ui_mipmap.slice_pitch(bc_image.slicePitch);
+			new_ui_mipmap.row_pitch(mipmap_image.rowPitch);
+			new_ui_mipmap.slice_pitch(mipmap_image.slicePitch);
 
 			ui_mipmaps.Append(new_ui_mipmap);
 		}

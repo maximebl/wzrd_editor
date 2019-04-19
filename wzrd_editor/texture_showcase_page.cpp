@@ -15,10 +15,6 @@ namespace winrt::wzrd_editor::implementation
 
 		m_renderer.enable_debug_layer();
 
-		m_ui_items[hstring{ L"swapchain_panel" }] = box_value(swapchain_panel());
-
-		auto ui_items = winrt::single_threaded_map<hstring, IInspectable>(std::move(m_ui_items));
-
 		VisualStateManager().GoToState(*this, L"valid_shader_not_selected", false);
 
 		auto address_modes = m_texture_showcase_vm.address_modes();
@@ -45,7 +41,7 @@ namespace winrt::wzrd_editor::implementation
 		auto alpha_modes_cpy = m_texture_showcase_vm.dds_creation_vm().alpha_modes();
 		Utilities::generate_alpha_modes_attributes(alpha_modes_cpy);
 
-		m_renderer.initialize_textures_showcase(ui_items);
+		m_renderer.initialize_textures_showcase(swapchain_panel());
 	}
 
 	wzrd_editor::texture_showcase_vm texture_showcase_page::texture_showcase_vm()

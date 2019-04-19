@@ -41,7 +41,6 @@ namespace winrt::wzrd_editor::implementation
 		void texture_showcase_vm(wzrd_editor::texture_showcase_vm const& value);
 
 	private:
-		std::map<hstring, Windows::Foundation::IInspectable> m_ui_items = {};
 		Windows::Foundation::Collections::IMap<hstring, IInspectable> m_ui_control_values = winrt::single_threaded_map<hstring, IInspectable>();
 		graphics::renderer m_renderer;
 		wzrd_editor::texture_showcase_vm m_texture_showcase_vm = winrt::make<wzrd_editor::implementation::texture_showcase_vm>();
