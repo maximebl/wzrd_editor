@@ -93,6 +93,8 @@ namespace winrt::graphics::implementation
 			uint64_t width,
 			uint64_t height,
 			graphics::alpha_mode const& alpha_mode,
+			bool is_generating_mipmaps,
+			bool is_saving_to_file,
 			Windows::Foundation::Collections::IObservableVector<graphics::texture>& new_textures);
 		graphics::primitive_types current_topology();
 		void current_topology(graphics::primitive_types const& value);

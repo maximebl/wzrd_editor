@@ -476,7 +476,7 @@ namespace winrt::graphics::implementation
 		m_uav_lod_readback_buffer->Unmap(0, &empty_range);
 
 		auto hr = m_swapchain->Present(0, 0);
-		check_hresult(hr);
+		//check_hresult(hr);
 		if (hr == E_FAIL)
 		{
 			check_hresult(m_device->GetDeviceRemovedReason());
@@ -502,6 +502,7 @@ namespace winrt::graphics::implementation
 			m_is_rendering = true;
 			init_psos();
 			execute_cmd_list();
+			flush_cmd_queue();
 			main_loop();
 		}
 	}
@@ -560,6 +561,8 @@ namespace winrt::graphics::implementation
 		uint64_t width,
 		uint64_t height,
 		graphics::alpha_mode const& alpha_mode,
+		bool is_generating_mipmaps,
+		bool is_saving_to_file,
 		IObservableVector<graphics::texture>& new_textures)
 	{
 		using namespace DirectX;
@@ -572,97 +575,102 @@ namespace winrt::graphics::implementation
 		picker.FileTypeFilter().Append(L".jpg");
 		picker.FileTypeFilter().Append(L".png");
 
-		Windows::Storage::StorageFile file = co_await picker.PickSingleFileAsync();
+		Windows::Foundation::Collections::IVectorView<Windows::Storage::StorageFile> files = co_await picker.PickMultipleFilesAsync();
 
-		if (!file)
+		if (!files)
 		{
 			result.status = operation_status::cancelled;
 			co_return result;
 		}
 
-		Windows::Storage::Streams::IRandomAccessStream stream = co_await file.OpenAsync(Windows::Storage::FileAccessMode::Read);
-		Windows::Graphics::Imaging::BitmapDecoder decoder = co_await Windows::Graphics::Imaging::BitmapDecoder::CreateAsync(stream);
-		auto pixel_data_provider = co_await decoder.GetPixelDataAsync();
-		Windows::Graphics::Imaging::BitmapPixelFormat format = decoder.BitmapPixelFormat();
-		auto detached_pixels = pixel_data_provider.DetachPixelData();
-
-		Image new_image;
-		switch (format)
-		{
-		case winrt::Windows::Graphics::Imaging::BitmapPixelFormat::Unknown:
-			new_image.format = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
-			break;
-		case winrt::Windows::Graphics::Imaging::BitmapPixelFormat::Rgba16:
-			new_image.format = DXGI_FORMAT::DXGI_FORMAT_R16G16B16A16_UNORM;
-			break;
-		case winrt::Windows::Graphics::Imaging::BitmapPixelFormat::Rgba8:
-			new_image.format = DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM;
-			break;
-		case winrt::Windows::Graphics::Imaging::BitmapPixelFormat::Bgra8:
-			new_image.format = DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM;
-			break;
-		default:
-			result.error_message = L"The file format is not supported.";
-			break;
-		}
-
-		new_image.pixels = detached_pixels.data();
-		new_image.height = width;
-		new_image.width = height;
-
-		check_hresult(
-			ComputePitch(new_image.format, new_image.width, new_image.height, new_image.rowPitch, new_image.slicePitch)
-		);
-
-		Blob new_blob;
-		check_hresult(SaveToDDSMemory(new_image, DDS_FLAGS::DDS_FLAGS_FORCE_DX10_EXT, new_blob));
-
-		com_ptr<graphics::implementation::texture> new_texture = winrt::make_self<graphics::implementation::texture>();
-		new_texture->texture_name(name);
-		new_texture->alpha_mode(alpha_mode);
-		//new_texture->mip_levels(loaded_image_md.mipLevels);
-		new_texture->dimension(get_dimension(D3D12_RESOURCE_DIMENSION::D3D12_RESOURCE_DIMENSION_TEXTURE2D));
-		new_texture->width(new_image.width);
-		new_texture->height(new_image.height);
-		new_texture->row_pitch(new_image.rowPitch);
-		new_texture->slice_pitch(new_image.slicePitch);
-
-		// debugging
-		auto folder = Windows::Storage::ApplicationData::Current().LocalFolder().Path();
-		auto file_dest = folder + L"\\new_tex.dds";
-		check_hresult(SaveToDDSFile(new_image, DDS_FLAGS::DDS_FLAGS_NONE, file_dest.data()));
-		// TODO: use the other overload that takes an array of images and metadata
-
-		std::vector<D3D12_SUBRESOURCE_DATA> subresources;
-		check_hresult(
-			LoadDDSTextureFromMemoryEx(
-				g_device,
-				reinterpret_cast<uint8_t*>(new_blob.GetBufferPointer()),
-				new_blob.GetBufferSize(),
-				sizeof(size_t),
-				D3D12_RESOURCE_FLAGS::D3D12_RESOURCE_FLAG_NONE,
-				DDS_LOADER_FLAGS::DDS_LOADER_DEFAULT,
-				new_texture->texture_default_buffer.put(),
-				subresources,
-				&static_cast<DDS_ALPHA_MODE>(alpha_mode),
-				false
-			));
-
-		co_await upload_to_gpu(new_texture.as<graphics::texture>(), subresources, new_image.format);
-
-		auto new_mipmaps = single_threaded_observable_vector<IInspectable>();
-		co_await create_subresources_for_ui(subresources, new_mipmaps, new_image.format, new_image.width);
-		new_texture->mipmaps(new_mipmaps);
-
-		SoftwareBitmap new_software_bitmap = co_await decoder.GetSoftwareBitmapAsync();
-		new_software_bitmap = SoftwareBitmap::Convert(new_software_bitmap, BitmapPixelFormat::Bgra8, BitmapAlphaMode::Premultiplied);
-		Windows::UI::Xaml::Media::Imaging::SoftwareBitmapSource new_bitmap_source;
-		co_await new_bitmap_source.SetBitmapAsync(new_software_bitmap);
-		new_texture->bitmap_source(new_bitmap_source);
-
-		m_textures[name] = new_texture.as<graphics::texture>();
 		new_textures = single_threaded_observable_vector<graphics::texture>();
-		new_textures.Append(new_texture.as<graphics::texture>());
+		auto new_mipmaps = single_threaded_observable_vector<IInspectable>();
+
+		for (auto& file : files)
+		{
+			Windows::Storage::Streams::IRandomAccessStream stream = co_await file.OpenAsync(Windows::Storage::FileAccessMode::Read);
+			Windows::Graphics::Imaging::BitmapDecoder decoder = co_await Windows::Graphics::Imaging::BitmapDecoder::CreateAsync(stream);
+			auto pixel_data_provider = co_await decoder.GetPixelDataAsync();
+			Windows::Graphics::Imaging::BitmapPixelFormat format = decoder.BitmapPixelFormat();
+			auto detached_pixels = pixel_data_provider.DetachPixelData();
+
+			Image new_image;
+			switch (format)
+			{
+			case winrt::Windows::Graphics::Imaging::BitmapPixelFormat::Unknown:
+				new_image.format = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
+				break;
+			case winrt::Windows::Graphics::Imaging::BitmapPixelFormat::Rgba16:
+				new_image.format = DXGI_FORMAT::DXGI_FORMAT_R16G16B16A16_UNORM;
+				break;
+			case winrt::Windows::Graphics::Imaging::BitmapPixelFormat::Rgba8:
+				new_image.format = DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM;
+				break;
+			case winrt::Windows::Graphics::Imaging::BitmapPixelFormat::Bgra8:
+				new_image.format = DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM;
+				break;
+			default:
+				result.status = operation_status::error;
+				result.error_message = L"The file format is not supported.";
+				co_return result;
+			}
+
+			new_image.pixels = detached_pixels.data();
+			new_image.height = width;
+			new_image.width = height;
+
+			check_hresult(ComputePitch(new_image.format, new_image.width, new_image.height, new_image.rowPitch, new_image.slicePitch));
+
+			ScratchImage mipmap_chain;
+			check_hresult(GenerateMipMaps(new_image, TEX_FILTER_FLAGS::TEX_FILTER_DEFAULT, 0, mipmap_chain));
+
+			TexMetadata md = mipmap_chain.GetMetadata();
+			size_t image_count = mipmap_chain.GetImageCount();
+			const Image* images = mipmap_chain.GetImages();
+
+			Blob new_blob;
+			check_hresult(SaveToDDSMemory(images, image_count, md, DDS_FLAGS::DDS_FLAGS_NONE, new_blob));
+
+			if (is_saving_to_file)
+			{
+				auto folder = Windows::Storage::ApplicationData::Current().LocalFolder().Path();
+				auto file_dest = folder + L"\\new_tex.dds";
+				check_hresult(SaveToDDSFile(images, image_count, md, DDS_FLAGS::DDS_FLAGS_NONE, file_dest.data()));
+			}
+
+			com_ptr<graphics::implementation::texture> new_texture = winrt::make_self<graphics::implementation::texture>();
+			new_texture->texture_name(name);
+			new_texture->alpha_mode(alpha_mode);
+			new_texture->mip_levels(md.mipLevels);
+			new_texture->dimension(get_dimension(D3D12_RESOURCE_DIMENSION::D3D12_RESOURCE_DIMENSION_TEXTURE2D));
+			new_texture->width(new_image.width);
+			new_texture->height(new_image.height);
+			new_texture->row_pitch(new_image.rowPitch);
+			new_texture->slice_pitch(new_image.slicePitch);
+
+			std::vector<D3D12_SUBRESOURCE_DATA> subresources;
+
+			check_hresult(LoadDDSTextureFromMemory(
+				g_device,
+				reinterpret_cast<uint8_t*> (new_blob.GetBufferPointer()),
+				new_blob.GetBufferSize(),
+				new_texture->texture_default_buffer.put(),
+				subresources));
+
+			co_await upload_to_gpu(new_texture.as<graphics::texture>(), subresources, new_image.format);
+
+			co_await create_subresources_for_ui(subresources, new_mipmaps, new_image.format, new_image.width);
+			new_texture->mipmaps(new_mipmaps);
+
+			SoftwareBitmap new_software_bitmap = co_await decoder.GetSoftwareBitmapAsync();
+			new_software_bitmap = SoftwareBitmap::Convert(new_software_bitmap, BitmapPixelFormat::Bgra8, BitmapAlphaMode::Premultiplied);
+			Windows::UI::Xaml::Media::Imaging::SoftwareBitmapSource new_bitmap_source;
+			co_await new_bitmap_source.SetBitmapAsync(new_software_bitmap);
+			new_texture->bitmap_source(new_bitmap_source);
+
+			m_textures[file.Name()] = new_texture.as<graphics::texture>();
+			new_textures.Append(new_texture.as<graphics::texture>());
+		}
 
 		result.status = operation_status::success;
 		co_return result;
@@ -787,13 +795,21 @@ namespace winrt::graphics::implementation
 				D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ,
 				nullptr,
 				winrt::guid_of<ID3D12Resource>(),
-				intermediate_upload_resource.put_void()
-			)
+				//intermediate_upload_resource.put_void()
+				texture.as<graphics::implementation::texture>()->texture_upload_buffer.put_void()
+		)
 		);
 
-		UpdateSubresources(g_cmd_list, texture.as<graphics::implementation::texture>()->texture_default_buffer.get(), intermediate_upload_resource.get(), 0, 0, subresources.size(), subresources.data());
+		UpdateSubresources(
+			g_cmd_list, 
+			texture.as<graphics::implementation::texture>()->texture_default_buffer.get(), 
+			texture.as<graphics::implementation::texture>()->texture_upload_buffer.get(), 
+			0, 
+			0, 
+			subresources.size(), 
+			subresources.data());
 
-		texture.as<graphics::implementation::texture>()->texture_upload_buffer = intermediate_upload_resource;
+		//texture.as<graphics::implementation::texture>()->texture_upload_buffer = intermediate_upload_resource;
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = {};
 		srv_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;

@@ -41,6 +41,26 @@ namespace winrt::wzrd_editor::implementation
 		update_value(L"alpha_mode", m_alpha_mode, value);
 	}
 
+	bool dds_creation_vm::is_generating_mipmaps()
+	{
+		return m_is_generating_mipmaps;
+	}
+
+	void dds_creation_vm::is_generating_mipmaps(bool value)
+	{
+		update_value(L"is_generating_mipmaps", m_is_generating_mipmaps, value);
+	}
+
+	bool dds_creation_vm::is_saving_to_file()
+	{
+		return m_is_saving_to_file;
+	}
+
+	void dds_creation_vm::is_saving_to_file(bool value)
+	{
+		update_value(L"is_saving_to_file", m_is_saving_to_file, value);
+	}
+
 	bool dds_creation_vm::is_texture_array()
 	{
 		return m_is_texture_array;

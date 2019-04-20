@@ -15,6 +15,10 @@ namespace winrt::wzrd_editor::implementation
 		Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> alpha_modes();
 		graphics::alpha_mode alpha_mode();
 		void alpha_mode(graphics::alpha_mode const& value);
+		bool is_generating_mipmaps();
+		void is_generating_mipmaps(bool value);
+		bool is_saving_to_file();
+		void is_saving_to_file(bool value);
 		bool is_texture_array();
 		void is_texture_array(bool value);
 		hstring texture_name();
@@ -27,6 +31,8 @@ namespace winrt::wzrd_editor::implementation
 		uint32_t m_width = 0;
 		uint32_t m_height = 0;
 		graphics::alpha_mode m_alpha_mode = graphics::alpha_mode::unknown;
+		bool m_is_generating_mipmaps = false;
+		bool m_is_saving_to_file = false;
 		Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> m_alpha_modes = winrt::single_threaded_observable_vector<IInspectable>();
 		bool m_is_texture_array = false;
 		hstring m_texture_name = L"";

@@ -9,6 +9,8 @@ namespace wzrd_editor
 		UInt32 width;
 		UInt32 height;
 		Windows.Foundation.Collections.IObservableVector<IInspectable> alpha_modes{ get; };
+		Boolean is_generating_mipmaps;
+		Boolean is_saving_to_file;
 		graphics.alpha_mode alpha_mode;
 		Boolean is_texture_array;
 		String texture_name;

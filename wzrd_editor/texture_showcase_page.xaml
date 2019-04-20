@@ -278,6 +278,10 @@
                             <Slider x:Name="height" Header="Height" Width="auto" Orientation="Horizontal" 
                                 Value="{x:Bind texture_showcase_vm.dds_creation_vm.height, Mode=TwoWay}" Minimum="4" Maximum="512" StepFrequency="2" TickFrequency="2" SnapsTo="StepValues" TickPlacement="None" />
 
+                            <CheckBox x:Name="chk_generate_mipmaps" Content="Generate mipmaps" IsChecked="{x:Bind texture_showcase_vm.dds_creation_vm.is_generating_mipmaps, Mode=TwoWay}"/>
+
+                            <CheckBox x:Name="chk_save_to_file" Content="Save to a file" IsChecked="{x:Bind texture_showcase_vm.dds_creation_vm.is_saving_to_file, Mode=TwoWay}"/>
+
                             <CheckBox x:Name="chk_is_texture_array" Content="create as a texture array" IsChecked="{x:Bind texture_showcase_vm.dds_creation_vm.is_texture_array, Mode=TwoWay}"/>
 
                             <TextBox Text="{x:Bind texture_showcase_vm.dds_creation_vm.texture_name, Mode=TwoWay}" Header="Texture name"/>

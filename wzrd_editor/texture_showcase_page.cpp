@@ -261,23 +261,29 @@ namespace winrt::wzrd_editor::implementation
 
 		new_texture_vm.is_loading(true);
 
-		IObservableVector<graphics::texture> new_dds_texture = nullptr;
+		IObservableVector<graphics::texture> new_dds_textures = nullptr;
 		auto result = co_await m_renderer.create_dds_textures(
 			m_texture_showcase_vm.dds_creation_vm().texture_name(),
 			m_texture_showcase_vm.dds_creation_vm().width(),
 			m_texture_showcase_vm.dds_creation_vm().height(),
 			m_texture_showcase_vm.dds_creation_vm().alpha_mode(),
-			new_dds_texture
+			m_texture_showcase_vm.dds_creation_vm().is_generating_mipmaps(),
+			m_texture_showcase_vm.dds_creation_vm().is_saving_to_file(),
+			new_dds_textures
 		);
 
-		new_texture_vm.current_texture(new_dds_texture.GetAt(0));
-		new_texture_vm.is_loading(false);
+		new_texture_vm.current_texture(new_dds_textures.GetAt(0));
 
 		this->Bindings->Update();
 
 		switch (result.status)
 		{
 		case graphics::operation_status::success:
+			new_texture_vm.is_loading(false);
+			for (auto mipmap : new_dds_textures.GetAt(0).mipmaps())
+			{
+				texture_showcase_vm().mipmaps().Append(box_value(mipmap));
+			}
 			break;
 		case graphics::operation_status::cancelled:
 			co_return;
