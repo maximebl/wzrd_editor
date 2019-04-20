@@ -186,13 +186,12 @@ namespace winrt::graphics::implementation
 
 	void renderer::flush_cmd_queue()
 	{
+		// Insert a new fence point inside the command queue.
+		// The new fence point wont be set until the gpu finishes processing all the commands prior to this signal
 		m_cpu_fence++;
-		check_hresult(
-			m_cmd_queue->Signal(m_gpu_fence.get(), m_cpu_fence)
-		);
+		check_hresult(m_cmd_queue->Signal(m_gpu_fence.get(), m_cpu_fence));
 
-		auto gpu_completed_value = m_gpu_fence->GetCompletedValue();
-		bool is_gpu_fence_completed = gpu_completed_value >= m_cpu_fence;
+		bool is_gpu_fence_completed = m_gpu_fence->GetCompletedValue() >= m_cpu_fence;
 
 		if (!is_gpu_fence_completed)
 		{
