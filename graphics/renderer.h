@@ -89,6 +89,7 @@ namespace winrt::graphics::implementation
 
 		Windows::Foundation::IAsyncOperationWithProgress<graphics::operation_result, hstring> pick_texture(graphics::texture& new_texture, hstring name);
 		Windows::Foundation::IAsyncOperationWithProgress<graphics::operation_result, hstring> create_dds_textures(
+			Windows::Foundation::Collections::IVectorView<Windows::Storage::StorageFile> const& files,
 			hstring name,
 			uint64_t width,
 			uint64_t height,

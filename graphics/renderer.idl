@@ -36,6 +36,7 @@ namespace graphics
 		void initialize_textures_showcase(Windows.UI.Xaml.Controls.SwapChainPanel target_swapchain);
 		void clear_shaders();
 		Windows.Foundation.IAsyncOperationWithProgress<operation_result, String> create_dds_textures(
+			Windows.Foundation.Collections.IVectorView<Windows.Storage.StorageFile> files,  
 			String name, 
 			UInt64 width, 
 			UInt64 height, 

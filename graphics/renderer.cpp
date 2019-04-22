@@ -577,6 +577,7 @@ namespace winrt::graphics::implementation
 	}
 
 	Windows::Foundation::IAsyncOperationWithProgress<graphics::operation_result, hstring> renderer::create_dds_textures(
+		Windows::Foundation::Collections::IVectorView<Windows::Storage::StorageFile> const& files,
 		hstring name,
 		uint64_t width,
 		uint64_t height,
@@ -590,13 +591,6 @@ namespace winrt::graphics::implementation
 
 		graphics::operation_result result;
 
-		Windows::Storage::Pickers::FileOpenPicker picker;
-		picker.FileTypeFilter().Append(L".bmp");
-		picker.FileTypeFilter().Append(L".jpg");
-		picker.FileTypeFilter().Append(L".png");
-
-		Windows::Foundation::Collections::IVectorView<Windows::Storage::StorageFile> files = co_await picker.PickMultipleFilesAsync();
-
 		if (files.Size() == 0)
 		{
 			result.status = operation_status::cancelled;
@@ -606,9 +600,12 @@ namespace winrt::graphics::implementation
 		new_textures = single_threaded_observable_vector<graphics::texture>();
 		auto new_mipmaps = single_threaded_observable_vector<IInspectable>();
 
-		for (auto& file : files)
+		auto files_copy = files;
+
+		for (int i = 0; i < files_copy.Size(); ++i)
 		{
-			Windows::Storage::Streams::IRandomAccessStream stream = co_await file.OpenAsync(Windows::Storage::FileAccessMode::Read);
+			auto current_file = files_copy.GetAt(i);
+			Windows::Storage::Streams::IRandomAccessStream stream = co_await current_file.OpenAsync(Windows::Storage::FileAccessMode::Read);
 			Windows::Graphics::Imaging::BitmapDecoder decoder = co_await Windows::Graphics::Imaging::BitmapDecoder::CreateAsync(stream);
 			auto pixel_data_provider = co_await decoder.GetPixelDataAsync();
 			Windows::Graphics::Imaging::BitmapPixelFormat format = decoder.BitmapPixelFormat();
@@ -679,7 +676,7 @@ namespace winrt::graphics::implementation
 			}
 
 			com_ptr<graphics::implementation::texture> new_texture = winrt::make_self<graphics::implementation::texture>();
-			new_texture->texture_name(name);
+			new_texture->texture_name(files.GetAt(i).Name());
 			new_texture->alpha_mode(alpha_mode);
 			new_texture->mip_levels(md.mipLevels);
 			new_texture->dimension(get_dimension(D3D12_RESOURCE_DIMENSION::D3D12_RESOURCE_DIMENSION_TEXTURE2D));
@@ -708,7 +705,7 @@ namespace winrt::graphics::implementation
 			co_await new_bitmap_source.SetBitmapAsync(new_software_bitmap);
 			new_texture->bitmap_source(new_bitmap_source);
 
-			m_textures[name] = new_texture.as<graphics::texture>();
+			m_textures[files.GetAt(i).Name()] = new_texture.as<graphics::texture>();
 			new_textures.Append(new_texture.as<graphics::texture>());
 		}
 

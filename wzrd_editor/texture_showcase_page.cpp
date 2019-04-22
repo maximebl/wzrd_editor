@@ -194,12 +194,6 @@ namespace winrt::wzrd_editor::implementation
 		switch (result.status)
 		{
 		case graphics::operation_status::success:
-			//new_mipmaps = new_texture.mipmaps();
-			//for (auto mipmap : new_mipmaps)
-			//{
-			//	texture_showcase_vm().mipmaps().Append(box_value(mipmap));
-			//}
-
 			new_texture.is_loading(false);
 			break;
 		case graphics::operation_status::error:
@@ -262,15 +256,34 @@ namespace winrt::wzrd_editor::implementation
 
 	IAsyncAction texture_showcase_page::onclick_create_dds(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		wzrd_editor::texture_vm new_texture_vm = make<wzrd_editor::implementation::texture_vm>();
-		texture_showcase_vm().current_texture_vm(new_texture_vm);
-		texture_showcase_vm().textures().Append(new_texture_vm);
+		using namespace std::chrono;
 
-		new_texture_vm.is_loading(true);
+		Windows::Storage::Pickers::FileOpenPicker picker;
+		picker.FileTypeFilter().Append(L".bmp");
+		picker.FileTypeFilter().Append(L".jpg");
+		picker.FileTypeFilter().Append(L".png");
+
+		Windows::Foundation::Collections::IVectorView<Windows::Storage::StorageFile> files = co_await picker.PickMultipleFilesAsync();
+
+		if (files.Size() == 0)
+		{
+			co_return;
+		}
+
+		for (Windows::Storage::StorageFile file : files)
+		{
+			wzrd_editor::texture_vm new_texture_vm = make<wzrd_editor::implementation::texture_vm>();
+			new_texture_vm.is_loading(true);
+			m_texture_showcase_vm.textures().Append(new_texture_vm);
+			//m_texture_showcase_vm.current_texture_vm(new_texture_vm);
+		}
+
+		//co_await 3s;
 
 		IObservableVector<graphics::texture> new_dds_textures = nullptr;
 
 		auto result = co_await m_renderer.create_dds_textures(
+			files,
 			m_texture_showcase_vm.dds_creation_vm().texture_name(),
 			m_texture_showcase_vm.dds_creation_vm().width(),
 			m_texture_showcase_vm.dds_creation_vm().height(),
@@ -283,8 +296,13 @@ namespace winrt::wzrd_editor::implementation
 		switch (result.status)
 		{
 		case graphics::operation_status::success:
-			new_texture_vm.is_loading(false);
-			new_texture_vm.current_texture(new_dds_textures.GetAt(0));
+
+			for (auto texture_vm : m_texture_showcase_vm.textures())
+			{
+				texture_vm.as<graphics::texture>().is_loading(false);
+			}
+
+			//new_texture_vm.current_texture(new_dds_textures.GetAt(0));
 			break;
 		case graphics::operation_status::cancelled:
 			texture_showcase_vm().textures().RemoveAtEnd();

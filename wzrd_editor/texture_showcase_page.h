@@ -18,6 +18,7 @@
 #include "utilities.h"
 #include "texture_vm.h"
 #include "../os_utilities/os_utilities.h"
+#include <chrono>
 
 namespace winrt::wzrd_editor::implementation
 {
