@@ -69,9 +69,6 @@ namespace winrt::graphics::implementation
 		uint32_t max_anisotropy();
 		void max_anisotropy(uint32_t value);
 
-		Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> mipmaps();
-		void mipmaps(Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> const value);
-
 		bool is_forced_mip_level();
 		void is_forced_mip_level(bool value);
 
@@ -105,6 +102,9 @@ namespace winrt::graphics::implementation
 
 		graphics::alpha_mode alpha_mode();
 		void alpha_mode(graphics::alpha_mode const& value);
+
+		Windows::Foundation::Collections::IObservableVector<IInspectable> mipmaps();
+		void mipmaps(Windows::Foundation::Collections::IObservableVector<IInspectable> const& value);
 
 		graphics::texture_address_mode u_address_mode();
 		void u_address_mode(graphics::texture_address_mode const& value);
@@ -169,7 +169,6 @@ namespace winrt::graphics::implementation
 		float m_sample_comparison_value = 0.0f;
 		uint32_t m_max_anisotropy = 16;
 
-		Windows::Foundation::Collections::IObservableVector<IInspectable> m_mipmaps;
 		bool m_is_anisotropic = false;
 
 		filtering_method m_minification_filter = filtering_method::linear_interpolation;
@@ -184,6 +183,8 @@ namespace winrt::graphics::implementation
 		texture_address_mode m_v_address_mode = texture_address_mode::wrap;
 		texture_address_mode m_w_address_mode = texture_address_mode::wrap;
 		graphics::alpha_mode m_alpha_mode = alpha_mode::unknown;
+
+		Windows::Foundation::Collections::IObservableVector<IInspectable> m_mipmaps = single_threaded_observable_vector<IInspectable>();
 
 		uint64_t m_mip_levels = 1.0f;
 		uint64_t m_width = 0.0f;

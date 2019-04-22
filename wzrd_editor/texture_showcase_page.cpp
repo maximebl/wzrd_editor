@@ -189,16 +189,16 @@ namespace winrt::wzrd_editor::implementation
 		this->Bindings->Update();
 
 		hstring error_msg;
-		IObservableVector<IInspectable> new_mipmaps;
+		IObservableVector<graphics::subresource> new_mipmaps;
 
 		switch (result.status)
 		{
 		case graphics::operation_status::success:
-			new_mipmaps = new_texture.mipmaps();
-			for (auto mipmap : new_mipmaps)
-			{
-				texture_showcase_vm().mipmaps().Append(box_value(mipmap));
-			}
+			//new_mipmaps = new_texture.mipmaps();
+			//for (auto mipmap : new_mipmaps)
+			//{
+			//	texture_showcase_vm().mipmaps().Append(box_value(mipmap));
+			//}
 
 			new_texture.is_loading(false);
 			break;
@@ -240,11 +240,18 @@ namespace winrt::wzrd_editor::implementation
 
 	IAsyncAction texture_showcase_page::texture_selection_changed(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
-		auto selected_items_count = unbox_value<Windows::UI::Xaml::Controls::ListView>(sender).SelectedItems().Size();
+		auto listview = unbox_value<Windows::UI::Xaml::Controls::ListView>(sender);
+		auto selected_items_count = listview.SelectedItems().Size();
 
 		if (selected_items_count > 0)
 		{
 			VisualStateManager().GoToState(*this, L"valid_texture_selected", false);
+
+			auto current_texture_vm = unbox_value<wzrd_editor::texture_vm>(listview.SelectedItem());
+			m_texture_showcase_vm.current_texture_vm(current_texture_vm);
+			m_renderer.current_texture(current_texture_vm.current_texture());
+			m_renderer.current_texture_index(listview.SelectedIndex());
+			this->Bindings->Update();
 		}
 		else
 		{
@@ -262,6 +269,7 @@ namespace winrt::wzrd_editor::implementation
 		new_texture_vm.is_loading(true);
 
 		IObservableVector<graphics::texture> new_dds_textures = nullptr;
+
 		auto result = co_await m_renderer.create_dds_textures(
 			m_texture_showcase_vm.dds_creation_vm().texture_name(),
 			m_texture_showcase_vm.dds_creation_vm().width(),
@@ -272,20 +280,14 @@ namespace winrt::wzrd_editor::implementation
 			new_dds_textures
 		);
 
-		new_texture_vm.current_texture(new_dds_textures.GetAt(0));
-
-		this->Bindings->Update();
-
 		switch (result.status)
 		{
 		case graphics::operation_status::success:
 			new_texture_vm.is_loading(false);
-			for (auto mipmap : new_dds_textures.GetAt(0).mipmaps())
-			{
-				texture_showcase_vm().mipmaps().Append(box_value(mipmap));
-			}
+			new_texture_vm.current_texture(new_dds_textures.GetAt(0));
 			break;
 		case graphics::operation_status::cancelled:
+			texture_showcase_vm().textures().RemoveAtEnd();
 			co_return;
 			break;
 		case graphics::operation_status::error:
@@ -294,6 +296,7 @@ namespace winrt::wzrd_editor::implementation
 			break;
 		}
 
+		this->Bindings->Update();
 		co_return;
 	}
 

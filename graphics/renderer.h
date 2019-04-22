@@ -105,6 +105,12 @@ namespace winrt::graphics::implementation
 		int32_t viewport_height();
 		void viewport_height(int32_t value);
 
+		graphics::texture current_texture();
+		void current_texture(graphics::texture const& value);
+
+		int32_t current_texture_index();
+		void current_texture_index(int32_t value);
+
 		static ID3D12Device* g_device;
 		static ID3D12GraphicsCommandList* g_cmd_list;
 
@@ -119,6 +125,8 @@ namespace winrt::graphics::implementation
 		constexpr static int m_swapchain_buffer_count = 2;
 		int m_current_backbuffer = 0;
 		UINT m_rtv_descriptor_size = 0;
+		UINT m_cbv_srv_uav_heap_descriptor_handle_size = 0;
+		D3D12_CPU_DESCRIPTOR_HANDLE m_texture_descriptor_handle = {};
 
 		int32_t m_output_width = 512;
 		int32_t m_output_height = 512;
@@ -150,7 +158,6 @@ namespace winrt::graphics::implementation
 		com_ptr<ID3D12Resource> m_swapchain_buffer[m_swapchain_buffer_count];
 		com_ptr<ID3D12Resource> m_depthstencil_buffer;
 		com_ptr<ID3D12Resource> m_checkerboard_texture = nullptr;
-		com_ptr<ID3D12Resource> m_crate_texture = nullptr;
 		com_ptr<ID3D12RootSignature> m_rootsig = nullptr;
 		com_ptr<ID3D12Device> m_device = nullptr;
 		com_ptr<IDXGIFactory4> m_dxgi_factory = nullptr;
@@ -190,7 +197,7 @@ namespace winrt::graphics::implementation
 		void create_texture_rootsignature(std::vector<CD3DX12_STATIC_SAMPLER_DESC> samplers);
 		void create_simple_triangle();
 		void create_point();
-		void create_texture_srv();
+		void create_checkerboard_tex_srv();
 		void create_cb_texcoord();
 		void create_cb_billboard_pos();
 		void create_uav();
@@ -224,6 +231,8 @@ namespace winrt::graphics::implementation
 
 		std::unordered_map<hstring, com_ptr<ID3DBlob>> m_shaders;
 		std::unordered_map<hstring, graphics::texture> m_textures;
+		graphics::texture m_current_texture = nullptr;
+		int32_t m_current_texture_index = 0;
 
 		winrt::event<Windows::UI::Xaml::Data::PropertyChangedEventHandler> m_property_changed;
 

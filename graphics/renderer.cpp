@@ -6,6 +6,26 @@ ID3D12GraphicsCommandList* winrt::graphics::implementation::renderer::g_cmd_list
 
 namespace winrt::graphics::implementation
 {
+	graphics::texture renderer::current_texture()
+	{
+		return m_current_texture;
+	}
+
+	void renderer::current_texture(graphics::texture const& value)
+	{
+		m_current_texture = value;
+	}
+
+	int32_t renderer::current_texture_index()
+	{
+		return m_current_texture_index;
+	}
+
+	void renderer::current_texture_index(int32_t value)
+	{
+		m_current_texture_index = value;
+	}
+
 	Windows::Foundation::IAsyncOperation<graphics::operation_result>
 		renderer::pick_and_compile_shader(graphics::shader new_shader)
 	{
@@ -41,17 +61,17 @@ namespace winrt::graphics::implementation
 		{
 		case graphics::shader_type::pixel:
 			entry_point = "PS";
-			version = "ps_5_0";
+			version = "ps_5_1";
 			break;
 
 		case graphics::shader_type::vertex:
 			entry_point = "VS";
-			version = "vs_5_0";
+			version = "vs_5_1";
 			break;
 
 		case graphics::shader_type::geometry:
 			entry_point = "GS";
-			version = "gs_5_0";
+			version = "gs_5_1";
 			break;
 
 		default:
@@ -156,6 +176,7 @@ namespace winrt::graphics::implementation
 	{
 		create_factory();
 		create_device();
+		m_cbv_srv_uav_heap_descriptor_handle_size = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
 		create_fence();
 		create_cmd_objects();
 		create_dsv_heap();
@@ -170,7 +191,7 @@ namespace winrt::graphics::implementation
 		create_cb_texcoord();
 		create_cb_billboard_pos();
 		create_uav();
-		create_texture_srv();
+		//create_checkerboard_tex_srv();
 		//create_simple_triangle();
 	}
 
@@ -264,7 +285,7 @@ namespace winrt::graphics::implementation
 
 	void renderer::update_samplers()
 	{
-		auto current_border_color = m_textures[L"default_texture"].sampler_border_color();
+		auto current_border_color = m_current_texture.sampler_border_color();
 		auto r = static_cast<float>(current_border_color.R / 255.f);
 		auto g = static_cast<float>(current_border_color.G / 255.f);
 		auto b = static_cast<float>(current_border_color.B / 255.f);
@@ -272,14 +293,14 @@ namespace winrt::graphics::implementation
 		float border_color[4] = { r,g,b,a };
 
 		memcpy(m_sampler_desc.BorderColor, border_color, sizeof(FLOAT) * 4);
-		m_sampler_desc.AddressU = static_cast<D3D12_TEXTURE_ADDRESS_MODE>(m_textures[L"default_texture"].u_address_mode());
-		m_sampler_desc.AddressV = static_cast<D3D12_TEXTURE_ADDRESS_MODE>(m_textures[L"default_texture"].v_address_mode());
-		m_sampler_desc.AddressW = static_cast<D3D12_TEXTURE_ADDRESS_MODE>(m_textures[L"default_texture"].w_address_mode());
-		m_sampler_desc.ComparisonFunc = static_cast<D3D12_COMPARISON_FUNC>(m_textures[L"default_texture"].comparison_function());
-		m_sampler_desc.MaxAnisotropy = static_cast<UINT>(m_textures[L"default_texture"].max_anisotropy());
+		m_sampler_desc.AddressU = static_cast<D3D12_TEXTURE_ADDRESS_MODE>(m_current_texture.u_address_mode());
+		m_sampler_desc.AddressV = static_cast<D3D12_TEXTURE_ADDRESS_MODE>(m_current_texture.v_address_mode());
+		m_sampler_desc.AddressW = static_cast<D3D12_TEXTURE_ADDRESS_MODE>(m_current_texture.w_address_mode());
+		m_sampler_desc.ComparisonFunc = static_cast<D3D12_COMPARISON_FUNC>(m_current_texture.comparison_function());
+		m_sampler_desc.MaxAnisotropy = static_cast<UINT>(m_current_texture.max_anisotropy());
 		m_sampler_desc.Filter = select_filter();
-		m_sampler_desc.MinLOD = m_textures[L"default_texture"].sampler_minLOD();
-		m_sampler_desc.MaxLOD = m_textures[L"default_texture"].sampler_maxLOD();
+		m_sampler_desc.MinLOD = m_current_texture.sampler_minLOD();
+		m_sampler_desc.MaxLOD = m_current_texture.sampler_maxLOD();
 		m_sampler_desc.MipLODBias = 0;
 
 		m_device->CreateSampler(&m_sampler_desc, m_sampler_heap->GetCPUDescriptorHandleForHeapStart());
@@ -294,8 +315,8 @@ namespace winrt::graphics::implementation
 
 	D3D12_FILTER renderer::select_filter()
 	{
-		D3D12_FILTER_REDUCTION_TYPE reduction_type = static_cast<D3D12_FILTER_REDUCTION_TYPE>(m_textures[L"default_texture"].reduction());
-		D3D12_FILTER_REDUCTION_TYPE is_anisotropic = static_cast<D3D12_FILTER_REDUCTION_TYPE>(m_textures[L"default_texture"].is_anisotropic());
+		D3D12_FILTER_REDUCTION_TYPE reduction_type = static_cast<D3D12_FILTER_REDUCTION_TYPE>(m_current_texture.reduction());
+		D3D12_FILTER_REDUCTION_TYPE is_anisotropic = static_cast<D3D12_FILTER_REDUCTION_TYPE>(m_current_texture.is_anisotropic());
 
 		D3D12_FILTER result;
 
@@ -305,9 +326,9 @@ namespace winrt::graphics::implementation
 		}
 		else
 		{
-			D3D12_FILTER_TYPE minification_filter = static_cast<D3D12_FILTER_TYPE>(m_textures[L"default_texture"].minification_filter());
-			D3D12_FILTER_TYPE magnification_filter = static_cast<D3D12_FILTER_TYPE>(m_textures[L"default_texture"].magnification_filter());
-			D3D12_FILTER_TYPE miplevel_filter = static_cast<D3D12_FILTER_TYPE>(m_textures[L"default_texture"].miplevel_sampling_filter());
+			D3D12_FILTER_TYPE minification_filter = static_cast<D3D12_FILTER_TYPE>(m_current_texture.minification_filter());
+			D3D12_FILTER_TYPE magnification_filter = static_cast<D3D12_FILTER_TYPE>(m_current_texture.magnification_filter());
+			D3D12_FILTER_TYPE miplevel_filter = static_cast<D3D12_FILTER_TYPE>(m_current_texture.miplevel_sampling_filter());
 
 			result = D3D12_ENCODE_BASIC_FILTER(
 				minification_filter,
@@ -323,17 +344,17 @@ namespace winrt::graphics::implementation
 	{
 		gs_box texcoords;
 
-		texcoords.topleft.x = m_textures[L"default_texture"].topleft_u();
-		texcoords.topleft.y = m_textures[L"default_texture"].topleft_v();
+		texcoords.topleft.x = m_current_texture.topleft_u();
+		texcoords.topleft.y = m_current_texture.topleft_v();
 
-		texcoords.topright.x = m_textures[L"default_texture"].topright_u();
-		texcoords.topright.y = m_textures[L"default_texture"].topright_v();
+		texcoords.topright.x = m_current_texture.topright_u();
+		texcoords.topright.y = m_current_texture.topright_v();
 
-		texcoords.bottomleft.x = m_textures[L"default_texture"].bottomleft_u();
-		texcoords.bottomleft.y = m_textures[L"default_texture"].bottomleft_v();
+		texcoords.bottomleft.x = m_current_texture.bottomleft_u();
+		texcoords.bottomleft.y = m_current_texture.bottomleft_v();
 
-		texcoords.bottomright.x = m_textures[L"default_texture"].bottomright_u();
-		texcoords.bottomright.y = m_textures[L"default_texture"].bottomright_v();
+		texcoords.bottomright.x = m_current_texture.bottomright_u();
+		texcoords.bottomright.y = m_current_texture.bottomright_v();
 
 		std::memcpy(
 			reinterpret_cast<void*>(m_mapped_texcoord_data),
@@ -342,17 +363,17 @@ namespace winrt::graphics::implementation
 
 		gs_box vertex_positions;
 
-		vertex_positions.topleft.x = m_textures[L"default_texture"].topleft_x();
-		vertex_positions.topleft.y = m_textures[L"default_texture"].topleft_y();
+		vertex_positions.topleft.x = m_current_texture.topleft_x();
+		vertex_positions.topleft.y = m_current_texture.topleft_y();
 
-		vertex_positions.topright.x = m_textures[L"default_texture"].topright_x();
-		vertex_positions.topright.y = m_textures[L"default_texture"].topright_y();
+		vertex_positions.topright.x = m_current_texture.topright_x();
+		vertex_positions.topright.y = m_current_texture.topright_y();
 
-		vertex_positions.bottomleft.x = m_textures[L"default_texture"].bottomleft_x();
-		vertex_positions.bottomleft.y = m_textures[L"default_texture"].bottomleft_y();
+		vertex_positions.bottomleft.x = m_current_texture.bottomleft_x();
+		vertex_positions.bottomleft.y = m_current_texture.bottomleft_y();
 
-		vertex_positions.bottomright.x = m_textures[L"default_texture"].bottomright_x();
-		vertex_positions.bottomright.y = m_textures[L"default_texture"].bottomright_y();
+		vertex_positions.bottomright.x = m_current_texture.bottomright_x();
+		vertex_positions.bottomright.y = m_current_texture.bottomright_y();
 
 		std::memcpy(
 			reinterpret_cast<void*>(m_mapped_position_data),
@@ -393,32 +414,35 @@ namespace winrt::graphics::implementation
 		m_graphics_cmdlist->SetGraphicsRootConstantBufferView(3, m_cb_position_upload_buffer->GetGPUVirtualAddress());
 		m_graphics_cmdlist->SetGraphicsRootUnorderedAccessView(4, m_uav_lod_default_buffer->GetGPUVirtualAddress());
 
-		float new_scale = m_textures[L"default_texture"].scale();
+		float new_scale = m_current_texture.scale();
 		m_graphics_cmdlist->SetGraphicsRoot32BitConstants(5, 1, &new_scale, 0);
 
-		uint32_t filter_reduction = static_cast<uint32_t>(m_textures[L"default_texture"].reduction());
+		uint32_t filter_reduction = static_cast<uint32_t>(m_current_texture.reduction());
 		m_graphics_cmdlist->SetGraphicsRoot32BitConstants(5, 1, &filter_reduction, 1);
 
-		float forced_miplevel = m_textures[L"default_texture"].forced_miplevel();
+		float forced_miplevel = m_current_texture.forced_miplevel();
 		m_graphics_cmdlist->SetGraphicsRoot32BitConstants(5, 1, &forced_miplevel, 2);
 
-		float sample_comparison_value = m_textures[L"default_texture"].sample_comparison_value();
+		float sample_comparison_value = m_current_texture.sample_comparison_value();
 		m_graphics_cmdlist->SetGraphicsRoot32BitConstants(5, 1, &sample_comparison_value, 3);
 
-		uint32_t is_forced_mip_level = static_cast<uint32_t>(m_textures[L"default_texture"].is_forced_mip_level());
+		uint32_t is_forced_mip_level = static_cast<uint32_t>(m_current_texture.is_forced_mip_level());
 		m_graphics_cmdlist->SetGraphicsRoot32BitConstants(5, 1, &is_forced_mip_level, 4);
 
-		uint32_t sampling_function = static_cast<uint32_t>(m_textures[L"default_texture"].sampling_function());
+		uint32_t sampling_function = static_cast<uint32_t>(m_current_texture.sampling_function());
 		m_graphics_cmdlist->SetGraphicsRoot32BitConstants(5, 1, &sampling_function, 5);
 
-		uint32_t is_screen_coords = static_cast<uint32_t>(m_textures[L"default_texture"].is_screen_coords());
+		uint32_t is_screen_coords = static_cast<uint32_t>(m_current_texture.is_screen_coords());
 		m_graphics_cmdlist->SetGraphicsRoot32BitConstants(5, 1, &is_screen_coords, 6);
 
-		uint32_t x_pixel_offset = static_cast<int32_t>(m_textures[L"default_texture"].x_pixel_offset());
+		uint32_t x_pixel_offset = static_cast<int32_t>(m_current_texture.x_pixel_offset());
 		m_graphics_cmdlist->SetGraphicsRoot32BitConstants(5, 1, &x_pixel_offset, 7);
 
-		uint32_t y_pixel_offset = static_cast<int32_t>(m_textures[L"default_texture"].y_pixel_offset());
+		uint32_t y_pixel_offset = static_cast<int32_t>(m_current_texture.y_pixel_offset());
 		m_graphics_cmdlist->SetGraphicsRoot32BitConstants(5, 1, &y_pixel_offset, 8);
+
+		uint32_t current_texture_index = static_cast<int32_t>(m_current_texture_index);
+		m_graphics_cmdlist->SetGraphicsRoot32BitConstants(5, 1, &current_texture_index, 9);
 
 		m_graphics_cmdlist->SetPipelineState(m_billboard_pso.get());
 
@@ -468,6 +492,7 @@ namespace winrt::graphics::implementation
 
 		auto current_shader_data = *static_cast<shader_readback_data*>(pData);
 		auto current_lod = current_shader_data.level_of_detail;
+
 		update_ui(current_lod);
 
 		D3D12_RANGE empty_range;
@@ -475,12 +500,7 @@ namespace winrt::graphics::implementation
 		empty_range.End = 0;
 		m_uav_lod_readback_buffer->Unmap(0, &empty_range);
 
-		auto hr = m_swapchain->Present(0, 0);
-		//check_hresult(hr);
-		if (hr == E_FAIL)
-		{
-			check_hresult(m_device->GetDeviceRemovedReason());
-		}
+		check_hresult(m_swapchain->Present(0, 0));
 		m_current_backbuffer = (m_current_backbuffer + 1) % m_swapchain_buffer_count;
 	}
 
@@ -577,7 +597,7 @@ namespace winrt::graphics::implementation
 
 		Windows::Foundation::Collections::IVectorView<Windows::Storage::StorageFile> files = co_await picker.PickMultipleFilesAsync();
 
-		if (!files)
+		if (files.Size() == 0)
 		{
 			result.status = operation_status::cancelled;
 			co_return result;
@@ -622,11 +642,31 @@ namespace winrt::graphics::implementation
 			check_hresult(ComputePitch(new_image.format, new_image.width, new_image.height, new_image.rowPitch, new_image.slicePitch));
 
 			ScratchImage mipmap_chain;
-			check_hresult(GenerateMipMaps(new_image, TEX_FILTER_FLAGS::TEX_FILTER_DEFAULT, 0, mipmap_chain));
+			TexMetadata md;
+			size_t image_count = 1;
+			const Image* images;
 
-			TexMetadata md = mipmap_chain.GetMetadata();
-			size_t image_count = mipmap_chain.GetImageCount();
-			const Image* images = mipmap_chain.GetImages();
+			if (is_generating_mipmaps)
+			{
+				check_hresult(GenerateMipMaps(new_image, TEX_FILTER_FLAGS::TEX_FILTER_DEFAULT, 0, mipmap_chain));
+
+				md = mipmap_chain.GetMetadata();
+				image_count = mipmap_chain.GetImageCount();
+				images = mipmap_chain.GetImages();
+			}
+			else
+			{
+				images = &new_image;
+				md.arraySize = 1;
+				md.depth = 1;
+				md.dimension = TEX_DIMENSION::TEX_DIMENSION_TEXTURE2D;
+				md.format = new_image.format;
+				md.mipLevels = 1;
+				md.height = new_image.height;
+				md.width = new_image.width;
+				md.miscFlags = DDS_FLAGS::DDS_FLAGS_NONE;
+				md.miscFlags2 = DDS_FLAGS::DDS_FLAGS_NONE;
+			}
 
 			Blob new_blob;
 			check_hresult(SaveToDDSMemory(images, image_count, md, DDS_FLAGS::DDS_FLAGS_NONE, new_blob));
@@ -668,7 +708,7 @@ namespace winrt::graphics::implementation
 			co_await new_bitmap_source.SetBitmapAsync(new_software_bitmap);
 			new_texture->bitmap_source(new_bitmap_source);
 
-			m_textures[file.Name()] = new_texture.as<graphics::texture>();
+			m_textures[name] = new_texture.as<graphics::texture>();
 			new_textures.Append(new_texture.as<graphics::texture>());
 		}
 
@@ -795,21 +835,18 @@ namespace winrt::graphics::implementation
 				D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_GENERIC_READ,
 				nullptr,
 				winrt::guid_of<ID3D12Resource>(),
-				//intermediate_upload_resource.put_void()
 				texture.as<graphics::implementation::texture>()->texture_upload_buffer.put_void()
-		)
+			)
 		);
 
 		UpdateSubresources(
-			g_cmd_list, 
-			texture.as<graphics::implementation::texture>()->texture_default_buffer.get(), 
-			texture.as<graphics::implementation::texture>()->texture_upload_buffer.get(), 
-			0, 
-			0, 
-			subresources.size(), 
+			g_cmd_list,
+			texture.as<graphics::implementation::texture>()->texture_default_buffer.get(),
+			texture.as<graphics::implementation::texture>()->texture_upload_buffer.get(),
+			0,
+			0,
+			subresources.size(),
 			subresources.data());
-
-		//texture.as<graphics::implementation::texture>()->texture_upload_buffer = intermediate_upload_resource;
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = {};
 		srv_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -826,7 +863,9 @@ namespace winrt::graphics::implementation
 		m_device->CreateShaderResourceView(
 			texture.as<graphics::implementation::texture>()->texture_default_buffer.get(),
 			&srv_desc,
-			m_srv_heap->GetCPUDescriptorHandleForHeapStart());
+			m_texture_descriptor_handle);
+
+		m_texture_descriptor_handle.ptr = m_texture_descriptor_handle.ptr + m_cbv_srv_uav_heap_descriptor_handle_size;
 
 		co_return;
 	}
@@ -861,7 +900,7 @@ namespace winrt::graphics::implementation
 	Windows::Foundation::IAsyncAction renderer::update_ui(float new_val)
 	{
 		co_await m_ui_thread;
-		m_textures[L"default_texture"].current_lod(new_val);
+		m_current_texture.current_lod(new_val);
 	}
 
 	void renderer::create_factory()
@@ -957,6 +996,8 @@ namespace winrt::graphics::implementation
 		check_hresult(
 			m_device->CreateDescriptorHeap(&srv_heap_desc, guid_of<ID3D12DescriptorHeap>(), m_srv_heap.put_void())
 		);
+
+		m_texture_descriptor_handle = m_srv_heap->GetCPUDescriptorHandleForHeapStart();
 	}
 
 	void renderer::create_sampler_heap()
@@ -1089,7 +1130,7 @@ namespace winrt::graphics::implementation
 		root_parameter[2].InitAsDescriptorTable(1, &samplers_range, D3D12_SHADER_VISIBILITY::D3D12_SHADER_VISIBILITY_PIXEL);
 		root_parameter[3].InitAsConstantBufferView(1);
 		root_parameter[4].InitAsUnorderedAccessView(1);
-		root_parameter[5].InitAsConstants(9, 2);
+		root_parameter[5].InitAsConstants(10, 2);
 
 		CD3DX12_ROOT_SIGNATURE_DESC rootsig_desc(
 			6,
@@ -1174,7 +1215,7 @@ namespace winrt::graphics::implementation
 			));
 	}
 
-	void renderer::create_texture_srv()
+	void renderer::create_checkerboard_tex_srv()
 	{
 		UINT texture_width = 512;
 		UINT texture_height = 512;
@@ -1210,8 +1251,7 @@ namespace winrt::graphics::implementation
 		srv_desc.Format = texture_desc.Format;
 
 		D3D12_CPU_DESCRIPTOR_HANDLE checkerboard_texture_descriptor_handle = {};
-		auto texture_heap_descriptor_handle_size = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
-		checkerboard_texture_descriptor_handle.ptr = m_srv_heap->GetCPUDescriptorHandleForHeapStart().ptr + texture_heap_descriptor_handle_size;
+		checkerboard_texture_descriptor_handle.ptr = m_srv_heap->GetCPUDescriptorHandleForHeapStart().ptr + m_cbv_srv_uav_heap_descriptor_handle_size;
 
 		m_device->CreateShaderResourceView(m_checkerboard_texture.get(), &srv_desc, checkerboard_texture_descriptor_handle);
 	}
@@ -1436,7 +1476,7 @@ namespace winrt::graphics::implementation
 			}
 			else
 			{
-				memcpy(writeable_bitmap_data, mipmap_image.pixels, mipmap_image.slicePitch);
+				memcpy(writeable_bitmap_data, mipmap_image.pixels, writeable_bitmap.PixelBuffer().Capacity());
 			}
 
 			SoftwareBitmap new_software_bitmap = SoftwareBitmap::CreateCopyFromBuffer(writeable_bitmap.PixelBuffer(), BitmapPixelFormat::Bgra8, subresource_width, subresource_width);

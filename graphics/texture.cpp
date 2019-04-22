@@ -169,16 +169,6 @@ using Windows::Foundation::IInspectable; namespace winrt::graphics::implementati
 		update_value(L"sampler_maxLOD", m_sampler_maxLOD, value);
 	}
 
-	Windows::Foundation::Collections::IObservableVector<IInspectable> texture::mipmaps()
-	{
-		return m_mipmaps;
-	}
-
-	void texture::mipmaps(Windows::Foundation::Collections::IObservableVector<Windows::Foundation::IInspectable> const value)
-	{
-		update_value(L"mipmaps", m_mipmaps, value);
-	}
-
 	float texture::forced_miplevel()
 	{
 		return m_forced_miplevel;
@@ -319,15 +309,25 @@ using Windows::Foundation::IInspectable; namespace winrt::graphics::implementati
 		update_value(L"sampling_function", m_sampling_function, value);
 	}
 
-    graphics::alpha_mode texture::alpha_mode()
-    {
+	graphics::alpha_mode texture::alpha_mode()
+	{
 		return m_alpha_mode;
-    }
+	}
 
-    void texture::alpha_mode(graphics::alpha_mode const& value)
-    {
+	void texture::alpha_mode(graphics::alpha_mode const& value)
+	{
 		update_value(L"alpha_mode", m_alpha_mode, value);
-    }
+	}
+
+	Windows::Foundation::Collections::IObservableVector<IInspectable> texture::mipmaps()
+	{
+		return m_mipmaps;
+	}
+
+	void texture::mipmaps(Windows::Foundation::Collections::IObservableVector<IInspectable> const& value)
+	{
+		update_value(L"mipmaps", m_mipmaps, value);
+	}
 
 	graphics::texture_address_mode texture::u_address_mode()
 	{

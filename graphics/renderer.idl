@@ -54,6 +54,8 @@ namespace graphics
 		Windows.Foundation.IAsyncOperation<operation_result> pick_and_compile_shader(shader new_shader);
 		Windows.Foundation.IAsyncOperationWithProgress<operation_result, String> pick_texture(out graphics.texture new_texture, String name);
 		buffer current_buffer{ get; set; };
+		texture current_texture;
+		Int32 current_texture_index;
 
 		UInt32 viewport_width;
 		UInt32 viewport_height;

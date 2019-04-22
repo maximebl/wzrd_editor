@@ -25,6 +25,7 @@ cbuffer cb_manips : register(b2)
     uint is_screen_coord;
     int x_pixel_offset;
     int y_pixel_offset;
+    int current_texture_index;
 };
 
 struct readback_data
@@ -54,8 +55,7 @@ struct gs_out
     float2 tex_coord : TEXCOORD;
 };
 
-Texture2D g_texture : register(t0);
-Texture2D g_texture2 : register(t1);
+Texture2D g_texture[2] : register(t0);
 SamplerState g_sampler : register(s0);
 SamplerComparisonState g_cmp_sampler : register(s1);
 
@@ -63,7 +63,7 @@ float3 average(float2 texcoord)
 {
     float3 result = float3(0.f, 0.0f, 0.0f);
 
-    float4 reds = g_texture.GatherRed(g_sampler, texcoord, int2(x_pixel_offset, y_pixel_offset));
+    float4 reds = g_texture[current_texture_index].GatherRed(g_sampler, texcoord, int2(x_pixel_offset, y_pixel_offset));
     float r1 = reds.x;
     float r2 = reds.y;
     float r3 = reds.z;
@@ -71,7 +71,7 @@ float3 average(float2 texcoord)
     float final_red = (r1 + r2 + r3 + r4) / 4;
     result.x = final_red;
 
-    float4 greens = g_texture.GatherGreen(g_sampler, texcoord, int2(x_pixel_offset, y_pixel_offset));
+    float4 greens = g_texture[current_texture_index].GatherGreen(g_sampler, texcoord, int2(x_pixel_offset, y_pixel_offset));
     float g1 = greens.x;
     float g2 = greens.y;
     float g3 = greens.z;
@@ -79,7 +79,7 @@ float3 average(float2 texcoord)
     float final_green = (g1 + g2 + g3 + g4) / 4;
     result.y = final_green;
 
-    float4 blues = g_texture.GatherBlue(g_sampler, texcoord, int2(x_pixel_offset, y_pixel_offset));
+    float4 blues = g_texture[current_texture_index].GatherBlue(g_sampler, texcoord, int2(x_pixel_offset, y_pixel_offset));
     float b1 = blues.x;
     float b2 = blues.y;
     float b3 = blues.z;
@@ -96,7 +96,7 @@ float3 bilinear(float2 texcoord, float tex_dimension)
     float3 result;
 
     // red channel
-    float4 reds = g_texture.GatherRed(g_sampler, texcoord, int2(x_pixel_offset, y_pixel_offset));
+    float4 reds = g_texture[current_texture_index].GatherRed(g_sampler, texcoord, int2(x_pixel_offset, y_pixel_offset));
     float r1 = reds.x;
     float r2 = reds.y;
     float r3 = reds.z;
@@ -112,7 +112,7 @@ float3 bilinear(float2 texcoord, float tex_dimension)
     result.x = final_red;
             
     // green channel
-    float4 greens = g_texture.GatherGreen(g_sampler, texcoord, int2(x_pixel_offset, y_pixel_offset));
+    float4 greens = g_texture[current_texture_index].GatherGreen(g_sampler, texcoord, int2(x_pixel_offset, y_pixel_offset));
     float g1 = greens.x;
     float g2 = greens.y;
     float g3 = greens.z;
@@ -125,7 +125,7 @@ float3 bilinear(float2 texcoord, float tex_dimension)
     result.y = final_green;
             
     // blue channel
-    float4 blues = g_texture.GatherBlue(g_sampler, texcoord, int2(x_pixel_offset, y_pixel_offset));
+    float4 blues = g_texture[current_texture_index].GatherBlue(g_sampler, texcoord, int2(x_pixel_offset, y_pixel_offset));
     float b1 = blues.x;
     float b2 = blues.y;
     float b3 = blues.z;
@@ -153,7 +153,7 @@ void GS(point vs_out gin[1], inout TriangleStream<gs_out> tri_stream)
 {
     uint width_texels;
     uint height_texels;
-    g_texture.GetDimensions(width_texels, height_texels);
+    g_texture[current_texture_index].GetDimensions(width_texels, height_texels);
 
     gs_out geo_out;
     geo_out.position.z = 0.0f;
@@ -192,7 +192,7 @@ float4 PS(float4 screen_pos : SV_Position, gs_out pin) : SV_Target
 {
     uint width_texels;
     uint height_texels;
-    g_texture.GetDimensions(width_texels, height_texels);
+    g_texture[current_texture_index].GetDimensions(width_texels, height_texels);
     rwb_readback_data[0].width = width_texels;
     rwb_readback_data[0].height = height_texels;
 
@@ -206,7 +206,7 @@ float4 PS(float4 screen_pos : SV_Position, gs_out pin) : SV_Target
 
     if (is_forced_mip_level)
     {
-        result = g_texture.SampleLevel(g_sampler, pin.tex_coord, forced_miplevel);
+        result = g_texture[current_texture_index].SampleLevel(g_sampler, pin.tex_coord, forced_miplevel);
     }
     else
     {
@@ -224,37 +224,37 @@ float4 PS(float4 screen_pos : SV_Position, gs_out pin) : SV_Target
                     case 2:
                     //maximum
                     case 3:
-                        result = g_texture.Sample(g_sampler, pin.tex_coord);
-                        lod = g_texture.CalculateLevelOfDetail(g_sampler, pin.tex_coord);
+                        result = g_texture[current_texture_index].Sample(g_sampler, pin.tex_coord);
+                        lod = g_texture[current_texture_index].CalculateLevelOfDetail(g_sampler, pin.tex_coord);
                         rwb_readback_data[0].level_of_detail = lod;
                         break;
                     //comparison
                     case 1:
-                        result = g_texture.SampleCmp(g_cmp_sampler, pin.tex_coord, comparison_value);
+                        result = g_texture[current_texture_index].SampleCmp(g_cmp_sampler, pin.tex_coord, comparison_value);
                         break;
                 }
                 break;
 
             //load function
             case 1:
-                result = g_texture.Load(int3(screen_pos.xy, floor(forced_miplevel)));
+                result = g_texture[current_texture_index].Load(int3(screen_pos.xy, floor(forced_miplevel)));
                 break;
 
             //gather red
             case 2:
-                result = g_texture.GatherRed(g_sampler, pin.tex_coord);
+                result = g_texture[current_texture_index].GatherRed(g_sampler, pin.tex_coord);
                 break;
             //gather green
             case 3:
-                result = g_texture.GatherGreen(g_sampler, pin.tex_coord);
+                result = g_texture[current_texture_index].GatherGreen(g_sampler, pin.tex_coord);
                 break;
             //gather blue
             case 4:
-                result = g_texture.GatherBlue(g_sampler, pin.tex_coord);
+                result = g_texture[current_texture_index].GatherBlue(g_sampler, pin.tex_coord);
                 break;
             //gather alpha
             case 5:
-                result = g_texture.GatherAlpha(g_sampler, pin.tex_coord);
+                result = g_texture[current_texture_index].GatherAlpha(g_sampler, pin.tex_coord);
                 break;
 
             //sample_grad
