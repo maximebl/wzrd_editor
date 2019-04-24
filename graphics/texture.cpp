@@ -29,26 +29,6 @@ using Windows::Foundation::IInspectable; namespace winrt::graphics::implementati
 		update_value(L"file_name", m_file_name, value);
 	}
 
-	bool texture::is_loading()
-	{
-		return m_is_loading;
-	}
-
-	void texture::is_loading(bool value)
-	{
-		update_value(L"is_loading", m_is_loading, value);
-	}
-
-	bool texture::is_error()
-	{
-		return m_is_error;
-	}
-
-	void texture::is_error(bool value)
-	{
-		update_value(L"is_error", m_is_error, value);
-	}
-
 	Windows::UI::Xaml::Media::Imaging::SoftwareBitmapSource texture::bitmap_source()
 	{
 		return m_bitmap_source;

@@ -44,6 +44,10 @@ namespace winrt::wzrd_editor::implementation
 		m_renderer.initialize_textures_showcase(swapchain_panel());
 	}
 
+	texture_showcase_page::~texture_showcase_page()
+	{
+	}
+
 	wzrd_editor::texture_showcase_vm texture_showcase_page::texture_showcase_vm()
 	{
 		return m_texture_showcase_vm;
@@ -150,6 +154,7 @@ namespace winrt::wzrd_editor::implementation
 
 	IAsyncAction texture_showcase_page::delete_selected_texture(IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args)
 	{
+		m_renderer.stop_render_loop();
 		//auto _textures_list = textures_list();
 
 		//auto items_source = _textures_list.ItemsSource();
@@ -194,7 +199,7 @@ namespace winrt::wzrd_editor::implementation
 		switch (result.status)
 		{
 		case graphics::operation_status::success:
-			new_texture.is_loading(false);
+			new_texture_vm.is_loading(false);
 			break;
 		case graphics::operation_status::error:
 			os_utilities::show_error_dialog(result.error_message, L"Failed to parse the DDS file");
@@ -270,50 +275,49 @@ namespace winrt::wzrd_editor::implementation
 			co_return;
 		}
 
-		for (Windows::Storage::StorageFile file : files)
+		if (files.Size() + m_texture_showcase_vm.textures().Size() >= 10)
+		{
+			co_await os_utilities::show_error_dialog(L"There is a limit of 10 textures.", L"DDS texture creation error.");
+			co_return;
+		}
+
+		for (auto file : files)
 		{
 			wzrd_editor::texture_vm new_texture_vm = make<wzrd_editor::implementation::texture_vm>();
 			new_texture_vm.is_loading(true);
 			m_texture_showcase_vm.textures().Append(new_texture_vm);
-			//m_texture_showcase_vm.current_texture_vm(new_texture_vm);
-		}
 
-		//co_await 3s;
+			graphics::texture new_dds_texture = nullptr;
 
-		IObservableVector<graphics::texture> new_dds_textures = nullptr;
+			auto result = co_await m_renderer.create_dds_texture(
+				file,
+				m_texture_showcase_vm.dds_creation_vm().texture_name(),
+				m_texture_showcase_vm.dds_creation_vm().width(),
+				m_texture_showcase_vm.dds_creation_vm().height(),
+				m_texture_showcase_vm.dds_creation_vm().alpha_mode(),
+				m_texture_showcase_vm.dds_creation_vm().is_generating_mipmaps(),
+				m_texture_showcase_vm.dds_creation_vm().is_saving_to_file(),
+				new_dds_texture
+			);
 
-		auto result = co_await m_renderer.create_dds_textures(
-			files,
-			m_texture_showcase_vm.dds_creation_vm().texture_name(),
-			m_texture_showcase_vm.dds_creation_vm().width(),
-			m_texture_showcase_vm.dds_creation_vm().height(),
-			m_texture_showcase_vm.dds_creation_vm().alpha_mode(),
-			m_texture_showcase_vm.dds_creation_vm().is_generating_mipmaps(),
-			m_texture_showcase_vm.dds_creation_vm().is_saving_to_file(),
-			new_dds_textures
-		);
-
-		switch (result.status)
-		{
-		case graphics::operation_status::success:
-
-			for (auto texture_vm : m_texture_showcase_vm.textures())
+			switch (result.status)
 			{
-				texture_vm.as<graphics::texture>().is_loading(false);
+			case graphics::operation_status::success:
+				new_texture_vm.current_texture(new_dds_texture);
+				new_texture_vm.is_loading(false);
+				break;
+			case graphics::operation_status::cancelled:
+				texture_showcase_vm().textures().RemoveAtEnd();
+				co_return;
+				break;
+			case graphics::operation_status::error:
+				co_await os_utilities::show_error_dialog(result.error_message, L"DDS texture creation error.");
+				break;
+			default:
+				break;
 			}
 
-			//new_texture_vm.current_texture(new_dds_textures.GetAt(0));
-			break;
-		case graphics::operation_status::cancelled:
-			texture_showcase_vm().textures().RemoveAtEnd();
-			co_return;
-			break;
-		case graphics::operation_status::error:
-			break;
-		default:
-			break;
 		}
-
 		this->Bindings->Update();
 		co_return;
 	}

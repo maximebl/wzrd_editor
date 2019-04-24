@@ -1,5 +1,7 @@
 ﻿#include "pch.h"
 #include "renderer.h"
+#include <chrono>
+#include <iomanip>
 
 ID3D12Device* winrt::graphics::implementation::renderer::g_device = nullptr;
 ID3D12GraphicsCommandList* winrt::graphics::implementation::renderer::g_cmd_list = nullptr;
@@ -576,138 +578,135 @@ namespace winrt::graphics::implementation
 		m_current_buffer = value.as<graphics::implementation::buffer>();
 	}
 
-	Windows::Foundation::IAsyncOperationWithProgress<graphics::operation_result, hstring> renderer::create_dds_textures(
-		Windows::Foundation::Collections::IVectorView<Windows::Storage::StorageFile> const& files,
-		hstring name,
-		uint64_t width,
-		uint64_t height,
-		graphics::alpha_mode const& alpha_mode,
-		bool is_generating_mipmaps,
-		bool is_saving_to_file,
-		IObservableVector<graphics::texture>& new_textures)
+	Windows::Foundation::IAsyncOperationWithProgress<graphics::operation_result, hstring> renderer::create_dds_texture(
+		Windows::Storage::StorageFile const file, 
+		hstring const name, 
+		uint64_t width, 
+		uint64_t height, 
+		graphics::alpha_mode const in_alpha_mode, 
+		bool is_generating_mipmaps, 
+		bool is_saving_to_file, 
+		graphics::texture& new_texture)
 	{
 		using namespace DirectX;
 		using namespace Windows::Graphics::Imaging;
 
 		graphics::operation_result result;
 
-		if (files.Size() == 0)
+		if (m_textures.size() >= 10)
 		{
-			result.status = operation_status::cancelled;
+			result.status = operation_status::error;
+			result.error_message = L"There is a limit of 10 textures.";
 			co_return result;
 		}
 
-		new_textures = single_threaded_observable_vector<graphics::texture>();
-		auto new_mipmaps = single_threaded_observable_vector<IInspectable>();
+		auto stream = co_await file.OpenReadAsync();
+		Windows::Graphics::Imaging::BitmapDecoder decoder = co_await Windows::Graphics::Imaging::BitmapDecoder::CreateAsync(stream);
+		auto pixel_data_provider = co_await decoder.GetPixelDataAsync();
+		Windows::Graphics::Imaging::BitmapPixelFormat format = decoder.BitmapPixelFormat();
+		auto detached_pixels = pixel_data_provider.DetachPixelData();
 
-		auto files_copy = files;
+		Image new_image;
 
-		for (int i = 0; i < files_copy.Size(); ++i)
+		switch (format)
 		{
-			auto current_file = files_copy.GetAt(i);
-			Windows::Storage::Streams::IRandomAccessStream stream = co_await current_file.OpenAsync(Windows::Storage::FileAccessMode::Read);
-			Windows::Graphics::Imaging::BitmapDecoder decoder = co_await Windows::Graphics::Imaging::BitmapDecoder::CreateAsync(stream);
-			auto pixel_data_provider = co_await decoder.GetPixelDataAsync();
-			Windows::Graphics::Imaging::BitmapPixelFormat format = decoder.BitmapPixelFormat();
-			auto detached_pixels = pixel_data_provider.DetachPixelData();
-
-			Image new_image;
-			switch (format)
-			{
-			case winrt::Windows::Graphics::Imaging::BitmapPixelFormat::Unknown:
-				new_image.format = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
-				break;
-			case winrt::Windows::Graphics::Imaging::BitmapPixelFormat::Rgba16:
-				new_image.format = DXGI_FORMAT::DXGI_FORMAT_R16G16B16A16_UNORM;
-				break;
-			case winrt::Windows::Graphics::Imaging::BitmapPixelFormat::Rgba8:
-				new_image.format = DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM;
-				break;
-			case winrt::Windows::Graphics::Imaging::BitmapPixelFormat::Bgra8:
-				new_image.format = DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM;
-				break;
-			default:
-				result.status = operation_status::error;
-				result.error_message = L"The file format is not supported.";
-				co_return result;
-			}
-
-			new_image.pixels = detached_pixels.data();
-			new_image.height = width;
-			new_image.width = height;
-
-			check_hresult(ComputePitch(new_image.format, new_image.width, new_image.height, new_image.rowPitch, new_image.slicePitch));
-
-			ScratchImage mipmap_chain;
-			TexMetadata md;
-			size_t image_count = 1;
-			const Image* images;
-
-			if (is_generating_mipmaps)
-			{
-				check_hresult(GenerateMipMaps(new_image, TEX_FILTER_FLAGS::TEX_FILTER_DEFAULT, 0, mipmap_chain));
-
-				md = mipmap_chain.GetMetadata();
-				image_count = mipmap_chain.GetImageCount();
-				images = mipmap_chain.GetImages();
-			}
-			else
-			{
-				images = &new_image;
-				md.arraySize = 1;
-				md.depth = 1;
-				md.dimension = TEX_DIMENSION::TEX_DIMENSION_TEXTURE2D;
-				md.format = new_image.format;
-				md.mipLevels = 1;
-				md.height = new_image.height;
-				md.width = new_image.width;
-				md.miscFlags = DDS_FLAGS::DDS_FLAGS_NONE;
-				md.miscFlags2 = DDS_FLAGS::DDS_FLAGS_NONE;
-			}
-
-			Blob new_blob;
-			check_hresult(SaveToDDSMemory(images, image_count, md, DDS_FLAGS::DDS_FLAGS_NONE, new_blob));
-
-			if (is_saving_to_file)
-			{
-				auto folder = Windows::Storage::ApplicationData::Current().LocalFolder().Path();
-				auto file_dest = folder + L"\\new_tex.dds";
-				check_hresult(SaveToDDSFile(images, image_count, md, DDS_FLAGS::DDS_FLAGS_NONE, file_dest.data()));
-			}
-
-			com_ptr<graphics::implementation::texture> new_texture = winrt::make_self<graphics::implementation::texture>();
-			new_texture->texture_name(files.GetAt(i).Name());
-			new_texture->alpha_mode(alpha_mode);
-			new_texture->mip_levels(md.mipLevels);
-			new_texture->dimension(get_dimension(D3D12_RESOURCE_DIMENSION::D3D12_RESOURCE_DIMENSION_TEXTURE2D));
-			new_texture->width(new_image.width);
-			new_texture->height(new_image.height);
-			new_texture->row_pitch(new_image.rowPitch);
-			new_texture->slice_pitch(new_image.slicePitch);
-
-			std::vector<D3D12_SUBRESOURCE_DATA> subresources;
-
-			check_hresult(LoadDDSTextureFromMemory(
-				g_device,
-				reinterpret_cast<uint8_t*> (new_blob.GetBufferPointer()),
-				new_blob.GetBufferSize(),
-				new_texture->texture_default_buffer.put(),
-				subresources));
-
-			co_await upload_to_gpu(new_texture.as<graphics::texture>(), subresources, new_image.format);
-
-			co_await create_subresources_for_ui(subresources, new_mipmaps, new_image.format, new_image.width);
-			new_texture->mipmaps(new_mipmaps);
-
-			SoftwareBitmap new_software_bitmap = co_await decoder.GetSoftwareBitmapAsync();
-			new_software_bitmap = SoftwareBitmap::Convert(new_software_bitmap, BitmapPixelFormat::Bgra8, BitmapAlphaMode::Premultiplied);
-			Windows::UI::Xaml::Media::Imaging::SoftwareBitmapSource new_bitmap_source;
-			co_await new_bitmap_source.SetBitmapAsync(new_software_bitmap);
-			new_texture->bitmap_source(new_bitmap_source);
-
-			m_textures[files.GetAt(i).Name()] = new_texture.as<graphics::texture>();
-			new_textures.Append(new_texture.as<graphics::texture>());
+		case winrt::Windows::Graphics::Imaging::BitmapPixelFormat::Unknown:
+			new_image.format = DXGI_FORMAT::DXGI_FORMAT_UNKNOWN;
+			break;
+		case winrt::Windows::Graphics::Imaging::BitmapPixelFormat::Rgba16:
+			new_image.format = DXGI_FORMAT::DXGI_FORMAT_R16G16B16A16_UNORM;
+			break;
+		case winrt::Windows::Graphics::Imaging::BitmapPixelFormat::Rgba8:
+			new_image.format = DXGI_FORMAT::DXGI_FORMAT_R8G8B8A8_UNORM;
+			break;
+		case winrt::Windows::Graphics::Imaging::BitmapPixelFormat::Bgra8:
+			new_image.format = DXGI_FORMAT::DXGI_FORMAT_B8G8R8A8_UNORM;
+			break;
+		default:
+			result.status = operation_status::error;
+			result.error_message = L"The file format is not supported.";
+			co_return result;
 		}
+
+		new_image.pixels = detached_pixels.data();
+		new_image.height = width;
+		new_image.width = height;
+
+		check_hresult(ComputePitch(new_image.format, new_image.width, new_image.height, new_image.rowPitch, new_image.slicePitch));
+
+		ScratchImage mipmap_chain;
+		TexMetadata md;
+		size_t image_count = 1;
+		const Image* images;
+
+		if (is_generating_mipmaps)
+		{
+			check_hresult(GenerateMipMaps(new_image, TEX_FILTER_FLAGS::TEX_FILTER_DEFAULT, 0, mipmap_chain));
+
+			md = mipmap_chain.GetMetadata();
+			image_count = mipmap_chain.GetImageCount();
+			images = mipmap_chain.GetImages();
+		}
+		else
+		{
+			images = &new_image;
+			md.arraySize = 1;
+			md.depth = 1;
+			md.dimension = TEX_DIMENSION::TEX_DIMENSION_TEXTURE2D;
+			md.format = new_image.format;
+			md.mipLevels = 1;
+			md.height = new_image.height;
+			md.width = new_image.width;
+			md.miscFlags = DDS_FLAGS::DDS_FLAGS_NONE;
+			md.miscFlags2 = DDS_FLAGS::DDS_FLAGS_NONE;
+		}
+
+		Blob new_blob;
+		check_hresult(SaveToDDSMemory(images, image_count, md, DDS_FLAGS::DDS_FLAGS_NONE, new_blob));
+
+		if (is_saving_to_file)
+		{
+			auto folder = Windows::Storage::ApplicationData::Current().LocalFolder().Path();
+			//Windows::Foundation::DateTime dt = winrt::clock::now();
+			//winrt::clock::to_time_t(dt);
+
+			hstring new_file_name = file.Name() + L"_" + L".dds";
+			auto file_dest = folder + new_file_name;
+			check_hresult(SaveToDDSFile(images, image_count, md, DDS_FLAGS::DDS_FLAGS_NONE, file_dest.data()));
+		}
+		new_texture = graphics::texture();
+		new_texture.file_name(file.Name());
+		new_texture.texture_name(file.Name());
+		new_texture.alpha_mode(in_alpha_mode);
+		new_texture.mip_levels(md.mipLevels);
+		new_texture.dimension(get_dimension(D3D12_RESOURCE_DIMENSION::D3D12_RESOURCE_DIMENSION_TEXTURE2D));
+		new_texture.width(new_image.width);
+		new_texture.height(new_image.height);
+		new_texture.row_pitch(new_image.rowPitch);
+		new_texture.slice_pitch(new_image.slicePitch);
+
+		std::vector<D3D12_SUBRESOURCE_DATA> subresources;
+
+		check_hresult(LoadDDSTextureFromMemory(
+			g_device,
+			reinterpret_cast<uint8_t*>(new_blob.GetBufferPointer()),
+			new_blob.GetBufferSize(),
+			new_texture.as<graphics::implementation::texture>()->texture_default_buffer.put(),
+			subresources));
+
+		co_await upload_to_gpu(new_texture, subresources, new_image.format);
+
+		auto new_mipmaps = single_threaded_observable_vector<IInspectable>();
+		co_await create_subresources_for_ui(subresources, new_mipmaps, new_image.format, new_image.width);
+		new_texture.mipmaps(new_mipmaps);
+
+		SoftwareBitmap new_software_bitmap = co_await decoder.GetSoftwareBitmapAsync();
+		new_software_bitmap = SoftwareBitmap::Convert(new_software_bitmap, BitmapPixelFormat::Bgra8, BitmapAlphaMode::Premultiplied);
+		Windows::UI::Xaml::Media::Imaging::SoftwareBitmapSource new_bitmap_source;
+		co_await new_bitmap_source.SetBitmapAsync(new_software_bitmap);
+		new_texture.bitmap_source(new_bitmap_source);
+
+		m_textures[file.Name()] = new_texture;
 
 		result.status = operation_status::success;
 		co_return result;
@@ -987,7 +986,7 @@ namespace winrt::graphics::implementation
 		D3D12_DESCRIPTOR_HEAP_DESC srv_heap_desc = {};
 		srv_heap_desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAGS::D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		srv_heap_desc.NodeMask = 0;
-		srv_heap_desc.NumDescriptors = 2;
+		srv_heap_desc.NumDescriptors = 10;
 		srv_heap_desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE::D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 
 		check_hresult(
@@ -1109,7 +1108,7 @@ namespace winrt::graphics::implementation
 		//recreate the texture's range
 		D3D12_DESCRIPTOR_RANGE textures_range = {};
 		textures_range.BaseShaderRegister = 0;
-		textures_range.NumDescriptors = 2;
+		textures_range.NumDescriptors = 10;
 		textures_range.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
 		textures_range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE::D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 		textures_range.RegisterSpace = 0;

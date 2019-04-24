@@ -10,7 +10,6 @@ namespace wzrd_editor
 		Windows.Foundation.Collections.IObservableVector<IInspectable> textures;
 		Windows.Foundation.Collections.IObservableVector<IInspectable> shaders;
 		Windows.Foundation.Collections.IObservableVector<IInspectable> address_modes;
-		//Windows.Foundation.Collections.IObservableVector<IInspectable> mipmaps;
 		Windows.Foundation.Collections.IObservableVector<IInspectable> minification_filters;
 		Windows.Foundation.Collections.IObservableVector<IInspectable> magnification_filters;
 		Windows.Foundation.Collections.IObservableVector<IInspectable> miplevel_sampling_filters;

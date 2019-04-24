@@ -35,15 +35,15 @@ namespace graphics
 		void initialize_buffers_showcase(Windows.UI.Xaml.Controls.SwapChainPanel target_swapchain);
 		void initialize_textures_showcase(Windows.UI.Xaml.Controls.SwapChainPanel target_swapchain);
 		void clear_shaders();
-		Windows.Foundation.IAsyncOperationWithProgress<operation_result, String> create_dds_textures(
-			Windows.Foundation.Collections.IVectorView<Windows.Storage.StorageFile> files,  
+		Windows.Foundation.IAsyncOperationWithProgress<operation_result, String> create_dds_texture(
+			Windows.Storage.StorageFile file,  
 			String name, 
 			UInt64 width, 
 			UInt64 height, 
-			alpha_mode alpha_mode, 
+			alpha_mode in_alpha_mode, 
 			Boolean is_generating_mipmaps, 
 			Boolean is_saving_to_file, 
-			out IObservableVector<graphics.texture> new_textures);
+			out graphics.texture new_texture);
 		void clear_textures();
 		void remove_texture(String name);
 		void remove_shader(String name);

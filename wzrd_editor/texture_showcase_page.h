@@ -18,13 +18,13 @@
 #include "utilities.h"
 #include "texture_vm.h"
 #include "../os_utilities/os_utilities.h"
-#include <chrono>
 
 namespace winrt::wzrd_editor::implementation
 {
 	struct texture_showcase_page : texture_showcase_pageT<texture_showcase_page>
 	{
 		texture_showcase_page();
+		~texture_showcase_page();
 
 		IAsyncAction render_onclick(Windows::Foundation::IInspectable const& sender, Windows::UI::Xaml::RoutedEventArgs const& args);
 		IAsyncAction onclick_vertexshader_picker(Windows::Foundation::IInspectable const & sender, Windows::UI::Xaml::RoutedEventArgs const & args);

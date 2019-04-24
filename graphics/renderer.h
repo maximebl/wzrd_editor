@@ -88,15 +88,15 @@ namespace winrt::graphics::implementation
 		Windows::Foundation::IAsyncOperation<graphics::operation_result> pick_and_compile_shader(graphics::shader new_shader);
 
 		Windows::Foundation::IAsyncOperationWithProgress<graphics::operation_result, hstring> pick_texture(graphics::texture& new_texture, hstring name);
-		Windows::Foundation::IAsyncOperationWithProgress<graphics::operation_result, hstring> create_dds_textures(
-			Windows::Foundation::Collections::IVectorView<Windows::Storage::StorageFile> const& files,
-			hstring name,
-			uint64_t width,
-			uint64_t height,
-			graphics::alpha_mode const& alpha_mode,
-			bool is_generating_mipmaps,
-			bool is_saving_to_file,
-			Windows::Foundation::Collections::IObservableVector<graphics::texture>& new_textures);
+		Windows::Foundation::IAsyncOperationWithProgress<graphics::operation_result, hstring> create_dds_texture(
+			Windows::Storage::StorageFile const file, 
+			hstring const name, 
+			uint64_t width, 
+			uint64_t height, 
+			graphics::alpha_mode const in_alpha_mode, 
+			bool is_generating_mipmaps, 
+			bool is_saving_to_file, 
+			graphics::texture& new_texture);
 		graphics::primitive_types current_topology();
 		void current_topology(graphics::primitive_types const& value);
 

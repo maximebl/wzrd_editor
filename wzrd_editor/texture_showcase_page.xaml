@@ -67,42 +67,6 @@
                             <TextBlock x:Name="texture_file_name" Text="{x:Bind current_texture.file_name, Mode=OneWay}" RelativePanel.Below="file_name_label" />
                         </RelativePanel>
 
-                        <NavigationViewItemSeparator/>
-
-                        <RelativePanel Margin="0,5,0,0" >
-                            <TextBlock x:Name="alpha_mode_label" FontWeight="Bold" Text="Alpha mode" />
-                            <TextBlock x:Name="alpha_mode" Text="{x:Bind current_texture.alpha_mode, Mode=OneWay, Converter={StaticResource alphamode_to_string_converter}}" RelativePanel.Below="alpha_mode_label" />
-                        </RelativePanel>
-
-                        <RelativePanel Margin="0,5,0,0" >
-                            <TextBlock x:Name="mip_levels_label" FontWeight="Bold" Text="Mip levels" />
-                            <TextBlock x:Name="mip_levels" Text="{x:Bind current_texture.mip_levels, Mode=OneWay}" RelativePanel.Below="mip_levels_label" />
-                        </RelativePanel>
-
-                        <RelativePanel Margin="0,5,0,0" >
-                            <TextBlock x:Name="width_label" FontWeight="Bold" Text="Width" />
-                            <TextBlock x:Name="width" Text="{x:Bind current_texture.width, Mode=OneWay}" RelativePanel.Below="width_label" />
-                        </RelativePanel>
-
-                        <RelativePanel Margin="0,5,0,0" >
-                            <TextBlock x:Name="height_label" FontWeight="Bold" Text="Height" />
-                            <TextBlock x:Name="height" Text="{x:Bind current_texture.height, Mode=OneWay}" RelativePanel.Below="height_label" />
-                        </RelativePanel>
-
-                        <RelativePanel Margin="0,5,0,0" >
-                            <TextBlock x:Name="dimension_label" FontWeight="Bold" Text="Dimension" />
-                            <TextBlock x:Name="dimension" Text="{x:Bind current_texture.dimension, Mode=OneWay}" RelativePanel.Below="dimension_label" />
-                        </RelativePanel>
-
-                        <RelativePanel Margin="0,5,0,0" >
-                            <TextBlock x:Name="row_pitch_label" FontWeight="Bold" Text="Row pitch" />
-                            <TextBlock x:Name="row_pitch" Text="{x:Bind current_texture.row_pitch, Mode=OneWay}" RelativePanel.Below="row_pitch_label" />
-                        </RelativePanel>
-
-                        <RelativePanel Margin="0,5,0,0" >
-                            <TextBlock x:Name="slice_pitch_label" FontWeight="Bold" Text="Slice pitch" />
-                            <TextBlock x:Name="slice_pitch" Text="{x:Bind current_texture.slice_pitch, Mode=OneWay}" RelativePanel.Below="slice_pitch_label" />
-                        </RelativePanel>
                     </StackPanel>
                 </StackPanel>
             </ListViewItem>
@@ -165,7 +129,7 @@
         </DataTemplate>
     </Page.Resources>
 
-    <SplitView x:Name="split_pane" IsPaneOpen="False" DisplayMode="Inline" OpenPaneLength="800">
+    <SplitView x:Name="split_pane" IsPaneOpen="False" DisplayMode="Inline" OpenPaneLength="512">
 
         <VisualStateManager.VisualStateGroups>
             <VisualStateGroup>
@@ -236,250 +200,304 @@
                             <AppBarButton x:Name="appbarbutton_delete_texture" Icon="Delete" Label="Delete" Click="delete_selected_texture" IsEnabled="False"/>
                         </CommandBar>
 
-                        <ListView x:Name="textures_list" 
+                        <RelativePanel>
+                            <ListView x:Name="textures_list" 
                                   SelectionChanged="texture_selection_changed"
                                   HorizontalAlignment="Left"
                                   ItemTemplate="{StaticResource textures_list_template}"
                                   ItemsSource="{x:Bind texture_showcase_vm.textures}"
                                   VerticalContentAlignment="Stretch"
-                                  HorizontalContentAlignment="Stretch" >
+                                  HorizontalContentAlignment="Stretch">
 
-                            <ListView.ItemContainerTransitions>
-                                <TransitionCollection>
-                                    <AddDeleteThemeTransition />
-                                    <RepositionThemeTransition />
+                                <ListView.ItemContainerTransitions>
+                                    <TransitionCollection>
+                                        <AddDeleteThemeTransition />
+                                        <RepositionThemeTransition />
+                                        <EntranceThemeTransition IsStaggeringEnabled="True" />
+                                    </TransitionCollection>
+                                </ListView.ItemContainerTransitions>
+                                <ListView.Resources>
+                                    <Style TargetType="ListViewItem">
+                                        <Setter Property="VerticalAlignment" Value="Stretch"></Setter>
+                                        <Setter Property="VerticalContentAlignment" Value="Stretch"></Setter>
+                                        <Setter Property="MaxHeight" Value="1000"></Setter>
+                                        <Setter Property="MaxWidth" Value="1000"></Setter>
+                                        <Setter Property="Width" Value="*"></Setter>
+                                    </Style>
+                                    <Style TargetType="Image">
+                                        <Setter Property="Width" Value="100"></Setter>
+                                        <Setter Property="Height" Value="100"></Setter>
+                                        <Setter Property="VerticalAlignment" Value="Top"></Setter>
+                                        <Setter Property="HorizontalAlignment" Value="Left"></Setter>
+                                    </Style>
+                                </ListView.Resources>
+                            </ListView>
+
+
+                            <StackPanel x:Name="dds_creation_form" Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Stretch" Visibility="Collapsed" RelativePanel.RightOf="textures_list">
+                                <StackPanel.ChildrenTransitions>
+                                    <RepositionThemeTransition/>
                                     <EntranceThemeTransition IsStaggeringEnabled="True" />
-                                </TransitionCollection>
-                            </ListView.ItemContainerTransitions>
-                            <ListView.Resources>
-                                <Style TargetType="ListViewItem">
-                                    <Setter Property="VerticalAlignment" Value="Stretch"></Setter>
-                                    <Setter Property="VerticalContentAlignment" Value="Stretch"></Setter>
-                                    <Setter Property="MaxHeight" Value="1000"></Setter>
-                                    <Setter Property="MaxWidth" Value="1000"></Setter>
-                                    <Setter Property="Width" Value="*"></Setter>
-                                </Style>
-                                <Style TargetType="Image">
-                                    <Setter Property="Width" Value="100"></Setter>
-                                    <Setter Property="Height" Value="100"></Setter>
-                                    <Setter Property="VerticalAlignment" Value="Top"></Setter>
-                                    <Setter Property="HorizontalAlignment" Value="Left"></Setter>
-                                </Style>
-                            </ListView.Resources>
-                        </ListView>
+                                </StackPanel.ChildrenTransitions>
 
-                        <StackPanel x:Name="dds_creation_form" Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Stretch" Visibility="Collapsed">
-                            <StackPanel.ChildrenTransitions>
-                                <RepositionThemeTransition/>
-                                <EntranceThemeTransition IsStaggeringEnabled="True" />
-                            </StackPanel.ChildrenTransitions>
-
-                            <Slider x:Name="width" Header="Width" Width="auto" Orientation="Horizontal" 
+                                <Slider x:Name="width" Header="Width" Width="auto" Orientation="Horizontal" 
                                 Value="{x:Bind texture_showcase_vm.dds_creation_vm.width, Mode=TwoWay}" Minimum="4" Maximum="512" StepFrequency="2" TickFrequency="2" SnapsTo="StepValues" TickPlacement="None" />
-                            <Slider x:Name="height" Header="Height" Width="auto" Orientation="Horizontal" 
+                                <Slider x:Name="height" Header="Height" Width="auto" Orientation="Horizontal" 
                                 Value="{x:Bind texture_showcase_vm.dds_creation_vm.height, Mode=TwoWay}" Minimum="4" Maximum="512" StepFrequency="2" TickFrequency="2" SnapsTo="StepValues" TickPlacement="None" />
 
-                            <CheckBox x:Name="chk_generate_mipmaps" Content="Generate mipmaps" IsChecked="{x:Bind texture_showcase_vm.dds_creation_vm.is_generating_mipmaps, Mode=TwoWay}"/>
+                                <CheckBox x:Name="chk_generate_mipmaps" Content="Generate mipmaps" IsChecked="{x:Bind texture_showcase_vm.dds_creation_vm.is_generating_mipmaps, Mode=TwoWay}"/>
 
-                            <CheckBox x:Name="chk_save_to_file" Content="Save to a file" IsChecked="{x:Bind texture_showcase_vm.dds_creation_vm.is_saving_to_file, Mode=TwoWay}"/>
+                                <CheckBox x:Name="chk_save_to_file" Content="Save to a file" IsChecked="{x:Bind texture_showcase_vm.dds_creation_vm.is_saving_to_file, Mode=TwoWay}"/>
 
-                            <CheckBox x:Name="chk_is_texture_array" Content="create as a texture array" IsChecked="{x:Bind texture_showcase_vm.dds_creation_vm.is_texture_array, Mode=TwoWay}"/>
+                                <CheckBox x:Name="chk_is_texture_array" Content="create as a texture array" IsChecked="{x:Bind texture_showcase_vm.dds_creation_vm.is_texture_array, Mode=TwoWay}"/>
 
-                            <TextBox Text="{x:Bind texture_showcase_vm.dds_creation_vm.texture_name, Mode=TwoWay}" Header="Texture name"/>
+                                <TextBox Text="{x:Bind texture_showcase_vm.dds_creation_vm.texture_name, Mode=TwoWay}" Header="Texture name"/>
 
-                            <ComboBox Header="Alpha mode" PlaceholderText="Choose an alpha mode" Width="auto"
+                                <ComboBox Header="Alpha mode" PlaceholderText="Choose an alpha mode" Width="auto"
                               SelectedIndex="0"
                               ItemsSource="{x:Bind texture_showcase_vm.dds_creation_vm.alpha_modes, Mode=OneTime}" DisplayMemberPath="attribute_name"/>
 
-                            <Button Content="Create" Click="onclick_create_dds"/>
-                        </StackPanel>
-
-                        <StackPanel x:Name="current_texture_controls" Orientation="Vertical" Visibility="Collapsed">
-                            <Slider x:Name="viewport_width" Header="Viewport width" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_renderer.viewport_width, Mode=TwoWay}" Minimum="0" Maximum="1000" StepFrequency="1" TickFrequency="1" SnapsTo="StepValues" TickPlacement="None" />
-                            <Slider x:Name="viewport_height" Header="Viewport height" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_renderer.viewport_height, Mode=TwoWay}" Minimum="0" Maximum="1000" StepFrequency="1" TickFrequency="1" SnapsTo="StepValues" TickPlacement="None" />
-                            <CheckBox x:Name="chk_is_screen_coords" Content="Use screen coordinates" IsChecked="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.is_screen_coords, Mode=TwoWay}"/>
-
-                            <Slider x:Name="x_pixel_offset" Header="X pixel offset" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.x_pixel_offset, Mode=TwoWay}" Minimum="-10" Maximum="10" StepFrequency="1" TickFrequency="1" SnapsTo="StepValues" TickPlacement="None" />
-                            <Slider x:Name="y_pixel_offset" Header="Y pixel offset" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.y_pixel_offset, Mode=TwoWay}" Minimum="-10" Maximum="10" StepFrequency="1" TickFrequency="1" SnapsTo="StepValues" TickPlacement="None" />
-
-                            <Grid Width="600" HorizontalAlignment="Left">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <Grid.RowDefinitions>
-                                    <RowDefinition Height="*"/>
-                                    <RowDefinition Height="*"/>
-                                </Grid.RowDefinitions>
-
-                                <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="0">
-                                    <TextBlock FontWeight="ExtraBlack" Text="Top left"/>
-                                    <Border BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundListMediumRevealBorderBrush}" Padding="3,3,3,3">
-                                        <StackPanel Orientation="Vertical">
-                                            <Slider x:Name="topleft_u" Header="texture u" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.topleft_u, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01"  TickFrequency="0.01" TickPlacement="None" />
-                                            <Slider x:Name="topleft_v" Header="texture v" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.topleft_v, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01"  TickFrequency="0.01" TickPlacement="None" />
-                                            <Slider x:Name="topleft_x" Header="vertex x" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.topleft_x, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01"  TickFrequency="0.01" TickPlacement="None" />
-                                            <Slider x:Name="topleft_y" Header="vertex y" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.topleft_y, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01"  TickFrequency="0.01" TickPlacement="None" />
-                                        </StackPanel>
-                                    </Border>
-                                </StackPanel>
-
-                                <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="0">
-                                    <TextBlock FontWeight="ExtraBlack" Text="Top right"/>
-                                    <Border BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundListMediumRevealBorderBrush}" Padding="3,3,3,3">
-                                        <StackPanel Orientation="Vertical">
-                                            <Slider x:Name="topright_u" Header="texture u" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.topright_u, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
-                                            <Slider x:Name="topright_v" Header="texture v" Width="auto"  Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.topright_v, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
-                                            <Slider x:Name="topright_x" Header="vertex x" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.topright_x, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
-                                            <Slider x:Name="topright_y" Header="vertex y" Width="auto"  Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.topright_y, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
-                                        </StackPanel>
-                                    </Border>
-                                </StackPanel>
-
-                                <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="1">
-                                    <TextBlock FontWeight="ExtraBlack" Text="Bottom left"/>
-                                    <Border BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundListMediumRevealBorderBrush}" Padding="3,3,3,3">
-                                        <StackPanel Orientation="Vertical">
-                                            <Slider x:Name="bottomleft_u" Header="texture u" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.bottomleft_u, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
-                                            <Slider x:Name="bottomleft_v" Header="texture v" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.bottomleft_v, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
-                                            <Slider x:Name="bottomleft_x" Header="vertex x" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.bottomleft_x, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
-                                            <Slider x:Name="bottomleft_y" Header="vertex y" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.bottomleft_y, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
-                                        </StackPanel>
-                                    </Border>
-                                </StackPanel>
-
-                                <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="1">
-                                    <TextBlock FontWeight="ExtraBlack" Text="Bottom right"/>
-                                    <Border BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundListMediumRevealBorderBrush}" Padding="3,3,3,3">
-                                        <StackPanel Orientation="Vertical">
-                                            <Slider x:Name="bottomright_u" Header="texture u" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.bottomright_u, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None"/>
-                                            <Slider x:Name="bottomright_v" Header="texture v" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.bottomright_v, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
-                                            <Slider x:Name="bottomright_x" Header="vertex x" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.bottomright_x, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None"/>
-                                            <Slider x:Name="bottomright_y" Header="vertex y" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.bottomright_y, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
-                                        </StackPanel>
-                                    </Border>
-                                </StackPanel>
-
-                            </Grid>
+                                <Button Content="Create" Click="onclick_create_dds"/>
+                            </StackPanel>
 
 
-                            <RelativePanel>
-                                <StackPanel x:Name="scale_lod_sliders" Orientation="Vertical" Width="300">
-                                    <RelativePanel x:Name="scale_slider">
-                                        <TextBlock x:Name="scale_label" Text="Scale" HorizontalAlignment="Left" />
-                                        <TextBlock x:Name="scale_text_value" Text="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.scale, Mode=OneWay}" HorizontalAlignment="Right"
-                                               RelativePanel.AlignRightWithPanel="True"
-                                               RelativePanel.RightOf="scale_label" />
 
-                                        <Slider x:Name="Scale" 
-                                            Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.scale, Mode=TwoWay}" Orientation="Horizontal" Minimum="0" Maximum="10" StepFrequency="0.001" TickFrequency="0.001" SnapsTo="Ticks" TickPlacement="None"
-                                            RelativePanel.Below="scale_label" 
-                                            RelativePanel.AlignRightWith="scale_text_value"
-                                            RelativePanel.AlignLeftWith="scale_label" />
-                                    </RelativePanel>
+                            <StackPanel x:Name="current_texture_controls" Orientation="Vertical" Visibility="Collapsed" RelativePanel.RightOf="dds_creation_form">
+
+                                <RelativePanel>
+
+                                    <StackPanel x:Name="texture_info" Orientation="Vertical" Visibility="{x:Bind texture_showcase_vm.current_texture_vm.is_loading , Converter={StaticResource bool_to_visibility_inverted_converter}, Mode=OneWay}">
+                                        <StackPanel.ChildrenTransitions>
+                                            <RepositionThemeTransition/>
+                                            <EntranceThemeTransition IsStaggeringEnabled="True" />
+                                        </StackPanel.ChildrenTransitions>
+
+                                        <NavigationViewItemSeparator/>
+
+                                        <RelativePanel >
+                                            <TextBlock x:Name="texture_name_label" FontWeight="Bold" Text="Texture name" />
+                                            <TextBlock x:Name="texture_name" Text="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.texture_name, Mode=OneWay}" RelativePanel.Below="texture_name_label" />
+                                        </RelativePanel>
+
+                                        <RelativePanel >
+                                            <TextBlock x:Name="file_name_label" FontWeight="Bold" Text="File name" />
+                                            <TextBlock x:Name="texture_file_name" Text="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.file_name, Mode=OneWay}" RelativePanel.Below="file_name_label" />
+                                        </RelativePanel>
+
+                                        <NavigationViewItemSeparator/>
+
+                                        <RelativePanel Margin="0,5,0,0" >
+                                            <TextBlock x:Name="alpha_mode_label" FontWeight="Bold" Text="Alpha mode" />
+                                            <TextBlock x:Name="alpha_mode" Text="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.alpha_mode, Mode=OneWay, Converter={StaticResource alphamode_to_string_converter}}" RelativePanel.Below="alpha_mode_label" />
+                                        </RelativePanel>
+
+                                        <RelativePanel Margin="0,5,0,0" >
+                                            <TextBlock x:Name="mip_levels_label" FontWeight="Bold" Text="Mip levels" />
+                                            <TextBlock Text="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.mip_levels, Mode=OneWay}" RelativePanel.Below="mip_levels_label" />
+                                        </RelativePanel>
+
+                                        <RelativePanel Margin="0,5,0,0" >
+                                            <TextBlock x:Name="width_label" FontWeight="Bold" Text="Width" />
+                                            <TextBlock Text="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.width, Mode=OneWay}" RelativePanel.Below="width_label" />
+                                        </RelativePanel>
+
+                                        <RelativePanel Margin="0,5,0,0" >
+                                            <TextBlock x:Name="height_label" FontWeight="Bold" Text="Height" />
+                                            <TextBlock Text="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.height, Mode=OneWay}" RelativePanel.Below="height_label" />
+                                        </RelativePanel>
+
+                                        <RelativePanel Margin="0,5,0,0" >
+                                            <TextBlock x:Name="dimension_label" FontWeight="Bold" Text="Dimension" />
+                                            <TextBlock Text="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.dimension, Mode=OneWay}" RelativePanel.Below="dimension_label" />
+                                        </RelativePanel>
+
+                                        <RelativePanel Margin="0,5,0,0" >
+                                            <TextBlock x:Name="row_pitch_label" FontWeight="Bold" Text="Row pitch" />
+                                            <TextBlock Text="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.row_pitch, Mode=OneWay}" RelativePanel.Below="row_pitch_label" />
+                                        </RelativePanel>
+
+                                        <RelativePanel Margin="0,5,0,0" >
+                                            <TextBlock x:Name="slice_pitch_label" FontWeight="Bold" Text="Slice pitch" />
+                                            <TextBlock Text="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.slice_pitch, Mode=OneWay}" RelativePanel.Below="slice_pitch_label" />
+                                        </RelativePanel>
+                                    </StackPanel>
 
 
-                                    <RelativePanel x:Name="lod_slider">
-                                        <TextBlock x:Name="lod_label" Text="Level of detail" HorizontalAlignment="Left"/>
-                                        <TextBlock x:Name="lod_text_value" Text="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.current_lod, Mode=OneWay}" HorizontalAlignment="Right"
-                                               RelativePanel.AlignRightWithPanel="True"
-                                               RelativePanel.RightOf="lod_label" />
+                                    <StackPanel x:Name="coordinate_info" RelativePanel.RightOf="texture_info">
+                                        <Slider x:Name="viewport_width" Header="Viewport width" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_renderer.viewport_width, Mode=TwoWay}" Minimum="0" Maximum="1000" StepFrequency="1" TickFrequency="1" SnapsTo="StepValues" TickPlacement="None" />
+                                        <Slider x:Name="viewport_height" Header="Viewport height" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_renderer.viewport_height, Mode=TwoWay}" Minimum="0" Maximum="1000" StepFrequency="1" TickFrequency="1" SnapsTo="StepValues" TickPlacement="None" />
+                                        <CheckBox x:Name="chk_is_screen_coords" Content="Use screen coordinates" IsChecked="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.is_screen_coords, Mode=TwoWay}"/>
 
-                                        <Slider x:Name="current_lod" 
-                                            IsEnabled="False" 
-                                            Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.current_lod, Mode=TwoWay}" Orientation="Horizontal" Minimum="0" Maximum="10" StepFrequency="0.01" TickFrequency="1" SnapsTo="StepValues" TickPlacement="None"
-                                            RelativePanel.Below="lod_label"
-                                            RelativePanel.AlignRightWith="lod_text_value"
-                                            RelativePanel.AlignLeftWith="lod_label" />
-                                    </RelativePanel>
-                                </StackPanel>
+                                        <Slider x:Name="x_pixel_offset" Header="X pixel offset" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.x_pixel_offset, Mode=TwoWay}" Minimum="-10" Maximum="10" StepFrequency="1" TickFrequency="1" SnapsTo="StepValues" TickPlacement="None" />
+                                        <Slider x:Name="y_pixel_offset" Header="Y pixel offset" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.y_pixel_offset, Mode=TwoWay}" Minimum="-10" Maximum="10" StepFrequency="1" TickFrequency="1" SnapsTo="StepValues" TickPlacement="None" />
 
-                                <FlipView 
-                                  x:Name="flipview"
-                                  MaxWidth="1100" 
-                                  MaxHeight="1100"
-                                  IsEnabled="False"
-                                  SelectedIndex="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.current_lod, Converter={StaticResource float_to_int_converter}, Mode=OneWay}" 
-                                  ItemTemplate="{StaticResource mipmaps_template}" 
-                                  ItemsSource="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.mipmaps, Mode=OneTime}"
-                                  RelativePanel.RightOf="scale_lod_sliders"/>
-                            </RelativePanel>
+                                        <Grid Width="600" HorizontalAlignment="Left">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="*"/>
+                                                <RowDefinition Height="*"/>
+                                            </Grid.RowDefinitions>
 
-                            <RelativePanel>
-                                <ColorPicker x:Name="sampler_bordercolor" Color="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.sampler_border_color, Mode=TwoWay}" 
+                                            <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="0">
+                                                <TextBlock FontWeight="ExtraBlack" Text="Top left"/>
+                                                <Border BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundListMediumRevealBorderBrush}" Padding="3,3,3,3">
+                                                    <StackPanel Orientation="Vertical">
+                                                        <Slider x:Name="topleft_u" Header="texture u" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.topleft_u, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01"  TickFrequency="0.01" TickPlacement="None" />
+                                                        <Slider x:Name="topleft_v" Header="texture v" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.topleft_v, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01"  TickFrequency="0.01" TickPlacement="None" />
+                                                        <Slider x:Name="topleft_x" Header="vertex x" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.topleft_x, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01"  TickFrequency="0.01" TickPlacement="None" />
+                                                        <Slider x:Name="topleft_y" Header="vertex y" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.topleft_y, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01"  TickFrequency="0.01" TickPlacement="None" />
+                                                    </StackPanel>
+                                                </Border>
+                                            </StackPanel>
+
+                                            <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="0">
+                                                <TextBlock FontWeight="ExtraBlack" Text="Top right"/>
+                                                <Border BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundListMediumRevealBorderBrush}" Padding="3,3,3,3">
+                                                    <StackPanel Orientation="Vertical">
+                                                        <Slider x:Name="topright_u" Header="texture u" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.topright_u, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
+                                                        <Slider x:Name="topright_v" Header="texture v" Width="auto"  Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.topright_v, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
+                                                        <Slider x:Name="topright_x" Header="vertex x" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.topright_x, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
+                                                        <Slider x:Name="topright_y" Header="vertex y" Width="auto"  Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.topright_y, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
+                                                    </StackPanel>
+                                                </Border>
+                                            </StackPanel>
+
+                                            <StackPanel Orientation="Vertical" Grid.Column="0" Grid.Row="1">
+                                                <TextBlock FontWeight="ExtraBlack" Text="Bottom left"/>
+                                                <Border BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundListMediumRevealBorderBrush}" Padding="3,3,3,3">
+                                                    <StackPanel Orientation="Vertical">
+                                                        <Slider x:Name="bottomleft_u" Header="texture u" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.bottomleft_u, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
+                                                        <Slider x:Name="bottomleft_v" Header="texture v" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.bottomleft_v, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
+                                                        <Slider x:Name="bottomleft_x" Header="vertex x" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.bottomleft_x, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
+                                                        <Slider x:Name="bottomleft_y" Header="vertex y" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.bottomleft_y, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
+                                                    </StackPanel>
+                                                </Border>
+                                            </StackPanel>
+
+                                            <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="1">
+                                                <TextBlock FontWeight="ExtraBlack" Text="Bottom right"/>
+                                                <Border BorderThickness="1" BorderBrush="{ThemeResource SystemControlBackgroundListMediumRevealBorderBrush}" Padding="3,3,3,3">
+                                                    <StackPanel Orientation="Vertical">
+                                                        <Slider x:Name="bottomright_u" Header="texture u" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.bottomright_u, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None"/>
+                                                        <Slider x:Name="bottomright_v" Header="texture v" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.bottomright_v, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
+                                                        <Slider x:Name="bottomright_x" Header="vertex x" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.bottomright_x, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None"/>
+                                                        <Slider x:Name="bottomright_y" Header="vertex y" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.bottomright_y, Mode=TwoWay}" Minimum="-2.0" Maximum="2.0" StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
+                                                    </StackPanel>
+                                                </Border>
+                                            </StackPanel>
+                                        </Grid>
+                                    </StackPanel>
+
+                                    <StackPanel x:Name="sampler_info" RelativePanel.RightOf="coordinate_info">
+                                        <RelativePanel>
+                                            <ColorPicker x:Name="sampler_bordercolor" Color="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.sampler_border_color, Mode=TwoWay}" 
                                             IsColorSliderVisible="False" IsColorChannelTextInputVisible="False" IsAlphaEnabled="False" IsAlphaSliderVisible="False" 
                                             RelativePanel.RightOf="texture_coords_sliders" />
 
-                                <StackPanel x:Name="texture_coords_sliders" Orientation="Vertical" Width="300">
-                                    <Slider x:Name="sampler_maxLOD" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.sampler_maxLOD, Mode=TwoWay}" Header="Max LOD" Width="auto" Orientation="Horizontal" Maximum="10" Minimum="{Binding Value, ElementName=sampler_minLOD}" 
-                                            StepFrequency="0.1" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
+                                            <StackPanel x:Name="texture_coords_sliders" Orientation="Vertical" Width="300">
+                                                <RelativePanel x:Name="scale_slider">
+                                                    <TextBlock x:Name="scale_label" Text="Scale" HorizontalAlignment="Left" />
+                                                    <TextBlock x:Name="scale_text_value" Text="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.scale, Mode=OneWay}" HorizontalAlignment="Right"
+                                                       RelativePanel.AlignRightWithPanel="True"
+                                                       RelativePanel.RightOf="scale_label" />
 
-                                    <Slider x:Name="sampler_minLOD" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.sampler_minLOD, Mode=TwoWay}" Header="Min LOD" Width="auto" Orientation="Horizontal" Minimum="0" Maximum="10.0" 
-                                            StepFrequency="0.1" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
+                                                    <Slider x:Name="Scale" 
+                                                        Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.scale, Mode=TwoWay}" Orientation="Horizontal" Minimum="0" Maximum="10" StepFrequency="0.001" TickFrequency="0.001" SnapsTo="Ticks" TickPlacement="None"
+                                                        RelativePanel.Below="scale_label" 
+                                                        RelativePanel.AlignRightWith="scale_text_value"
+                                                        RelativePanel.AlignLeftWith="scale_label" />
+                                                </RelativePanel>
 
-                                    <StackPanel Orientation="Horizontal">
-                                        <CheckBox x:Name="chk_force_miplevel" Content="Force mip level" IsChecked="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.is_forced_mip_level, Mode=TwoWay}"/>
 
-                                        <Slider x:Name="force_miplevel" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.forced_miplevel, Mode=TwoWay}" Header="Mip-level to force" Width="auto" Orientation="Horizontal" Minimum="0" Maximum="{Binding Value, ElementName=sampler_maxLOD}" 
-                                            StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" IsEnabled="{Binding IsChecked, ElementName=chk_force_miplevel}"/>
+                                                <RelativePanel x:Name="lod_slider">
+                                                    <TextBlock x:Name="lod_label" Text="Level of detail" HorizontalAlignment="Left"/>
+                                                    <TextBlock x:Name="lod_text_value" Text="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.current_lod, Mode=OneWay}" HorizontalAlignment="Right"
+                                                       RelativePanel.AlignRightWithPanel="True"
+                                                       RelativePanel.RightOf="lod_label" />
+
+                                                    <Slider x:Name="current_lod" 
+                                                        IsEnabled="False" 
+                                                        Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.current_lod, Mode=TwoWay}" Orientation="Horizontal" Minimum="0" Maximum="10" StepFrequency="0.01" TickFrequency="1" SnapsTo="StepValues" TickPlacement="None"
+                                                        RelativePanel.Below="lod_label"
+                                                        RelativePanel.AlignRightWith="lod_text_value"
+                                                        RelativePanel.AlignLeftWith="lod_label" />
+                                                </RelativePanel>
+
+                                                <Slider x:Name="sampler_maxLOD" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.sampler_maxLOD, Mode=TwoWay}" Header="Max LOD" Width="auto" Orientation="Horizontal" Maximum="10" Minimum="{Binding Value, ElementName=sampler_minLOD}" 
+                                                    StepFrequency="0.1" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
+
+                                                <Slider x:Name="sampler_minLOD" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.sampler_minLOD, Mode=TwoWay}" Header="Min LOD" Width="auto" Orientation="Horizontal" Minimum="0" Maximum="10.0" 
+                                                    StepFrequency="0.1" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
+
+                                                <StackPanel Orientation="Horizontal">
+                                                    <CheckBox x:Name="chk_force_miplevel" Content="Force mip level" IsChecked="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.is_forced_mip_level, Mode=TwoWay}"/>
+
+                                                    <Slider x:Name="force_miplevel" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.forced_miplevel, Mode=TwoWay}" Header="Mip-level to force" Width="auto" Orientation="Horizontal" Minimum="0" Maximum="{Binding Value, ElementName=sampler_maxLOD}" 
+                                                        StepFrequency="0.01" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" IsEnabled="{Binding IsChecked, ElementName=chk_force_miplevel}"/>
+                                                </StackPanel>
+
+                                                <ComboBox Header="Address Mode U" PlaceholderText="U addressing mode" Width="auto"
+                                                      SelectedIndex="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.u_address_mode, Mode=TwoWay, Converter={StaticResource enum_to_int_converter}}"
+                                                      ItemsSource="{x:Bind texture_showcase_vm.address_modes, Mode=OneTime}" DisplayMemberPath="attribute_name"/>
+
+                                                <ComboBox Header="Address Mode V" PlaceholderText="V addressing mode" Width="auto"
+                                                      SelectedIndex="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.v_address_mode, Mode=TwoWay, Converter={StaticResource enum_to_int_converter}}"
+                                                      ItemsSource="{x:Bind texture_showcase_vm.address_modes, Mode=OneTime}" DisplayMemberPath="attribute_name"/>
+
+                                                <ComboBox Header="Address Mode W" PlaceholderText="W addressing mode" Width="auto"
+                                                      SelectedIndex="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.w_address_mode, Mode=TwoWay, Converter={StaticResource enum_to_int_converter}}"
+                                                      ItemsSource="{x:Bind texture_showcase_vm.address_modes, Mode=OneTime}" DisplayMemberPath="attribute_name"/>
+                                            </StackPanel>
+                                        </RelativePanel>
+
+                                        <RelativePanel>
+                                            <StackPanel>
+                                                <ComboBox Header="Minification filter" PlaceholderText="Choose a minification filter" Width="auto" 
+                                                      IsEnabled="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.is_anisotropic,Mode=OneWay, Converter={StaticResource bool_invert_converter}}"
+                                                      ItemsSource="{x:Bind texture_showcase_vm.minification_filters, Mode=OneTime}" DisplayMemberPath="attribute_name"
+                                                      SelectedIndex="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.minification_filter, Mode=TwoWay, Converter={StaticResource enum_to_int_converter}}" />
+
+                                                <ComboBox Header="Magnification filter" PlaceholderText="Choose a magnification filter" Width="auto"
+                                                      IsEnabled="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.is_anisotropic,Mode=OneWay, Converter={StaticResource bool_invert_converter}}"
+                                                      ItemsSource="{x:Bind texture_showcase_vm.magnification_filters, Mode=OneTime}" DisplayMemberPath="attribute_name" 
+                                                      SelectedIndex="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.magnification_filter, Mode=TwoWay, Converter={StaticResource enum_to_int_converter}}"/>
+
+                                                <ComboBox Header="Mip-level filter" PlaceholderText="Choose a mip-level filter" Width="auto"
+                                                      IsEnabled="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.is_anisotropic,Mode=OneWay, Converter={StaticResource bool_invert_converter}}"
+                                                      ItemsSource="{x:Bind texture_showcase_vm.miplevel_sampling_filters, Mode=OneTime}" DisplayMemberPath="attribute_name" 
+                                                      SelectedIndex="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.miplevel_sampling_filter, Mode=TwoWay, Converter={StaticResource enum_to_int_converter}}"/>
+
+                                                <ComboBox Header="Filter reduction type" PlaceholderText="Choose a reduction type" Width="auto"
+                                                      ItemsSource="{x:Bind texture_showcase_vm.filter_reduction_types, Mode=OneTime}" DisplayMemberPath="attribute_name" 
+                                                      SelectedIndex="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.reduction, Mode=TwoWay, Converter={StaticResource enum_to_int_converter}}"/>
+
+                                                <ComboBox Header="Filter comparison function" PlaceholderText="Choose a comparison function" Width="auto"
+                                                      ItemsSource="{x:Bind texture_showcase_vm.filter_comparisonfuncs, Mode=OneTime}" DisplayMemberPath="attribute_name" 
+                                                      SelectedIndex="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.comparison_function, Mode=TwoWay, Converter={StaticResource enum_to_int_converter}}"/>
+
+                                                <Slider x:Name="sampler_comparison_value" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.sample_comparison_value, Mode=TwoWay}" Header="Sampler comparison value" Width="auto" Orientation="Horizontal" Minimum="-100" Maximum="100.0" 
+                                                    StepFrequency="0.1" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
+
+                                                <ComboBox Header="Sampling functions" PlaceholderText="Choose a sampling function" Width="auto"
+                                                  ItemsSource="{x:Bind texture_showcase_vm.sampling_functions, Mode=OneTime}" DisplayMemberPath="attribute_name" 
+                                                  SelectedIndex="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.sampling_function, Mode=TwoWay, Converter={StaticResource enum_to_int_converter}}"/>
+
+                                                <StackPanel Orientation="Horizontal">
+
+                                                    <Slider x:Name="max_anisotropy" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.max_anisotropy, Mode=TwoWay}" Header="Max anisotropy" Width="auto" Orientation="Horizontal" Minimum="0" Maximum="16" 
+                                                        StepFrequency="1" TickFrequency="1" SnapsTo="StepValues" TickPlacement="None" />
+                                                    <RadioButton Content="Anisotropic" Tag="Anisotropic" GroupName="isotropy" IsChecked="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.is_anisotropic, Mode=TwoWay}"/>
+                                                    <RadioButton Content="Isotropic" Tag="Isotropic" GroupName="isotropy" IsChecked="True"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </RelativePanel>
                                     </StackPanel>
-
-                                    <ComboBox Header="Address Mode U" PlaceholderText="U addressing mode" Width="auto"
-                                          SelectedIndex="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.u_address_mode, Mode=TwoWay, Converter={StaticResource enum_to_int_converter}}"
-                                          ItemsSource="{x:Bind texture_showcase_vm.address_modes, Mode=OneTime}" DisplayMemberPath="attribute_name"/>
-
-                                    <ComboBox Header="Address Mode V" PlaceholderText="V addressing mode" Width="auto"
-                                          SelectedIndex="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.v_address_mode, Mode=TwoWay, Converter={StaticResource enum_to_int_converter}}"
-                                          ItemsSource="{x:Bind texture_showcase_vm.address_modes, Mode=OneTime}" DisplayMemberPath="attribute_name"/>
-
-                                    <ComboBox Header="Address Mode W" PlaceholderText="W addressing mode" Width="auto"
-                                          SelectedIndex="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.w_address_mode, Mode=TwoWay, Converter={StaticResource enum_to_int_converter}}"
-                                          ItemsSource="{x:Bind texture_showcase_vm.address_modes, Mode=OneTime}" DisplayMemberPath="attribute_name"/>
-                                </StackPanel>
-                            </RelativePanel>
-
-                            <RelativePanel>
-                                <StackPanel>
-                                    <ComboBox Header="Minification filter" PlaceholderText="Choose a minification filter" Width="auto" 
-                                          IsEnabled="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.is_anisotropic,Mode=OneWay, Converter={StaticResource bool_invert_converter}}"
-                                          ItemsSource="{x:Bind texture_showcase_vm.minification_filters, Mode=OneTime}" DisplayMemberPath="attribute_name"
-                                          SelectedIndex="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.minification_filter, Mode=TwoWay, Converter={StaticResource enum_to_int_converter}}" />
-
-                                    <ComboBox Header="Magnification filter" PlaceholderText="Choose a magnification filter" Width="auto"
-                                          IsEnabled="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.is_anisotropic,Mode=OneWay, Converter={StaticResource bool_invert_converter}}"
-                                          ItemsSource="{x:Bind texture_showcase_vm.magnification_filters, Mode=OneTime}" DisplayMemberPath="attribute_name" 
-                                          SelectedIndex="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.magnification_filter, Mode=TwoWay, Converter={StaticResource enum_to_int_converter}}"/>
-
-                                    <ComboBox Header="Mip-level filter" PlaceholderText="Choose a mip-level filter" Width="auto"
-                                          IsEnabled="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.is_anisotropic,Mode=OneWay, Converter={StaticResource bool_invert_converter}}"
-                                          ItemsSource="{x:Bind texture_showcase_vm.miplevel_sampling_filters, Mode=OneTime}" DisplayMemberPath="attribute_name" 
-                                          SelectedIndex="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.miplevel_sampling_filter, Mode=TwoWay, Converter={StaticResource enum_to_int_converter}}"/>
-
-                                    <ComboBox Header="Filter reduction type" PlaceholderText="Choose a reduction type" Width="auto"
-                                          ItemsSource="{x:Bind texture_showcase_vm.filter_reduction_types, Mode=OneTime}" DisplayMemberPath="attribute_name" 
-                                          SelectedIndex="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.reduction, Mode=TwoWay, Converter={StaticResource enum_to_int_converter}}"/>
-
-                                    <ComboBox Header="Filter comparison function" PlaceholderText="Choose a comparison function" Width="auto"
-                                          ItemsSource="{x:Bind texture_showcase_vm.filter_comparisonfuncs, Mode=OneTime}" DisplayMemberPath="attribute_name" 
-                                          SelectedIndex="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.comparison_function, Mode=TwoWay, Converter={StaticResource enum_to_int_converter}}"/>
-
-                                    <Slider x:Name="sampler_comparison_value" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.sample_comparison_value, Mode=TwoWay}" Header="Sampler comparison value" Width="auto" Orientation="Horizontal" Minimum="-100" Maximum="100.0" 
-                                            StepFrequency="0.1" TickFrequency="0.01" SnapsTo="StepValues" TickPlacement="None" />
-
-                                    <ComboBox Header="Sampling functions" PlaceholderText="Choose a sampling function" Width="auto"
-                                          ItemsSource="{x:Bind texture_showcase_vm.sampling_functions, Mode=OneTime}" DisplayMemberPath="attribute_name" 
-                                          SelectedIndex="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.sampling_function, Mode=TwoWay, Converter={StaticResource enum_to_int_converter}}"/>
-
-                                    <StackPanel Orientation="Horizontal">
-
-                                        <Slider x:Name="max_anisotropy" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.max_anisotropy, Mode=TwoWay}" Header="Max anisotropy" Width="auto" Orientation="Horizontal" Minimum="0" Maximum="16" 
-                                            StepFrequency="1" TickFrequency="1" SnapsTo="StepValues" TickPlacement="None" />
-                                        <RadioButton Content="Anisotropic" Tag="Anisotropic" GroupName="isotropy" IsChecked="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.is_anisotropic, Mode=TwoWay}"/>
-                                        <RadioButton Content="Isotropic" Tag="Isotropic" GroupName="isotropy" IsChecked="True"/>
-                                    </StackPanel>
-                                </StackPanel>
-                            </RelativePanel>
-                        </StackPanel>
+                                </RelativePanel>
+                            </StackPanel>
+                        </RelativePanel>
                     </StackPanel>
                 </PivotItem>
                 <PivotItem Header="Shaders">
@@ -562,7 +580,20 @@
 
         </StackPanel>
         <SplitView.Pane>
-            <SwapChainPanel x:Name="swapchain_panel" Width="700" Height="700" HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+            <StackPanel Orientation="Vertical">
+                <SwapChainPanel x:Name="swapchain_panel" Width="512" Height="512" HorizontalAlignment="Left" VerticalAlignment="Center" />
+
+                <FlipView 
+                      HorizontalAlignment="Left" VerticalAlignment="Center"
+                      x:Name="flipview"
+                      MaxWidth="512" 
+                      MaxHeight="512"
+                      IsEnabled="False"
+                      SelectedIndex="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.current_lod, Converter={StaticResource float_to_int_converter}, Mode=OneWay}" 
+                      ItemTemplate="{StaticResource mipmaps_template}" 
+                      ItemsSource="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.mipmaps, Mode=OneTime}" />
+            </StackPanel>
         </SplitView.Pane>
 
     </SplitView>

@@ -64,8 +64,6 @@ namespace graphics
 	{
 		texture();
 
-		Boolean is_loading;
-		Boolean is_error;
 		Windows.UI.Xaml.Media.Imaging.SoftwareBitmapSource bitmap_source;
 
 		String texture_name;
