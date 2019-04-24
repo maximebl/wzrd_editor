@@ -629,10 +629,15 @@ namespace winrt::graphics::implementation
 		}
 
 		new_image.pixels = detached_pixels.data();
-		new_image.height = width;
-		new_image.width = height;
+		new_image.height = decoder.PixelHeight();
+		new_image.width = decoder.PixelWidth();
+		//new_image.height = width;
+		//new_image.width = height;
 
 		check_hresult(ComputePitch(new_image.format, new_image.width, new_image.height, new_image.rowPitch, new_image.slicePitch));
+
+		ScratchImage resized_image;
+		DirectX::Resize(new_image, width, height, TEX_FILTER_FLAGS::TEX_FILTER_DEFAULT, resized_image);
 
 		ScratchImage mipmap_chain;
 		TexMetadata md;
@@ -641,7 +646,7 @@ namespace winrt::graphics::implementation
 
 		if (is_generating_mipmaps)
 		{
-			check_hresult(GenerateMipMaps(new_image, TEX_FILTER_FLAGS::TEX_FILTER_DEFAULT, 0, mipmap_chain));
+			check_hresult(GenerateMipMaps(*resized_image.GetImages(), TEX_FILTER_FLAGS::TEX_FILTER_DEFAULT, 0, mipmap_chain));
 
 			md = mipmap_chain.GetMetadata();
 			image_count = mipmap_chain.GetImageCount();
@@ -649,14 +654,14 @@ namespace winrt::graphics::implementation
 		}
 		else
 		{
-			images = &new_image;
+			images = resized_image.GetImages();
 			md.arraySize = 1;
 			md.depth = 1;
 			md.dimension = TEX_DIMENSION::TEX_DIMENSION_TEXTURE2D;
-			md.format = new_image.format;
+			md.format = images->format;
 			md.mipLevels = 1;
-			md.height = new_image.height;
-			md.width = new_image.width;
+			md.height = images->height;
+			md.width = images->width;
 			md.miscFlags = DDS_FLAGS::DDS_FLAGS_NONE;
 			md.miscFlags2 = DDS_FLAGS::DDS_FLAGS_NONE;
 		}
@@ -680,10 +685,10 @@ namespace winrt::graphics::implementation
 		new_texture.alpha_mode(in_alpha_mode);
 		new_texture.mip_levels(md.mipLevels);
 		new_texture.dimension(get_dimension(D3D12_RESOURCE_DIMENSION::D3D12_RESOURCE_DIMENSION_TEXTURE2D));
-		new_texture.width(new_image.width);
-		new_texture.height(new_image.height);
-		new_texture.row_pitch(new_image.rowPitch);
-		new_texture.slice_pitch(new_image.slicePitch);
+		new_texture.width(images->width);
+		new_texture.height(images->height);
+		new_texture.row_pitch(images->rowPitch);
+		new_texture.slice_pitch(images->slicePitch);
 
 		std::vector<D3D12_SUBRESOURCE_DATA> subresources;
 
@@ -694,10 +699,10 @@ namespace winrt::graphics::implementation
 			new_texture.as<graphics::implementation::texture>()->texture_default_buffer.put(),
 			subresources));
 
-		co_await upload_to_gpu(new_texture, subresources, new_image.format);
+		co_await upload_to_gpu(new_texture, subresources, images->format);
 
 		auto new_mipmaps = single_threaded_observable_vector<IInspectable>();
-		co_await create_subresources_for_ui(subresources, new_mipmaps, new_image.format, new_image.width);
+		co_await create_subresources_for_ui(subresources, new_mipmaps, images->format, images->width);
 		new_texture.mipmaps(new_mipmaps);
 
 		SoftwareBitmap new_software_bitmap = co_await decoder.GetSoftwareBitmapAsync();
