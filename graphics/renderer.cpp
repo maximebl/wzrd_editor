@@ -579,13 +579,13 @@ namespace winrt::graphics::implementation
 	}
 
 	Windows::Foundation::IAsyncOperationWithProgress<graphics::operation_result, hstring> renderer::create_dds_texture(
-		Windows::Storage::StorageFile const file, 
-		hstring const name, 
-		uint64_t width, 
-		uint64_t height, 
-		graphics::alpha_mode const in_alpha_mode, 
-		bool is_generating_mipmaps, 
-		bool is_saving_to_file, 
+		Windows::Storage::StorageFile const file,
+		hstring const name,
+		uint64_t width,
+		uint64_t height,
+		graphics::alpha_mode const in_alpha_mode,
+		bool is_generating_mipmaps,
+		bool is_saving_to_file,
 		graphics::texture& new_texture)
 	{
 		using namespace DirectX;
@@ -851,9 +851,26 @@ namespace winrt::graphics::implementation
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = {};
 		srv_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		srv_desc.ViewDimension = D3D12_SRV_DIMENSION::D3D12_SRV_DIMENSION_TEXTURE2D;
-		srv_desc.Texture2D.MipLevels = texture.mip_levels();
-		srv_desc.Format = texture_format;
+
+		if (true)
+		{
+			srv_desc.ViewDimension = D3D12_SRV_DIMENSION::D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
+			srv_desc.Texture2DArray.ArraySize = 3;
+			srv_desc.Texture2DArray.FirstArraySlice = 0;
+			srv_desc.Texture2DArray.MipLevels = 10;
+			srv_desc.Texture2DArray.MostDetailedMip = 0;
+			srv_desc.Texture2DArray.PlaneSlice = 0;
+			srv_desc.Texture2DArray.ResourceMinLODClamp = 0.f;
+		}
+		else
+		{
+			srv_desc.ViewDimension = D3D12_SRV_DIMENSION::D3D12_SRV_DIMENSION_TEXTURE2D;
+			srv_desc.Format = texture_format;
+			srv_desc.Texture2D.MipLevels = texture.mip_levels();
+			srv_desc.Texture2D.MostDetailedMip = 0;
+			srv_desc.Texture2D.PlaneSlice = 0;
+			srv_desc.Texture2D.ResourceMinLODClamp = 0.f;
+		}
 
 		m_graphics_cmdlist->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(
 			texture.as<graphics::implementation::texture>()->texture_default_buffer.get(),
@@ -1103,6 +1120,8 @@ namespace winrt::graphics::implementation
 			check_hresult(
 				m_swapchain->GetBuffer(i, guid_of<ID3D12Resource>(), m_swapchain_buffer[i].put_void())
 			);
+
+			//nullptr: inherits the resource format and dimension (if not typeless) and RTVs target the first mip and all array slices.
 			m_device->CreateRenderTargetView(m_swapchain_buffer[i].get(), nullptr, rtv_heap_handle);
 			rtv_heap_handle.Offset(1, m_rtv_descriptor_size);
 		}
@@ -1110,13 +1129,24 @@ namespace winrt::graphics::implementation
 
 	void renderer::create_texture_rootsignature(std::vector<CD3DX12_STATIC_SAMPLER_DESC> samplers)
 	{
-		//recreate the texture's range
-		D3D12_DESCRIPTOR_RANGE textures_range = {};
+		D3D12_DESCRIPTOR_RANGE texture_ranges[2];
+		D3D12_DESCRIPTOR_RANGE textures_range;
 		textures_range.BaseShaderRegister = 0;
 		textures_range.NumDescriptors = 10;
-		textures_range.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;
+		textures_range.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;//indicates this range should immediately follow the preceding range.
 		textures_range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE::D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
 		textures_range.RegisterSpace = 0;
+
+		texture_ranges[0] = textures_range;
+
+		D3D12_DESCRIPTOR_RANGE texture_array_range;
+		texture_array_range.BaseShaderRegister = 1;
+		texture_array_range.NumDescriptors = 1;
+		texture_array_range.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;//indicates this range should immediately follow the preceding range.
+		texture_array_range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE::D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
+		texture_array_range.RegisterSpace = 0;
+
+		texture_ranges[1] = texture_array_range;
 
 		D3D12_DESCRIPTOR_RANGE samplers_range = {};
 		samplers_range.BaseShaderRegister = 0;
@@ -1126,7 +1156,7 @@ namespace winrt::graphics::implementation
 		samplers_range.RegisterSpace = 0;
 
 		CD3DX12_ROOT_PARAMETER root_parameter[6];
-		root_parameter[0].InitAsDescriptorTable(1, &textures_range, D3D12_SHADER_VISIBILITY::D3D12_SHADER_VISIBILITY_PIXEL);
+		root_parameter[0].InitAsDescriptorTable(2, texture_ranges, D3D12_SHADER_VISIBILITY::D3D12_SHADER_VISIBILITY_PIXEL);
 		root_parameter[1].InitAsConstantBufferView(0);
 		root_parameter[2].InitAsDescriptorTable(1, &samplers_range, D3D12_SHADER_VISIBILITY::D3D12_SHADER_VISIBILITY_PIXEL);
 		root_parameter[3].InitAsConstantBufferView(1);
