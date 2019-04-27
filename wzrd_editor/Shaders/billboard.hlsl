@@ -55,7 +55,7 @@ struct gs_out
     float2 tex_coord : TEXCOORD;
 };
 
-Texture2DArray g_texture_array : register(t1);
+Texture2DArray g_texture_array : register(t10);
 Texture2D g_texture[10] : register(t0);
 SamplerState g_sampler : register(s0);
 SamplerComparisonState g_cmp_sampler : register(s1);

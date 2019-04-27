@@ -1140,7 +1140,7 @@ namespace winrt::graphics::implementation
 		texture_ranges[0] = textures_range;
 
 		D3D12_DESCRIPTOR_RANGE texture_array_range;
-		texture_array_range.BaseShaderRegister = 1;
+		texture_array_range.BaseShaderRegister = 10;
 		texture_array_range.NumDescriptors = 1;
 		texture_array_range.OffsetInDescriptorsFromTableStart = D3D12_DESCRIPTOR_RANGE_OFFSET_APPEND;//indicates this range should immediately follow the preceding range.
 		texture_array_range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE::D3D12_DESCRIPTOR_RANGE_TYPE_SRV;
@@ -1155,16 +1155,17 @@ namespace winrt::graphics::implementation
 		samplers_range.RangeType = D3D12_DESCRIPTOR_RANGE_TYPE::D3D12_DESCRIPTOR_RANGE_TYPE_SAMPLER;
 		samplers_range.RegisterSpace = 0;
 
-		CD3DX12_ROOT_PARAMETER root_parameter[6];
-		root_parameter[0].InitAsDescriptorTable(2, texture_ranges, D3D12_SHADER_VISIBILITY::D3D12_SHADER_VISIBILITY_PIXEL);
+		CD3DX12_ROOT_PARAMETER root_parameter[7];
+		root_parameter[0].InitAsDescriptorTable(1, &texture_ranges[0], D3D12_SHADER_VISIBILITY::D3D12_SHADER_VISIBILITY_PIXEL);
 		root_parameter[1].InitAsConstantBufferView(0);
 		root_parameter[2].InitAsDescriptorTable(1, &samplers_range, D3D12_SHADER_VISIBILITY::D3D12_SHADER_VISIBILITY_PIXEL);
 		root_parameter[3].InitAsConstantBufferView(1);
 		root_parameter[4].InitAsUnorderedAccessView(1);
 		root_parameter[5].InitAsConstants(10, 2);
+		root_parameter[6].InitAsDescriptorTable(1, &texture_ranges[1], D3D12_SHADER_VISIBILITY::D3D12_SHADER_VISIBILITY_PIXEL);
 
 		CD3DX12_ROOT_SIGNATURE_DESC rootsig_desc(
-			6,
+			7,
 			root_parameter,
 			0,
 			nullptr,
