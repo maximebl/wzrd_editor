@@ -57,6 +57,7 @@ namespace graphics
 		buffer current_buffer{ get; set; };
 		texture current_texture;
 		Int32 current_texture_index;
+		Int32 current_texture_array_index;
 
 		UInt32 viewport_width;
 		UInt32 viewport_height;

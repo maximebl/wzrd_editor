@@ -112,6 +112,9 @@ namespace winrt::graphics::implementation
 		int32_t current_texture_index();
 		void current_texture_index(int32_t value);
 
+		int32_t current_texture_array_index();
+		void current_texture_array_index(int32_t value);
+
 		static ID3D12Device* g_device;
 		static ID3D12GraphicsCommandList* g_cmd_list;
 
@@ -234,6 +237,7 @@ namespace winrt::graphics::implementation
 		std::unordered_map<hstring, graphics::texture> m_textures;
 		graphics::texture m_current_texture = nullptr;
 		int32_t m_current_texture_index = 0;
+		int32_t m_current_texture_array_index = 0;
 
 		winrt::event<Windows::UI::Xaml::Data::PropertyChangedEventHandler> m_property_changed;
 

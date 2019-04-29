@@ -28,6 +28,16 @@ namespace winrt::graphics::implementation
 		m_current_texture_index = value;
 	}
 
+	int32_t renderer::current_texture_array_index()
+	{
+		return m_current_texture_array_index;
+	}
+
+	void renderer::current_texture_array_index(int32_t value)
+	{
+		m_current_texture_array_index = value;
+	}
+
 	Windows::Foundation::IAsyncOperation<graphics::operation_result>
 		renderer::pick_and_compile_shader(graphics::shader new_shader)
 	{
@@ -446,6 +456,9 @@ namespace winrt::graphics::implementation
 		uint32_t current_texture_index = static_cast<int32_t>(m_current_texture_index);
 		m_graphics_cmdlist->SetGraphicsRoot32BitConstants(5, 1, &current_texture_index, 9);
 
+		uint32_t current_texture_array_index = static_cast<int32_t>(m_current_texture_array_index);
+		m_graphics_cmdlist->SetGraphicsRoot32BitConstants(5, 1, &current_texture_array_index, 10);
+
 		m_graphics_cmdlist->SetPipelineState(m_billboard_pso.get());
 
 		update_samplers();
@@ -454,6 +467,11 @@ namespace winrt::graphics::implementation
 		m_graphics_cmdlist->SetDescriptorHeaps(_countof(heaps), heaps);
 		m_graphics_cmdlist->SetGraphicsRootDescriptorTable(0, m_srv_heap->GetGPUDescriptorHandleForHeapStart());
 		m_graphics_cmdlist->SetGraphicsRootDescriptorTable(2, m_sampler_heap->GetGPUDescriptorHandleForHeapStart());
+
+		// offset at descriptor #10
+		D3D12_GPU_DESCRIPTOR_HANDLE texarray_handle = {};
+		texarray_handle.ptr = m_srv_heap->GetGPUDescriptorHandleForHeapStart().ptr + (m_cbv_srv_uav_heap_descriptor_handle_size * 7);
+		m_graphics_cmdlist->SetGraphicsRootDescriptorTable(6, texarray_handle);
 
 		m_graphics_cmdlist->IASetVertexBuffers(0, 1, (D3D12_VERTEX_BUFFER_VIEW*)& m_current_buffer->get_view());
 		m_graphics_cmdlist->DrawInstanced(m_current_buffer->current_size(), 1, 0, 0);
@@ -849,28 +867,7 @@ namespace winrt::graphics::implementation
 			subresources.size(),
 			subresources.data());
 
-		D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = {};
-		srv_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
 
-		if (true)
-		{
-			srv_desc.ViewDimension = D3D12_SRV_DIMENSION::D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
-			srv_desc.Texture2DArray.ArraySize = 3;
-			srv_desc.Texture2DArray.FirstArraySlice = 0;
-			srv_desc.Texture2DArray.MipLevels = 10;
-			srv_desc.Texture2DArray.MostDetailedMip = 0;
-			srv_desc.Texture2DArray.PlaneSlice = 0;
-			srv_desc.Texture2DArray.ResourceMinLODClamp = 0.f;
-		}
-		else
-		{
-			srv_desc.ViewDimension = D3D12_SRV_DIMENSION::D3D12_SRV_DIMENSION_TEXTURE2D;
-			srv_desc.Format = texture_format;
-			srv_desc.Texture2D.MipLevels = texture.mip_levels();
-			srv_desc.Texture2D.MostDetailedMip = 0;
-			srv_desc.Texture2D.PlaneSlice = 0;
-			srv_desc.Texture2D.ResourceMinLODClamp = 0.f;
-		}
 
 		m_graphics_cmdlist->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(
 			texture.as<graphics::implementation::texture>()->texture_default_buffer.get(),
@@ -878,12 +875,44 @@ namespace winrt::graphics::implementation
 			D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
 		));
 
-		m_device->CreateShaderResourceView(
-			texture.as<graphics::implementation::texture>()->texture_default_buffer.get(),
-			&srv_desc,
-			m_texture_descriptor_handle);
+		if (true)
+		{
+			D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = {};
+			srv_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+			srv_desc.ViewDimension = D3D12_SRV_DIMENSION::D3D12_SRV_DIMENSION_TEXTURE2DARRAY;
+			srv_desc.Texture2DArray.ArraySize = 3;
+			srv_desc.Texture2DArray.FirstArraySlice = 0;
+			srv_desc.Texture2DArray.MipLevels = 10;
+			srv_desc.Texture2DArray.MostDetailedMip = 0;
+			srv_desc.Texture2DArray.PlaneSlice = 0;
+			srv_desc.Texture2DArray.ResourceMinLODClamp = 0.f;
 
-		m_texture_descriptor_handle.ptr = m_texture_descriptor_handle.ptr + m_cbv_srv_uav_heap_descriptor_handle_size;
+			// insert at offset to descriptor #11
+			m_texture_descriptor_handle.ptr = m_texture_descriptor_handle.ptr + (m_cbv_srv_uav_heap_descriptor_handle_size * 7);
+
+			m_device->CreateShaderResourceView(
+				texture.as<graphics::implementation::texture>()->texture_default_buffer.get(),
+				&srv_desc,
+				m_texture_descriptor_handle);
+		}
+		else
+		{
+			D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = {};
+			srv_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+			srv_desc.ViewDimension = D3D12_SRV_DIMENSION::D3D12_SRV_DIMENSION_TEXTURE2D;
+			srv_desc.Format = texture_format;
+			srv_desc.Texture2D.MipLevels = texture.mip_levels();
+			srv_desc.Texture2D.MostDetailedMip = 0;
+			srv_desc.Texture2D.PlaneSlice = 0;
+			srv_desc.Texture2D.ResourceMinLODClamp = 0.f;
+
+			m_device->CreateShaderResourceView(
+				texture.as<graphics::implementation::texture>()->texture_default_buffer.get(),
+				&srv_desc,
+				m_texture_descriptor_handle);
+
+			m_texture_descriptor_handle.ptr = m_texture_descriptor_handle.ptr + m_cbv_srv_uav_heap_descriptor_handle_size;
+		}
 
 		co_return;
 	}
@@ -1161,7 +1190,7 @@ namespace winrt::graphics::implementation
 		root_parameter[2].InitAsDescriptorTable(1, &samplers_range, D3D12_SHADER_VISIBILITY::D3D12_SHADER_VISIBILITY_PIXEL);
 		root_parameter[3].InitAsConstantBufferView(1);
 		root_parameter[4].InitAsUnorderedAccessView(1);
-		root_parameter[5].InitAsConstants(10, 2);
+		root_parameter[5].InitAsConstants(11, 2);
 		root_parameter[6].InitAsDescriptorTable(1, &texture_ranges[1], D3D12_SHADER_VISIBILITY::D3D12_SHADER_VISIBILITY_PIXEL);
 
 		CD3DX12_ROOT_SIGNATURE_DESC rootsig_desc(

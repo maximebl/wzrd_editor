@@ -26,6 +26,7 @@ cbuffer cb_manips : register(b2)
     int x_pixel_offset;
     int y_pixel_offset;
     int current_texture_index;
+    int current_texture_array_index;
 };
 
 struct readback_data
@@ -225,7 +226,9 @@ float4 PS(float4 screen_pos : SV_Position, gs_out pin) : SV_Target
                     case 2:
                     //maximum
                     case 3:
-                        result = g_texture[current_texture_index].Sample(g_sampler, pin.tex_coord);
+                        float3 uvw = float3(pin.tex_coord, current_texture_array_index);
+                        //result = g_texture[current_texture_index].Sample(g_sampler, pin.tex_coord);
+                        result = g_texture_array.Sample(g_sampler, uvw);
                         lod = g_texture[current_texture_index].CalculateLevelOfDetail(g_sampler, pin.tex_coord);
                         rwb_readback_data[0].level_of_detail = lod;
                         break;
