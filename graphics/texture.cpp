@@ -299,6 +299,26 @@ using Windows::Foundation::IInspectable; namespace winrt::graphics::implementati
 		update_value(L"alpha_mode", m_alpha_mode, value);
 	}
 
+	uint32_t texture::dds_array_size()
+	{
+		return m_dds_array_size;
+	}
+
+	void texture::dds_array_size(uint32_t value)
+	{
+		update_value(L"dds_array_size", m_dds_array_size, value);
+	}
+
+	uint32_t texture::dds_array_index()
+	{
+		return m_dds_array_index;
+	}
+
+	void texture::dds_array_index(uint32_t value)
+	{
+		update_value(L"dds_array_index", m_dds_array_index, value);
+	}
+
 	Windows::Foundation::Collections::IObservableVector<IInspectable> texture::mipmaps()
 	{
 		return m_mipmaps;

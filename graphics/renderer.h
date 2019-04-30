@@ -131,6 +131,7 @@ namespace winrt::graphics::implementation
 		UINT m_rtv_descriptor_size = 0;
 		UINT m_cbv_srv_uav_heap_descriptor_handle_size = 0;
 		D3D12_CPU_DESCRIPTOR_HANDLE m_texture_descriptor_handle = {};
+		D3D12_CPU_DESCRIPTOR_HANDLE m_texture_array_descriptor_handle = {};
 
 		int32_t m_output_width = 512;
 		int32_t m_output_height = 512;

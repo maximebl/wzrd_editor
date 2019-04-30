@@ -456,8 +456,11 @@ namespace winrt::graphics::implementation
 		uint32_t current_texture_index = static_cast<int32_t>(m_current_texture_index);
 		m_graphics_cmdlist->SetGraphicsRoot32BitConstants(5, 1, &current_texture_index, 9);
 
-		uint32_t current_texture_array_index = static_cast<int32_t>(m_current_texture_array_index);
-		m_graphics_cmdlist->SetGraphicsRoot32BitConstants(5, 1, &current_texture_array_index, 10);
+		uint32_t dds_array_size = m_current_texture.dds_array_size();
+		m_graphics_cmdlist->SetGraphicsRoot32BitConstants(5, 1, &dds_array_size, 10);
+
+		uint32_t dds_array_index = m_current_texture.dds_array_index();
+		m_graphics_cmdlist->SetGraphicsRoot32BitConstants(5, 1, &dds_array_index, 11);
 
 		m_graphics_cmdlist->SetPipelineState(m_billboard_pso.get());
 
@@ -787,6 +790,7 @@ namespace winrt::graphics::implementation
 		new_texture.width(dds_header->width);
 		new_texture.height(dds_header->height);
 		new_texture.dimension(get_dimension(extended_header->resourceDimension));
+		new_texture.dds_array_size(extended_header->arraySize);
 
 		auto pixel_size = 4;
 		auto row_pitch = dds_header->width * pixel_size;
@@ -875,7 +879,7 @@ namespace winrt::graphics::implementation
 			D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
 		));
 
-		if (true)
+		if (texture.dds_array_size() > 1)
 		{
 			D3D12_SHADER_RESOURCE_VIEW_DESC srv_desc = {};
 			srv_desc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
@@ -888,12 +892,12 @@ namespace winrt::graphics::implementation
 			srv_desc.Texture2DArray.ResourceMinLODClamp = 0.f;
 
 			// insert at offset to descriptor #11
-			m_texture_descriptor_handle.ptr = m_texture_descriptor_handle.ptr + (m_cbv_srv_uav_heap_descriptor_handle_size * 7);
+			m_texture_array_descriptor_handle.ptr = m_texture_array_descriptor_handle.ptr + (m_cbv_srv_uav_heap_descriptor_handle_size * 7);
 
 			m_device->CreateShaderResourceView(
 				texture.as<graphics::implementation::texture>()->texture_default_buffer.get(),
 				&srv_desc,
-				m_texture_descriptor_handle);
+				m_texture_array_descriptor_handle);
 		}
 		else
 		{
@@ -1045,6 +1049,7 @@ namespace winrt::graphics::implementation
 		);
 
 		m_texture_descriptor_handle = m_srv_heap->GetCPUDescriptorHandleForHeapStart();
+		m_texture_array_descriptor_handle = m_srv_heap->GetCPUDescriptorHandleForHeapStart();
 	}
 
 	void renderer::create_sampler_heap()
@@ -1190,7 +1195,7 @@ namespace winrt::graphics::implementation
 		root_parameter[2].InitAsDescriptorTable(1, &samplers_range, D3D12_SHADER_VISIBILITY::D3D12_SHADER_VISIBILITY_PIXEL);
 		root_parameter[3].InitAsConstantBufferView(1);
 		root_parameter[4].InitAsUnorderedAccessView(1);
-		root_parameter[5].InitAsConstants(11, 2);
+		root_parameter[5].InitAsConstants(12, 2);
 		root_parameter[6].InitAsDescriptorTable(1, &texture_ranges[1], D3D12_SHADER_VISIBILITY::D3D12_SHADER_VISIBILITY_PIXEL);
 
 		CD3DX12_ROOT_SIGNATURE_DESC rootsig_desc(

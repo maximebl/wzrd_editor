@@ -75,6 +75,8 @@ namespace graphics
 		UInt32 row_pitch;
 		UInt32 slice_pitch;
 		alpha_mode alpha_mode;
+		UInt32 dds_array_size;
+		UInt32 dds_array_index;
 		IObservableVector<IInspectable> mipmaps;
 
 		Single current_lod;

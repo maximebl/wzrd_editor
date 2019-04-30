@@ -97,6 +97,12 @@ namespace winrt::graphics::implementation
 		graphics::alpha_mode alpha_mode();
 		void alpha_mode(graphics::alpha_mode const& value);
 
+		uint32_t dds_array_size();
+		void dds_array_size(uint32_t value);
+
+		uint32_t dds_array_index();
+		void dds_array_index(uint32_t value);
+
 		Windows::Foundation::Collections::IObservableVector<IInspectable> mipmaps();
 		void mipmaps(Windows::Foundation::Collections::IObservableVector<IInspectable> const& value);
 
@@ -175,6 +181,8 @@ namespace winrt::graphics::implementation
 		texture_address_mode m_v_address_mode = texture_address_mode::wrap;
 		texture_address_mode m_w_address_mode = texture_address_mode::wrap;
 		graphics::alpha_mode m_alpha_mode = alpha_mode::unknown;
+		uint32_t m_dds_array_size = 0;
+		uint32_t m_dds_array_index = 0;
 
 		Windows::Foundation::Collections::IObservableVector<IInspectable> m_mipmaps = single_threaded_observable_vector<IInspectable>();
 

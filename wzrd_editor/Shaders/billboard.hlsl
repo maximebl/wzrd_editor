@@ -26,7 +26,8 @@ cbuffer cb_manips : register(b2)
     int x_pixel_offset;
     int y_pixel_offset;
     int current_texture_index;
-    int current_texture_array_index;
+    int dds_array_size;
+    int dds_array_index;
 };
 
 struct readback_data
@@ -153,10 +154,6 @@ vs_out VS(vs_in vin)
 [maxvertexcount(4)]
 void GS(point vs_out gin[1], inout TriangleStream<gs_out> tri_stream)
 {
-    uint width_texels;
-    uint height_texels;
-    g_texture[current_texture_index].GetDimensions(width_texels, height_texels);
-
     gs_out geo_out;
     geo_out.position.z = 0.0f;
     geo_out.position.w = 1.0f;
@@ -194,7 +191,18 @@ float4 PS(float4 screen_pos : SV_Position, gs_out pin) : SV_Target
 {
     uint width_texels;
     uint height_texels;
-    g_texture[current_texture_index].GetDimensions(width_texels, height_texels);
+    uint element_count = 0;
+
+    if (dds_array_size > 1)
+    {
+        g_texture_array.GetDimensions(width_texels, height_texels, element_count);
+    }
+    else
+    {
+        //g_texture[current_texture_index].GetDimensions(width_texels, height_texels);
+        g_texture[0].GetDimensions(width_texels, height_texels);
+    }
+
     rwb_readback_data[0].width = width_texels;
     rwb_readback_data[0].height = height_texels;
 
@@ -226,10 +234,20 @@ float4 PS(float4 screen_pos : SV_Position, gs_out pin) : SV_Target
                     case 2:
                     //maximum
                     case 3:
-                        float3 uvw = float3(pin.tex_coord, current_texture_array_index);
-                        //result = g_texture[current_texture_index].Sample(g_sampler, pin.tex_coord);
-                        result = g_texture_array.Sample(g_sampler, uvw);
-                        lod = g_texture[current_texture_index].CalculateLevelOfDetail(g_sampler, pin.tex_coord);
+                        if (dds_array_size > 1)
+                        {
+                            float3 uvw = float3(pin.tex_coord, dds_array_index);
+                            result = g_texture_array.Sample(g_sampler, uvw);
+                            lod = g_texture_array.CalculateLevelOfDetail(g_sampler, pin.tex_coord);
+                        }
+                        else
+                        {
+                            //result = g_texture[current_texture_index].Sample(g_sampler, pin.tex_coord);
+                            //lod = g_texture[current_texture_index].CalculateLevelOfDetail(g_sampler, pin.tex_coord);
+                            result = g_texture[0].Sample(g_sampler, pin.tex_coord);
+                            lod = g_texture[0].CalculateLevelOfDetail(g_sampler, pin.tex_coord);
+                        }
+
                         rwb_readback_data[0].level_of_detail = lod;
                         break;
                     //comparison
@@ -268,7 +286,7 @@ float4 PS(float4 screen_pos : SV_Position, gs_out pin) : SV_Target
 
             //sample_bias
             case 7:
-                result.xyz = bilinear(pin.tex_coord, width_texels);
+                //result.xyz = bilinear(pin.tex_coord, width_texels);
                 break;
         }
     }

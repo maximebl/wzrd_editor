@@ -322,8 +322,11 @@
                                         </RelativePanel>
                                     </StackPanel>
 
+                                    <StackPanel x:Name="texture_array_info" RelativePanel.RightOf="texture_info">
+                                        <Slider x:Name="current_dds_array_index" Header="Current dds array index" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.dds_array_index, Mode=TwoWay}" Minimum="0" Maximum="3" StepFrequency="1" TickFrequency="1" SnapsTo="StepValues" TickPlacement="None" />
+                                    </StackPanel>
 
-                                    <StackPanel x:Name="coordinate_info" RelativePanel.RightOf="texture_info">
+                                    <StackPanel x:Name="coordinate_info" RelativePanel.RightOf="texture_array_info">
                                         <Slider x:Name="viewport_width" Header="Viewport width" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_renderer.viewport_width, Mode=TwoWay}" Minimum="0" Maximum="1000" StepFrequency="1" TickFrequency="1" SnapsTo="StepValues" TickPlacement="None" />
                                         <Slider x:Name="viewport_height" Header="Viewport height" Width="auto" Orientation="Horizontal" Value="{x:Bind texture_showcase_vm.current_renderer.viewport_height, Mode=TwoWay}" Minimum="0" Maximum="1000" StepFrequency="1" TickFrequency="1" SnapsTo="StepValues" TickPlacement="None" />
                                         <CheckBox x:Name="chk_is_screen_coords" Content="Use screen coordinates" IsChecked="{x:Bind texture_showcase_vm.current_texture_vm.current_texture.is_screen_coords, Mode=TwoWay}"/>
