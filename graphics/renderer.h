@@ -152,7 +152,9 @@ namespace winrt::graphics::implementation
 		com_ptr<IDXGISwapChain1> m_swapchain = nullptr;
 		com_ptr<ID3D12CommandQueue> m_cmd_queue = nullptr;
 		com_ptr<ID3D12GraphicsCommandList> m_graphics_cmdlist = nullptr;
+		com_ptr<ID3D12GraphicsCommandList> m_graphics_cmdlist2 = nullptr;
 		com_ptr<ID3D12CommandAllocator> m_cmd_allocator = nullptr;
+		com_ptr<ID3D12CommandAllocator> m_cmd_allocator2 = nullptr;
 		com_ptr<ID3D12DescriptorHeap> m_rtv_heap = nullptr;
 		com_ptr<ID3D12DescriptorHeap> m_dsv_heap = nullptr;
 		com_ptr<ID3D12DescriptorHeap> m_srv_heap = nullptr;

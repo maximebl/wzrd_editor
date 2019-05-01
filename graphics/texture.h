@@ -103,6 +103,9 @@ namespace winrt::graphics::implementation
 		uint32_t dds_array_index();
 		void dds_array_index(uint32_t value);
 
+		uint32_t tex_array_index();
+		void tex_array_index(uint32_t value);
+
 		Windows::Foundation::Collections::IObservableVector<IInspectable> mipmaps();
 		void mipmaps(Windows::Foundation::Collections::IObservableVector<IInspectable> const& value);
 
@@ -183,6 +186,7 @@ namespace winrt::graphics::implementation
 		graphics::alpha_mode m_alpha_mode = alpha_mode::unknown;
 		uint32_t m_dds_array_size = 0;
 		uint32_t m_dds_array_index = 0;
+		uint32_t m_tex_array_index = 0;
 
 		Windows::Foundation::Collections::IObservableVector<IInspectable> m_mipmaps = single_threaded_observable_vector<IInspectable>();
 

@@ -77,6 +77,7 @@ namespace graphics
 		alpha_mode alpha_mode;
 		UInt32 dds_array_size;
 		UInt32 dds_array_index;
+		UInt32 tex_array_index;
 		IObservableVector<IInspectable> mipmaps;
 
 		Single current_lod;

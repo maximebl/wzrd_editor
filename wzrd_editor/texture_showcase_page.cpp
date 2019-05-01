@@ -249,7 +249,6 @@ namespace winrt::wzrd_editor::implementation
 			auto current_texture_vm = unbox_value<wzrd_editor::texture_vm>(listview.SelectedItem());
 			m_texture_showcase_vm.current_texture_vm(current_texture_vm);
 			m_renderer.current_texture(current_texture_vm.current_texture());
-			m_renderer.current_texture_index(listview.SelectedIndex());
 			this->Bindings->Update();
 		}
 		else

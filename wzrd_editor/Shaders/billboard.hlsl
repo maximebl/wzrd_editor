@@ -199,8 +199,7 @@ float4 PS(float4 screen_pos : SV_Position, gs_out pin) : SV_Target
     }
     else
     {
-        //g_texture[current_texture_index].GetDimensions(width_texels, height_texels);
-        g_texture[0].GetDimensions(width_texels, height_texels);
+        g_texture[current_texture_index].GetDimensions(width_texels, height_texels);
     }
 
     rwb_readback_data[0].width = width_texels;
@@ -242,10 +241,8 @@ float4 PS(float4 screen_pos : SV_Position, gs_out pin) : SV_Target
                         }
                         else
                         {
-                            //result = g_texture[current_texture_index].Sample(g_sampler, pin.tex_coord);
-                            //lod = g_texture[current_texture_index].CalculateLevelOfDetail(g_sampler, pin.tex_coord);
-                            result = g_texture[0].Sample(g_sampler, pin.tex_coord);
-                            lod = g_texture[0].CalculateLevelOfDetail(g_sampler, pin.tex_coord);
+                            result = g_texture[current_texture_index].Sample(g_sampler, pin.tex_coord);
+                            lod = g_texture[current_texture_index].CalculateLevelOfDetail(g_sampler, pin.tex_coord);
                         }
 
                         rwb_readback_data[0].level_of_detail = lod;

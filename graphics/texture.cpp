@@ -319,6 +319,16 @@ using Windows::Foundation::IInspectable; namespace winrt::graphics::implementati
 		update_value(L"dds_array_index", m_dds_array_index, value);
 	}
 
+	uint32_t texture::tex_array_index()
+	{
+		return m_tex_array_index;
+	}
+
+	void texture::tex_array_index(uint32_t value)
+	{
+		update_value(L"tex_array_index", m_tex_array_index, value);
+	}
+
 	Windows::Foundation::Collections::IObservableVector<IInspectable> texture::mipmaps()
 	{
 		return m_mipmaps;

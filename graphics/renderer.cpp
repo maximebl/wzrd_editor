@@ -453,7 +453,7 @@ namespace winrt::graphics::implementation
 		uint32_t y_pixel_offset = static_cast<int32_t>(m_current_texture.y_pixel_offset());
 		m_graphics_cmdlist->SetGraphicsRoot32BitConstants(5, 1, &y_pixel_offset, 8);
 
-		uint32_t current_texture_index = static_cast<int32_t>(m_current_texture_index);
+		uint32_t current_texture_index = m_current_texture.tex_array_index();
 		m_graphics_cmdlist->SetGraphicsRoot32BitConstants(5, 1, &current_texture_index, 9);
 
 		uint32_t dds_array_size = m_current_texture.dds_array_size();
@@ -732,6 +732,16 @@ namespace winrt::graphics::implementation
 		co_await new_bitmap_source.SetBitmapAsync(new_software_bitmap);
 		new_texture.bitmap_source(new_bitmap_source);
 
+		if (md.arraySize > 1)
+		{
+			new_texture.dds_array_index(m_current_texture_array_index++);
+		}
+		else
+		{
+			new_texture.tex_array_index(m_current_texture_index++);
+		}
+
+
 		m_textures[file.Name()] = new_texture;
 
 		result.status = operation_status::success;
@@ -832,6 +842,15 @@ namespace winrt::graphics::implementation
 
 		new_texture.bitmap_source(new_bitmap_source);
 
+		if (extended_header->arraySize > 1)
+		{
+			new_texture.dds_array_index(m_current_texture_array_index++);
+		}
+		else
+		{
+			new_texture.tex_array_index(m_current_texture_index++);
+		}
+
 		m_textures[name] = new_texture;
 		result.status = operation_status::success;
 		result.error_message = L"";
@@ -863,7 +882,7 @@ namespace winrt::graphics::implementation
 		);
 
 		UpdateSubresources(
-			g_cmd_list,
+			m_graphics_cmdlist2.get(),
 			texture.as<graphics::implementation::texture>()->texture_default_buffer.get(),
 			texture.as<graphics::implementation::texture>()->texture_upload_buffer.get(),
 			0,
@@ -871,13 +890,19 @@ namespace winrt::graphics::implementation
 			subresources.size(),
 			subresources.data());
 
-
-
-		m_graphics_cmdlist->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(
+		m_graphics_cmdlist2->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(
 			texture.as<graphics::implementation::texture>()->texture_default_buffer.get(),
 			D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_COPY_DEST,
 			D3D12_RESOURCE_STATES::D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE
 		));
+
+		check_hresult(m_graphics_cmdlist2->Close());
+		std::array<ID3D12CommandList*, 1> cmd_lists = { m_graphics_cmdlist2.get() };
+		m_cmd_queue->ExecuteCommandLists((UINT)cmd_lists.size(), &cmd_lists[0]);
+
+		flush_cmd_queue();
+		check_hresult(m_cmd_allocator2->Reset());
+		check_hresult(m_graphics_cmdlist2->Reset(m_cmd_allocator2.get(), m_billboard_pso.get()));
 
 		if (texture.dds_array_size() > 1)
 		{
@@ -1007,7 +1032,24 @@ namespace winrt::graphics::implementation
 				guid_of<ID3D12GraphicsCommandList>(),
 				m_graphics_cmdlist.put_void())
 		);
+		m_graphics_cmdlist->SetName(L"main_rendering_thread_cmd_list");
+
 		g_cmd_list = m_graphics_cmdlist.get();
+
+		check_hresult(
+			m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE::D3D12_COMMAND_LIST_TYPE_DIRECT, guid_of<ID3D12CommandAllocator>(), m_cmd_allocator2.put_void())
+		);
+
+		check_hresult(
+			m_device->CreateCommandList(
+				0,
+				D3D12_COMMAND_LIST_TYPE::D3D12_COMMAND_LIST_TYPE_DIRECT,
+				m_cmd_allocator2.get(),
+				nullptr,
+				guid_of<ID3D12GraphicsCommandList>(),
+				m_graphics_cmdlist2.put_void())
+		);
+		m_graphics_cmdlist->SetName(L"ui_thread_cmd_list");
 	}
 
 	void renderer::create_dsv_heap()
@@ -1302,7 +1344,7 @@ namespace winrt::graphics::implementation
 
 		m_checkerboard_texture = utilities::create_static_texture_resource(
 			renderer::g_device,
-			renderer::g_cmd_list,
+			m_graphics_cmdlist.get(),
 			texture_desc,
 			texture_data.data(),
 			texture_width,
@@ -1660,6 +1702,7 @@ namespace winrt::graphics::implementation
 	void renderer::execute_cmd_list()
 	{
 		check_hresult(m_graphics_cmdlist->Close());
+		//check_hresult(m_graphics_cmdlist2->Close());
 		std::array<ID3D12CommandList*, 1> cmd_lists = { m_graphics_cmdlist.get() };
 		m_cmd_queue->ExecuteCommandLists((UINT)cmd_lists.size(), &cmd_lists[0]);
 	}
